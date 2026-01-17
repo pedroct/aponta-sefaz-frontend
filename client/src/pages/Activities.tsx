@@ -16,7 +16,25 @@ const ADOHeader = ({ title, children }: { title: string; children?: React.ReactN
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-[#201F1E]">{title}</h1>
       </div>
-      {children && <div className="flex items-end gap-6">{children}</div>}
+      
+      {/* Progress Section */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-sm">
+          <Clock className="w-4 h-4 text-[#605E5C]" />
+          <span className="text-[#605E5C] font-semibold">Estimate <span className="text-[#201F1E]">8 hours</span></span>
+          <span className="text-[#605E5C] font-semibold">Completed <span className="text-[#201F1E]">7 hours : 45 minutes</span></span>
+        </div>
+        <div className="w-full max-w-md h-4 bg-[#F3F2F1] rounded-full overflow-hidden relative">
+          <div 
+            className="h-full bg-[#CA5010] transition-all duration-500 ease-out flex items-center justify-end px-2"
+            style={{ width: "96.8%" }}
+          >
+            <span className="text-[10px] text-white font-bold">96.8%</span>
+          </div>
+        </div>
+      </div>
+
+      {children && <div className="flex items-end gap-6 mt-2">{children}</div>}
     </div>
   );
 };
