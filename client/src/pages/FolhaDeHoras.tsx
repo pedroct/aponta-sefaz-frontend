@@ -99,7 +99,7 @@ const TabelaApontamentosGrid = ({ dataInicio }: { dataInicio: Date }) => {
     }));
   };
 
-  const isVisivel = (item: LinhaApontamento) => {
+  const isVisivel = (item: LinhaApontamento): boolean => {
     if (item.nivel === 0) return true;
     
     // Para tarefas (nivel 3), o pai é o item cujo idTarefa é item.projeto
