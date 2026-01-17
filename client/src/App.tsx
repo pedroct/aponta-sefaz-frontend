@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApontamentosPage from "@/pages/Apontamentos";
 import FolhaDeHorasPage from "@/pages/FolhaDeHoras";
+import DetalheTarefaPage from "@/pages/DetalheTarefa";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={ApontamentosPage} />
       <Route path="/folha-de-horas" component={FolhaDeHorasPage} />
+      <Route path="/tarefa" component={DetalheTarefaPage} />
       <Route component={NotFound} />
     </Switch>
   );
