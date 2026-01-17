@@ -108,7 +108,7 @@ export const ModalAdicionarTempo = ({ isOpen, onClose, taskTitle = "C02. Documen
                      <button 
                        key={p} 
                        onClick={() => handleAddPreset(p)}
-                       className="px-2 py-1 text-[10px] border border-[#C8C6C4] rounded-sm hover:bg-[#F3F2F1] text-[#201F1E] transition-colors"
+                       className="px-2.5 h-8 text-[11px] border border-[#C8C6C4] rounded-sm bg-[#EFF6FC] hover:bg-[#DEECF9] text-[#201F1E] transition-colors font-medium"
                      >
                        {p}
                      </button>
