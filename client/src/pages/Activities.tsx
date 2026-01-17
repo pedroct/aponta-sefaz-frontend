@@ -21,8 +21,8 @@ const ADOHeader = ({ title, children }: { title: string; children?: React.ReactN
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-sm">
           <Clock className="w-4 h-4 text-[#605E5C]" />
-          <span className="text-[#605E5C] font-semibold"><span className="text-[#201F1E]">Estimado</span> <span className="text-[#201F1E]">8 horas</span></span>
-          <span className="text-[#605E5C] font-semibold"><span className="text-[#201F1E]">Executado</span> <span className="text-[#201F1E]">7 horas : 45 minutos</span></span>
+          <span className="text-[#605E5C] font-normal"><span className="text-[#201F1E] font-bold">Estimado</span> 8 horas</span>
+          <span className="text-[#605E5C] font-normal"><span className="text-[#201F1E] font-bold">Executado</span> 7 horas : 45 minutos</span>
         </div>
         <div className="w-full max-w-md h-4 bg-[#F3F2F1] rounded-full overflow-hidden relative">
           <div 
