@@ -114,15 +114,15 @@ const ADODropdown = ({
 const ADOTable = ({ data, onEdit, onDelete }: { data: any[]; onEdit?: (row: any) => void; onDelete?: (row: any) => void }) => {
   return (
     <div className="w-full overflow-x-auto">
-      <table className="w-full text-left border-collapse">
+      <table className="w-full text-left border-collapse table-fixed">
         <thead>
           <tr className="border-b border-[#EAEAEA] bg-[#FAF9F8]">
-            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-32">Data</th>
-            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-40">Tempo apontado</th>
-            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-48">Apontado por</th>
-            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-48">Atividade</th>
+            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-[120px]">Data</th>
+            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-[140px]">Tempo apontado</th>
+            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-[200px]">Apontado por</th>
+            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] w-[350px]">Atividade</th>
             <th className="py-2 px-4 text-xs font-semibold text-[#605E5C]">Comentário</th>
-            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] text-center w-24">Ações</th>
+            <th className="py-2 px-4 text-xs font-semibold text-[#605E5C] text-center w-[100px]">Ações</th>
           </tr>
         </thead>
         <tbody>
