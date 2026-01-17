@@ -44,11 +44,23 @@ const ADODropdown = ({
   value?: string | number;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <div className="flex flex-col gap-1.5 w-full relative">
+    <div className="flex flex-col gap-1.5 w-full relative" ref={containerRef}>
       {label && <label className="text-xs font-semibold text-[#605E5C]">{label}</label>}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "w-full h-8 px-2 text-sm border border-[#C8C6C4] rounded-sm hover:border-[#323130] focus:outline-none focus:border-[#0078D4] focus:ring-1 focus:ring-[#0078D4] bg-white flex items-center justify-between text-left transition-colors",
@@ -208,14 +220,14 @@ export default function ActivitiesPage() {
                     {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "dd/mm/aaaa"}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white shadow-xl border border-[#C8C6C4] z-[100]" align="start">
+                <PopoverContent className="w-[300px] p-2 bg-white shadow-xl border border-[#C8C6C4] z-[100]" align="start">
                   <Calendar
                     mode="single"
                     selected={date}
                     onSelect={setDate}
                     initialFocus
                     locale={ptBR}
-                    className="bg-white"
+                    className="bg-white w-full"
                   />
                 </PopoverContent>
               </Popover>
