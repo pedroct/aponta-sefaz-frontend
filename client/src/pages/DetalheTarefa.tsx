@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ModalAdicionarTempo } from "@/components/custom/ModalAdicionarTempo";
-import { Clock, MessageSquare, Tag, Users, MoreHorizontal, ChevronDown, Check } from "lucide-react";
+import { Clock, MessageSquare, Tag, Users, MoreHorizontal, ChevronDown, Check, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function DetalheTarefa() {
