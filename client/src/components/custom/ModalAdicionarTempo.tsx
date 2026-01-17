@@ -32,10 +32,43 @@ export const ModalAdicionarTempo = ({ isOpen, onClose, taskTitle = "C02. Documen
     const currentMins = parseInt(parts[1]) || 0;
     
     let totalMins = (currentHours * 60) + currentMins + (val * 60);
+    
+    // Limite máximo de 08:00 (480 minutos)
+    if (totalMins > 480) {
+      totalMins = 480;
+    }
+    
     const newHours = Math.floor(totalMins / 60);
     const newMins = totalMins % 60;
     
     setDuration(`${newHours.toString().padStart(2, '0')}:${newMins.toString().padStart(2, '0')}`);
+  };
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    // Se o usuário digitar algo que não seja número ou :
+    if (!/^[0-9:]*$/.test(value)) return;
+
+    setDuration(value);
+
+    // Validação ao perder o foco ou completar o campo seria ideal, 
+    // mas para o mockup vamos validar o formato básico e o limite
+    const parts = value.split(":");
+    if (parts.length === 2) {
+      const h = parseInt(parts[0]) || 0;
+      const m = parseInt(parts[1]) || 0;
+      const total = (h * 60) + m;
+      
+      if (total > 480) {
+        setDuration("08:00");
+      }
+    } else if (parts.length === 1) {
+      const h = parseInt(parts[0]) || 0;
+      if (h > 8) {
+        setDuration("08:00");
+      }
+    }
   };
 
   return (
@@ -99,9 +132,10 @@ export const ModalAdicionarTempo = ({ isOpen, onClose, taskTitle = "C02. Documen
              <label className="text-[11px] text-[#605E5C]">Duração</label>
              <div className="flex items-center gap-2">
                 <input 
-                  className="w-20 h-9 px-2 text-sm border border-[#C8C6C4] rounded-sm text-center font-mono"
+                  className="w-20 h-9 px-2 text-sm border border-[#C8C6C4] rounded-sm text-center font-mono focus:border-[#0078D4] outline-none"
                   value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
+                  onChange={handleDurationChange}
+                  placeholder="00:00"
                 />
                 <div className="flex gap-1">
                    {presets.map(p => (
