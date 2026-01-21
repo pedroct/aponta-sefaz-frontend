@@ -1,5 +1,19 @@
 # 📋 Changelog - Aponta SEFAZ Frontend
 
+## [1.0.1] - 2026-01-21 (Staging)
+
+### 🐛 Correções
+
+- **X-Frame-Options**: Removido via Cloudflare Transform Rules para permitir iframe no Azure DevOps
+- **nginx.conf**: Adicionado redirecionamento de `/dist/*.html` para `index.html` (suporte à extensão Azure DevOps)
+- **502 Bad Gateway**: Documentado procedimento de restart do nginx-aponta após deploys
+
+### 📁 Arquivos Modificados
+
+- `nginx.conf`: Nova location para `/dist/*.html`
+
+---
+
 ## [1.0.0] - 2026-01-21 (Staging)
 
 ### 🚀 Lançamento Inicial

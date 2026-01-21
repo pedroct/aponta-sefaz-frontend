@@ -2,12 +2,13 @@
 
 ## 📖 Documentos por Categoria
 
-### 🚀 Deploy & Infraestrutura (NOVO!)
+### 🚀 Deploy & Infraestrutura
 
 | Documento | Descrição |
 |-----------|-----------|
 | [CI_CD_PIPELINE.md](./docs/deploy/CI_CD_PIPELINE.md) | Configuração do GitHub Actions e fluxo de deploy |
-| [INFRASTRUCTURE.md](./docs/deploy/INFRASTRUCTURE.md) | Detalhes da VPS, containers e rede Docker |
+| [INFRASTRUCTURE.md](./docs/deploy/INFRASTRUCTURE.md) | Detalhes da VPS, containers, URLs e rede Docker |
+| [TROUBLESHOOTING.md](./docs/deploy/TROUBLESHOOTING.md) | **NOVO!** Problemas comuns e soluções |
 | [CHANGELOG.md](./docs/deploy/CHANGELOG.md) | Histórico de versões e mudanças |
 
 ### 🔐 Autenticação Azure DevOps
@@ -47,6 +48,9 @@ COMECE AQUI
      ├─→ [AUTH] Problemas com autenticação?
      │      └─→ QUICK_REFERENCE.md
      │
+     ├─→ [PROBLEMA] Algo não funciona?
+     │      └─→ docs/deploy/TROUBLESHOOTING.md  ← NOVO!
+     │
      └─→ [INFRA] Problemas no servidor?
             └─→ docs/deploy/INFRASTRUCTURE.md
 ```
@@ -63,7 +67,7 @@ COMECE AQUI
 ### 🚀 DevOps
 1. Ler [CI_CD_PIPELINE.md](./docs/deploy/CI_CD_PIPELINE.md)
 2. Verificar [INFRASTRUCTURE.md](./docs/deploy/INFRASTRUCTURE.md)
-3. Configurar secrets no GitHub
+3. Consultar [TROUBLESHOOTING.md](./docs/deploy/TROUBLESHOOTING.md) se algo falhar
 
 ### 🏗️ Arquiteto
 1. Ler [architecture.md](./docs/architecture.md)
@@ -74,10 +78,10 @@ COMECE AQUI
 
 ## 📊 Status do Projeto
 
-| Ambiente | Status | Data |
-|----------|--------|------|
-| **Staging** | ✅ Funcionando | 21/01/2026 |
-| **Production** | 🔄 Pronto para deploy | - |
+| Ambiente | Status | Versão | Data |
+|----------|--------|--------|------|
+| **Staging** | ✅ Funcionando | v1.0.1 | 21/01/2026 |
+| **Production** | 🔄 Pronto para deploy | - | - |
 
 ### CI/CD Status
 
@@ -85,6 +89,21 @@ COMECE AQUI
 - ✅ Deploy automático staging (branch `develop`)
 - ✅ Deploy automático production (branch `main`)
 - ✅ Health checks funcionando
+- ✅ Extensão Azure DevOps carregando em iframe
+
+---
+
+## 🌐 URLs
+
+### Produção
+- https://aponta.treit.com.br
+
+### Staging  
+- https://staging-aponta.treit.com.br
+
+### API Docs
+- https://staging-aponta.treit.com.br/docs (Swagger)
+- https://staging-aponta.treit.com.br/redoc (ReDoc)
 
 ---
 
@@ -122,6 +141,6 @@ COMECE AQUI
 
 ---
 
-**Versão**: 2.0
+**Versão**: 2.1
 **Última atualização**: 21 de janeiro de 2026
-**Status**: ✅ Staging v1.0.0 em produção
+**Status**: ✅ Staging v1.0.1 em produção
