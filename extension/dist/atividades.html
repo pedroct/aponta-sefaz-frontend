@@ -60,15 +60,46 @@
       var webContext = VSS.getWebContext();
       var extensionContext = VSS.getExtensionContext();
       
-      // Obter token de acesso OAuth
-      // Nota: VSS SDK usa Promises customizadas - usar segundo arg do then() para erros
-      VSS.getAccessToken().then(function(tokenResult) {
-        var accessToken = tokenResult.token;
+      // IMPORTANTE: Usar getAppToken() para autenticação com backend próprio
+      // getAccessToken() é para chamar APIs do Azure DevOps diretamente
+      // getAppToken() gera um JWT assinado com o secret da extensão, validável pelo backend
+      VSS.getAppToken().then(function(tokenResult) {
+        // Debug: ver o que o SDK retorna
+        console.log('[Aponta Atividades] tokenResult tipo:', typeof tokenResult);
+        console.log('[Aponta Atividades] tokenResult:', tokenResult);
         
-        console.log('[Aponta Extension] Token obtido para atividades, tamanho:', accessToken.length);
+        // O SDK pode retornar string direta OU objeto {token: string}
+        var appToken = typeof tokenResult === 'string' ? tokenResult : (tokenResult && tokenResult.token);
+        
+        if (!appToken) {
+          console.error('[Aponta Atividades] Não foi possível obter o token!');
+          document.getElementById('loading').innerHTML = '<span style="color: #A80000;">Erro: Token não disponível. Verifique os scopes da extensão.</span>';
+          return;
+        }
+        
+        console.log('[Aponta Atividades] App Token obtido, tamanho:', appToken.length);
+        console.log('[Aponta Atividades] App Token (primeiros 50 chars):', appToken.substring(0, 50));
+        
+        // Verificar estrutura do JWT
+        var parts = appToken.split('.');
+        console.log('[Aponta Atividades] Token é JWT válido (3 partes):', parts.length === 3);
+        if (parts.length === 3) {
+          try {
+            var payload = JSON.parse(atob(parts[1]));
+            console.log('[Aponta Atividades] Token claims:', JSON.stringify(payload, null, 2));
+          } catch (e) {
+            console.log('[Aponta Atividades] Erro ao decodificar JWT:', e.message);
+          }
+        }
+        
+        console.log('[Aponta Atividades] WebContext:', JSON.stringify({
+          account: webContext.account.name,
+          project: webContext.project.name,
+          user: webContext.user.id
+        }));
         
         // URL fixa do servidor staging - rota de atividades
-        var baseUrl = 'https://staging-aponta.treit.com.br';
+        var baseUrl = 'https://staging-aponta.treit.com.br/atividades';
         var params = new URLSearchParams({
           organization: webContext.account.name,
           project: webContext.project.name,
@@ -78,14 +109,13 @@
           userEmail: webContext.user.email || '',
           embedded: 'true',
           source: 'azdo-extension',
-          page: 'atividades',
-          token: accessToken
+          token: appToken  // App token (JWT assinado com secret da extensão)
         });
         
         var iframe = document.getElementById('app-frame');
         var loading = document.getElementById('loading');
         
-        iframe.src = baseUrl + '/atividades?' + params.toString();
+        iframe.src = baseUrl + '?' + params.toString();
         
         iframe.onload = function() {
           loading.style.display = 'none';
@@ -97,7 +127,8 @@
           loading.innerHTML = '<span style="color: #A80000;">Erro ao carregar a aplicação. Tente novamente.</span>';
         };
       }, function(err) {
-        console.error('[Aponta Extension] Erro ao obter token:', err);
+        // Segundo argumento do then() para tratamento de erros (VSS SDK não suporta .catch())
+        console.error('[Aponta Atividades] Erro ao obter token:', err);
         document.getElementById('loading').innerHTML = '<span style="color: #A80000;">Erro de autenticação. Tente novamente.</span>';
       });
     });

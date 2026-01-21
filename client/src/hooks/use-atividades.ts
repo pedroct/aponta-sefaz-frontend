@@ -1,18 +1,60 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAzureContext } from "@/contexts/AzureDevOpsContext";
+
+// ============================================
+// Tipos
+// ============================================
+
+export interface ProjetoSimples {
+  id: string;
+  nome: string;
+}
 
 export interface Atividade {
   id: string;
   nome: string;
   descricao?: string;
   ativo: boolean;
-  projetos?: { id: string; nome: string }[];
+  projetos?: ProjetoSimples[];
+  criado_por?: string;
+  criado_em?: string;
+  atualizado_em?: string;
+}
+
+export interface AtividadeCreate {
+  nome: string;
+  descricao?: string;
+  ativo?: boolean;
+  ids_projetos: string[];
+}
+
+export interface AtividadeUpdate {
+  nome?: string;
+  descricao?: string;
+  ativo?: boolean;
+  ids_projetos?: string[];
 }
 
 interface AtividadeListResponse {
   items: Atividade[];
   total: number;
 }
+
+// ============================================
+// Query Keys
+// ============================================
+
+export const atividadesKeys = {
+  all: ["atividades"] as const,
+  lists: () => [...atividadesKeys.all, "list"] as const,
+  list: (params?: Record<string, unknown>) => [...atividadesKeys.lists(), params] as const,
+  details: () => [...atividadesKeys.all, "detail"] as const,
+  detail: (id: string) => [...atividadesKeys.details(), id] as const,
+};
+
+// ============================================
+// Funções auxiliares
+// ============================================
 
 function normalizeAtividadesResponse(data: unknown): AtividadeListResponse {
   if (Array.isArray(data)) {
@@ -30,6 +72,13 @@ function normalizeAtividadesResponse(data: unknown): AtividadeListResponse {
   return { items: [], total: 0 };
 }
 
+// ============================================
+// Hooks de Query
+// ============================================
+
+/**
+ * Hook para listar atividades
+ */
 export function useAtividades(params?: {
   ativo?: boolean;
   id_projeto?: string;
@@ -39,7 +88,7 @@ export function useAtividades(params?: {
   const { api, token, isLoading } = useAzureContext();
 
   return useQuery({
-    queryKey: ["atividades", params],
+    queryKey: atividadesKeys.list(params),
     queryFn: async () => {
       console.log('[useAtividades] Executando queryFn, token disponível:', !!token);
       const data = await api.get("/atividades", {
@@ -53,5 +102,83 @@ export function useAtividades(params?: {
     // Só executar quando tiver token e não estiver carregando
     enabled: !!token && !isLoading,
     staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+}
+
+/**
+ * Hook para obter uma atividade específica por ID
+ */
+export function useAtividade(id: string) {
+  const { api, token, isLoading } = useAzureContext();
+
+  return useQuery({
+    queryKey: atividadesKeys.detail(id),
+    queryFn: async () => {
+      const data = await api.get(`/atividades/${id}`);
+      return data as Atividade;
+    },
+    enabled: !!id && !!token && !isLoading,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ============================================
+// Hooks de Mutation
+// ============================================
+
+/**
+ * Hook para criar uma nova atividade
+ */
+export function useCriarAtividade() {
+  const queryClient = useQueryClient();
+  const { api } = useAzureContext();
+
+  return useMutation({
+    mutationFn: async (data: AtividadeCreate) => {
+      const response = await api.post("/atividades", data);
+      return response as Atividade;
+    },
+    onSuccess: () => {
+      // Invalida a lista para recarregar
+      queryClient.invalidateQueries({ queryKey: atividadesKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Hook para atualizar uma atividade existente
+ */
+export function useAtualizarAtividade() {
+  const queryClient = useQueryClient();
+  const { api } = useAzureContext();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: AtividadeUpdate }) => {
+      const response = await api.put(`/atividades/${id}`, data);
+      return response as Atividade;
+    },
+    onSuccess: (_, variables) => {
+      // Invalida a lista e o detalhe específico
+      queryClient.invalidateQueries({ queryKey: atividadesKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: atividadesKeys.detail(variables.id) });
+    },
+  });
+}
+
+/**
+ * Hook para excluir uma atividade
+ */
+export function useExcluirAtividade() {
+  const queryClient = useQueryClient();
+  const { api } = useAzureContext();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/atividades/${id}`);
+    },
+    onSuccess: () => {
+      // Invalida a lista para recarregar
+      queryClient.invalidateQueries({ queryKey: atividadesKeys.lists() });
+    },
   });
 }
