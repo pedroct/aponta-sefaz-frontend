@@ -63,7 +63,20 @@
       // IMPORTANTE: Usar getAppToken() para autenticação com backend próprio
       // getAccessToken() é para chamar APIs do Azure DevOps diretamente
       // getAppToken() gera um JWT assinado com o secret da extensão, validável pelo backend
-      VSS.getAppToken().then(function(appToken) {
+      VSS.getAppToken().then(function(tokenResult) {
+        // Debug: ver o que o SDK retorna
+        console.log('[Aponta Extension] tokenResult tipo:', typeof tokenResult);
+        console.log('[Aponta Extension] tokenResult:', tokenResult);
+        
+        // O SDK pode retornar string direta OU objeto {token: string}
+        var appToken = typeof tokenResult === 'string' ? tokenResult : (tokenResult && tokenResult.token);
+        
+        if (!appToken) {
+          console.error('[Aponta Extension] Não foi possível obter o token!');
+          document.getElementById('loading').innerHTML = '<span style="color: #A80000;">Erro: Token não disponível. Verifique os scopes da extensão.</span>';
+          return;
+        }
+        
         console.log('[Aponta Extension] App Token obtido, tamanho:', appToken.length);
         console.log('[Aponta Extension] App Token (primeiros 50 chars):', appToken.substring(0, 50));
         
