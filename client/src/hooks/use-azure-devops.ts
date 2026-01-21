@@ -46,31 +46,47 @@ function detectAzureDevOpsEnvironment(): boolean {
   
   // Verificar se está em iframe
   const inIframe = window.parent !== window;
-  if (!inIframe) return false;
   
   // Verificar se a URL do parent parece ser Azure DevOps
   try {
     const referrer = document.referrer;
-    // Só considera Azure DevOps se o referrer explicitamente indicar
-    const isAzureDevOps = referrer.includes('dev.azure.com') || 
-                          referrer.includes('visualstudio.com') ||
-                          referrer.includes('.azure.com');
-    
-    // Verificar parâmetros específicos na URL
     const urlParams = new URLSearchParams(window.location.search);
-    const hasAzureParams = urlParams.has('hostId') || urlParams.has('extensionId');
     
-    return isAzureDevOps || hasAzureParams;
-  } catch {
-    // Se der erro, assumir que NÃO é Azure DevOps (mais seguro)
-    return false;
-  }
-}
+    // Verificar referrer para domínios Azure
+    const isAzureReferrer = referrer.includes('dev.azure.com') ||
+                            referrer.includes('visualstudio.com') ||
+                            referrer.includes('.azure.com');
 
-/**
- * Carrega o SDK do Azure DevOps dinamicamente
- * Isso evita erros quando rodando fora do Azure DevOps
- */
+    // Verificar parâmetros específicos do Azure DevOps na URL
+    const hasAzureParams = urlParams.has('hostId') || 
+                           urlParams.has('extensionId') ||
+                           urlParams.has('__ado');
+
+    // Verificar path específico da extensão (dist/*.html)
+    const isExtensionPath = window.location.pathname.startsWith('/dist/');
+
+    // Log para debug
+    console.log('[detectAzureDevOpsEnvironment]', {
+      inIframe,
+      referrer: referrer || '(empty)',
+      isAzureReferrer,
+      hasAzureParams,
+      isExtensionPath,
+      pathname: window.location.pathname,
+      search: window.location.search,
+    });
+
+    // Considerar Azure DevOps se:
+    // 1. Está em iframe E tem referrer Azure, OU
+    // 2. Tem parâmetros Azure na URL, OU
+    // 3. Está em iframe E está no path /dist/ (path da extensão)
+    const isAzureEnv = (inIframe && isAzureReferrer) || 
+                       hasAzureParams || 
+                       (inIframe && isExtensionPath);
+
+    return isAzureEnv;
+  } catch (err) {
+    console.error('[detectAzureDevOpsEnvironment] Erro:', err);
 async function loadAzureSDK() {
   if (!sdkModule) {
     sdkModule = await import('azure-devops-extension-sdk');
