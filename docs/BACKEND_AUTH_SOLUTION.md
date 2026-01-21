@@ -1,7 +1,18 @@
 # 🔴 SOLUÇÃO: Autenticação Correta para Extensão Azure DevOps
 
 **Data:** 21/01/2026  
-**Status:** PROBLEMA IDENTIFICADO - Usando método de autenticação incorreto
+**Status:** ✅ FRONTEND FUNCIONANDO - ⏳ AGUARDANDO IMPLEMENTAÇÃO NO BACKEND
+
+---
+
+## 📊 Status Atual
+
+| Componente | Status | Observação |
+|------------|--------|------------|
+| Frontend - getAppToken() | ✅ OK | Token JWT de 421 chars obtido |
+| Frontend - Passa token para iframe | ✅ OK | Via URL params |
+| Frontend - Envia token nas requisições | ✅ OK | Header Authorization |
+| Backend - Valida token | ❌ PENDENTE | Retornando 401 |
 
 ---
 
@@ -72,39 +83,77 @@ VSS.ready(function() {
 
 ### 3.3. Backend - Validar o Token
 
-O token de `getAppToken()` é um JWT padrão assinado com o secret:
+O token de `getAppToken()` é um JWT padrão assinado com o secret (HS256):
 
 ```python
 # Python com PyJWT
 import jwt
+from datetime import datetime, timezone
 
-EXTENSION_SECRET = "ey9asfasdmax...9faf7eh"  # Secret baixado do portal
+# Secret obtido do portal do Marketplace (ver seção 3.2)
+EXTENSION_SECRET = "ey9asfasdmax...9faf7eh"
 
 def validate_app_token(token: str) -> dict | None:
+    """
+    Valida um App Token do Azure DevOps Extension SDK.
+    
+    Claims esperados:
+    - nameid: ID do usuário Azure DevOps
+    - tid: Tenant ID
+    - iss: app.vstoken.visualstudio.com
+    - aud: ID da extensão (560de67c-a2e8-408a-86ae-be7ea6bd0b7a)
+    - exp: Timestamp de expiração
+    """
     try:
         payload = jwt.decode(
             token,
             EXTENSION_SECRET,
             algorithms=["HS256"],
+            audience="560de67c-a2e8-408a-86ae-be7ea6bd0b7a",  # App ID da extensão
             options={
-                "require": ["exp"],
+                "require": ["exp", "nameid", "iss", "aud"],
                 "verify_exp": True,
             }
         )
+        
+        # Validar issuer
+        if payload.get("iss") != "app.vstoken.visualstudio.com":
+            print(f"Issuer inválido: {payload.get('iss')}")
+            return None
+            
         return payload
+    except jwt.ExpiredSignatureError:
+        print("Token expirado")
+        return None
+    except jwt.InvalidAudienceError:
+        print("Audience inválido")
+        return None
     except jwt.InvalidTokenError as e:
         print(f"Token inválido: {e}")
         return None
+
+
+# Exemplo de uso no endpoint
+def get_user_id_from_token(token: str) -> str | None:
+    payload = validate_app_token(token)
+    if payload:
+        return payload.get("nameid")  # ID do usuário Azure DevOps
+    return None
 ```
 
 ```csharp
 // C# com System.IdentityModel.Tokens.Jwt
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+
 var validationParameters = new TokenValidationParameters()
 {
     IssuerSigningKey = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(EXTENSION_SECRET)),
-    ValidateIssuer = false,
-    ValidateAudience = false,
+    ValidIssuer = "app.vstoken.visualstudio.com",
+    ValidAudience = "560de67c-a2e8-408a-86ae-be7ea6bd0b7a",
+    ValidateIssuer = true,
+    ValidateAudience = true,
     RequireSignedTokens = true,
     RequireExpirationTime = true,
     ValidateLifetime = true
@@ -112,25 +161,32 @@ var validationParameters = new TokenValidationParameters()
 
 var tokenHandler = new JwtSecurityTokenHandler();
 var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+var userId = principal.FindFirst("nameid")?.Value;
 ```
 
 ---
 
-## 4. Claims do App Token
+## 4. Claims do App Token (CONFIRMADO EM PRODUÇÃO)
 
-O JWT de `getAppToken()` contém:
+O JWT de `getAppToken()` contém (formato real testado em 21/01/2026):
 
 ```json
 {
-  "iss": "https://app.vssps.visualstudio.com",
-  "aud": "YOUR_EXTENSION_ID",
-  "sub": "USER_ID",
-  "name": "USER_NAME",
-  "email": "user@example.com",
-  "oid": "ORGANIZATION_ID",
-  "exp": 1234567890
+  "nameid": "08347002-d37b-6380-a5a7-645420d92a52",  // ID do usuário Azure DevOps
+  "tid": "e9ad8643-b5e9-447f-b324-d78e61d7ed84",     // Tenant ID
+  "jti": "5a3a4469-9908-446f-bd72-837bc8bb9f39",     // JWT ID único
+  "iss": "app.vstoken.visualstudio.com",             // Issuer (NÃO tem https://)
+  "aud": "560de67c-a2e8-408a-86ae-be7ea6bd0b7a",     // App ID da extensão
+  "nbf": 1769006959,                                  // Not Before
+  "exp": 1769011159                                   // Expiration (~70 min)
 }
 ```
+
+**⚠️ IMPORTANTE:**
+- O `iss` é `app.vstoken.visualstudio.com` (sem `https://`)
+- O `aud` é o **App ID** da extensão, não o ID do publisher
+- O token expira em aproximadamente **70 minutos**
+- `nameid` é o ID do usuário (mesmo que vem do webContext)
 
 ---
 
