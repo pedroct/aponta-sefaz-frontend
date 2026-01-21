@@ -87,6 +87,11 @@ function detectAzureDevOpsEnvironment(): boolean {
     return isAzureEnv;
   } catch (err) {
     console.error('[detectAzureDevOpsEnvironment] Erro:', err);
+    // Se houver erro (ex: cross-origin), assumir standalone
+    return false;
+  }
+}
+
 async function loadAzureSDK() {
   if (!sdkModule) {
     sdkModule = await import('azure-devops-extension-sdk');
