@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script type="text/javascript" src="scripts/VSS.SDK.js"></script>
+    <script type="text/javascript" src="scripts/base64.js"></script>
+    <script type="text/javascript" src="scripts/dialogStyle.js"></script>
+
+    <script type="text/javascript">
+
+        VSS.init();
+
+        function getParams() {
+            return new Proxy(new URLSearchParams(window.location.search), {
+                get: (searchParams, prop) => searchParams.get(prop),
+            });
+        }
+
+        function getLang() {
+            if (navigator.languages != undefined)
+                return navigator.languages[0];
+            return navigator.language;
+        }
+
+        async function getAuthHeader() {
+            const headers = new Object();
+            const context = VSS.getWebContext();
+            const userId = context.user.id;
+
+            const timeZoneOffset = -(new Date()).getTimezoneOffset();
+
+            if (context.team && context.team.userIsAdmin) {
+                headers['Is-Admin'] = context.team.userIsAdmin;
+            }
+
+            headers['User-Unique-Name'] = context.user.uniqueName;
+            headers['User-Name'] = context.user.name;
+            headers['User-Email'] = context.user.email;
+            headers['Account-Id'] = context.account.id;
+            headers['Account-Name'] = context.collection.name;
+            headers['Project-Id'] = (context.project != null) ? context.project.id : null;
+            headers['Project-Name'] = (context.project != null) ? context.project.name : null;
+            headers['TimeZoneOffset'] = timeZoneOffset;
+
+            if (context.collection != undefined) {
+                headers['Collection-Id'] = context.collection.id;
+                headers['Collection-User-Id'] = userId;
+            }
+
+            const localeName = getLang();
+            if (localeName) {
+                headers['Locale'] = localeName;
+            }
+
+            const extensionCtx = VSS.getExtensionContext();
+
+            if (extensionCtx) {
+                headers['Publisher-Id'] = extensionCtx.publisherId;
+                headers['Extension-Id'] = extensionCtx.extensionId;
+            }
+
+            const accessTokenPromise = VSS.getAccessToken();
+            const appTokenPromise = VSS.getAppToken();
+            headers['Token'] = (await accessTokenPromise).token;
+            headers['App-Token'] = (await appTokenPromise).token;
+
+            return Base64.encode(JSON.stringify(headers));
+        }
+
+         function _asyncAtatus(t) {
+             var e = document.createElement("script");
+             e.type = "text/javascript", e.async = !0, e.src = "scripts/atatus.js";
+             var n = document.getElementsByTagName("script")[0];
+             e.addEventListener && e.addEventListener("load", (function(e) { t(null, e) }), !1), n.parentNode.insertBefore(e, n)
+         }
+
+        function GetBaseUrlNoRest(str){
+            return "https://dev.azure.com/" + VSS.getWebContext().collection.name + "/_apis/" + str;
+        }
+
+        async function setExtensionFeatureState(featureId, userTfsId, newState){
+            const contributionProps = VSS.getContribution().properties;
+            const isCloud = contributionProps.isCloud;
+            if (!isCloud) {
+                return;
+            }
+            const extensionCtx = VSS.getExtensionContext();
+            const extensionName = extensionCtx.publisherId + "." + extensionCtx.extensionId;
+            const query = 'FeatureManagement/FeatureStates/' + userTfsId + '/' + extensionName + '.' + featureId + '?api-version=4.1-preview';
+
+            const token = await VSS.getAccessToken();
+            await fetch(GetBaseUrlNoRest(query),
+                {
+                    method: "PATCH",
+                    mode: "cors",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": 'Bearer ' + token.token
+                    },
+                    body: JSON.stringify({ state: newState })
+                }
+            );
+        }
+
+
+        const workItemContextMenuItems = function() {
+
+            execute = function(actionContext, callback) {
+                let id = actionContext.id; // from board
+                if (!id) {
+                    id = actionContext.workItemId; //from WI Form
+                }
+                if (!id && !!actionContext.workItemIds && actionContext.workItemIds.length > 0) {
+                    if (actionContext.workItemIds.length == 1) {
+                        id = actionContext.workItemIds[0]; // from backlog
+                    } else {
+                        alert("Please select only one work item to start tracking");
+                        return;
+                    }
+                }
+                if (!id) {
+                    alert("Start tracking error: Work Item was not found");
+                    return;
+                }
+                callback(id);
+            };
+            return {
+                getMenuItems: async function(context) {
+                    const query = getParams();
+                    const host = query.host;
+
+                    await VSS.ready();
+                    const contributionProps = VSS.getContribution().properties;
+                    const isCloud = contributionProps.isCloud;
+                     if (isCloud && !window.atatus && contributionProps.atatusConfig) {
+                         _asyncAtatus(() => {
+                             if (window.atatusInit) {
+                                 atatusInit(window, document, contributionProps.atatusConfig, host, "contextMenu");
+                             }
+                         });
+                     }
+                    const name = contributionProps.name;
+
+                    let result = [];
+                    let childItems = [];
+
+                    childItems.push({
+                        text: "Start Tracking",
+                        description: "Click here to begin tracking on this work item",
+                        title: "Click here to begin tracking on this work item",
+                        icon: "/pages/contextMenu/img/startTracking.png",
+                        action: function(c) {
+                            execute(c, async function (id) {
+                                const res = await fetch(host + "Integration/StartTrackingContextMenuClick/" + id, {
+                                    method: "POST",
+                                    mode: "cors",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-Custom-Header": await getAuthHeader()
+                                    }
+                                });
+
+                                const clickResult = await res.json();
+
+                                //EK if we can start tracking without any questions - just silently start
+                                if (clickResult.started === true) {
+                                    return;
+                                }
+
+                                //EK If we have a rules validation - show error with text
+                                if (clickResult.hasValidationError === true) {
+                                    await VSS.ready();
+                                    const dialogService = await VSS.getService(VSS.ServiceIds.Dialog);
+                                    const dialogOptions = {
+                                        title: clickResult.validationErrorTitle,
+                                        width: 350,
+                                        height: 240,
+                                        resizable: false,
+                                        buttons:
+                                            [
+                                                {
+                                                    id: "ok",
+                                                    text: "OK"
+                                                }
+                                            ]
+                                    };
+                                    dialogService.openMessageDialog(clickResult.validationErrorDescription, dialogOptions);
+                                    return;
+                                }
+                                //EK if we need tracking details - open dialog with details
+                                if (clickResult.askForDetails === true) {
+                                    await openStartTrackingButtonDetailsDialog(id, isCloud, async () => { return clickResult; });
+                                    return;
+                                }
+                            });
+                        }
+                    });
+
+                    childItems.push({
+                        text: "Add Time",
+                        description: "Click here to add time to this work item",
+                        title: "Click here to add time to this work item",
+                        icon: "/pages/contextMenu/img/addTime.png",
+                        action: function(c) {
+                            execute(c, async function(id) {
+                                await VSS.ready();
+                                const dialogService = await VSS.getService(VSS.ServiceIds.Dialog);
+                                const extensionCtx = VSS.getExtensionContext();
+                                // Build absolute contribution id for dialogContent
+                                const contributionId = extensionCtx.publisherId +
+                                    "." +
+                                    extensionCtx.extensionId +
+                                    ".addTimePopupDialog";
+                                let popupHeight = 586;
+                                if (isCloud) {
+                                    popupHeight += 10;
+                                }
+                                // Show dialog
+                                const dialogOptions = {
+                                    title: "Add Time",
+                                    width: 410,
+                                    height: popupHeight,
+                                    resizable: false,
+                                    buttons: null,
+                                    urlReplacementObject: { id: id }
+                                };
+                                const dialog = await dialogService.openDialog(contributionId, dialogOptions);
+                                const addTimeDialogCallbacks = await dialog.getContributionInstance("addTimeDialogCallbacks");
+                                addTimeDialogCallbacks.setCloseCallback(dialog.close);
+                            });
+                        }
+                    });
+
+                    result.push({
+                        title: "Click to add time or start tracking",
+                        description: "Click to add time or start tracking",
+                        text: name,
+                        childItems: childItems,
+                        icon: "/pages/contextMenu/img/7paceLogo.png"
+                    });
+
+                    return result;
+                }
+            };
+        };
+        VSS.register("WorkItemContextMenuItems", workItemContextMenuItems());
+
+        async function openStartTrackingButtonDetailsDialog(itemId, isCloud, trackingStateDeferredCallback) {
+            await VSS.ready();
+            const dialogService = await VSS.getService(VSS.ServiceIds.Dialog);
+
+            const extensionCtx = VSS.getExtensionContext();
+            // Build absolute contribution id for dialogContent
+            const contributionId = extensionCtx.publisherId +
+                "." +
+                extensionCtx.extensionId +
+                ".startTrackingButtonDetailsDialog";
+
+            let popupHeight = 260;
+            if (isCloud) {
+                popupHeight += 10;
+            }
+            // Show dialog
+            const dialogOptions = {
+                title: "Tracking Details",
+                width: 400,
+                height: popupHeight,
+                resizable: false,
+                buttons: null
+            };
+
+            const dialog = await dialogService.openDialog(contributionId, dialogOptions);
+            stylizeStartTrackingWithDetailsDialog(dialog);
+
+            const startTrackingButtonDetailsCallback = await dialog.getContributionInstance("startWithDetailsCallback");
+            startTrackingButtonDetailsCallback.setItemId(itemId);
+            startTrackingButtonDetailsCallback.setTrackingStateDeferredCallback(trackingStateDeferredCallback);
+            startTrackingButtonDetailsCallback.setCloseCallback(() => { dialog.close(); });
+            startTrackingButtonDetailsCallback.setUseOwnClient();
+        }
+    </script>
+</head>
+
+<body>
+</body>
+</html>

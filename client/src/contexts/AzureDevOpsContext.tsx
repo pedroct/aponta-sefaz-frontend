@@ -1,6 +1,6 @@
 /**
  * Context Provider para integração com Azure DevOps
- * 
+ *
  * Fornece:
  * - Cliente API configurado com autenticação
  * - Contexto da organização/projeto
@@ -8,7 +8,7 @@
  * - Detecção de ambiente (iframe vs standalone)
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useCallback, useRef, useEffect, type ReactNode } from 'react';
 import { useAzureDevOps } from '@/hooks/use-azure-devops';
 import { ApiClient } from '@/lib/api';
 
@@ -51,16 +51,37 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
     error,
   } = useAzureDevOps();
 
-  // Criar função getToken que retorna o token atual
-  const getToken = useMemo(() => {
-    return async () => token || '';
+  // Usar ref para armazenar o token atual
+  // Isso permite que getToken sempre retorne o valor mais recente
+  const tokenRef = useRef<string | null>(token);
+  
+  // Atualizar a ref sempre que o token mudar
+  useEffect(() => {
+    tokenRef.current = token;
+    console.log('[AzureDevOpsContext] Token atualizado na ref:', token ? `(${token.length} chars)` : 'null');
   }, [token]);
 
+  // getToken usa a ref, então sempre retorna o valor atual
+  // Não precisa recriar quando token muda
+  const getToken = useCallback(async () => {
+    const currentToken = tokenRef.current || '';
+    console.log('[AzureDevOpsContext] getToken chamado:', currentToken ? `(${currentToken.length} chars)` : 'vazio');
+    return currentToken;
+  }, []);
+
+  // Wrapper do refreshToken para manter compatibilidade
+  const refreshTokenCallback = useCallback(async (): Promise<string> => {
+    const newToken = await refreshToken();
+    tokenRef.current = newToken;
+    return newToken;
+  }, [refreshToken]);
+
   // Criar instância única do ApiClient
-  // Usando useMemo para evitar re-criação a cada render
+  // Agora usa callbacks estáveis, então só é criado uma vez
   const api = useMemo(() => {
-    return new ApiClient(getToken, refreshToken);
-  }, [getToken, refreshToken]);
+    console.log('[AzureDevOpsContext] Criando ApiClient');
+    return new ApiClient(getToken, refreshTokenCallback);
+  }, [getToken, refreshTokenCallback]);
 
   // Valores do contexto
   const contextValue = useMemo<AzureDevOpsContextType>(() => ({
@@ -72,9 +93,9 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
     api,
     token,
     getToken,
-    refreshToken,
+    refreshToken: refreshTokenCallback,
     error,
-  }), [isInAzureDevOps, isLoading, context, api, token, getToken, refreshToken, error]);
+  }), [isInAzureDevOps, isLoading, context, api, token, getToken, refreshTokenCallback, error]);
 
   return (
     <AzureDevOpsContext.Provider value={contextValue}>
@@ -85,19 +106,19 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
 
 /**
  * Hook para acessar o contexto do Azure DevOps
- * 
+ *
  * @throws Error se usado fora do AzureDevOpsProvider
  */
 export function useAzureContext(): AzureDevOpsContextType {
   const context = useContext(AzureDevOpsContext);
-  
+
   if (!context) {
     throw new Error(
       'useAzureContext must be used within an AzureDevOpsProvider. ' +
       'Wrap your app with <AzureDevOpsProvider> in App.tsx'
     );
   }
-  
+
   return context;
 }
 

@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <script src="content/scripts/VSS.SDK.min.js"></script>
+    <link href="content/main.css" rel="stylesheet">
+    <link href="content/styles.min.css" rel="stylesheet">
+    <link href="content/timetracker-styles.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="info-block">
+        <div class="container body-content error-block-container outside-devops">
+            <div class="welcome-container outside-devops">
+                <div class="ttt-logon-content-block outside-devops">
+                    <div class="ttt-logo2"></div>
+                    <div class="ttt-content-message">Welcome to 7pace Timetracker</div>
+                    <div class="ttt-message">This version of 7pace Timetracker is designed to work with <b>Cloud</b> DevOps Services</div>
+                    <div class="ttt-message download-link"><b>You can <a href='https://7pace.com/download' target="_blank">download On-Premise version of 7pace Timetracker</a></b></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        VSS.init({
+            usePlatformScripts: true,
+            usePlatformStyles: false,
+            applyTheme: true
+        });
+
+        VSS.notifyLoadSucceeded();
+
+        VSS.ready(() => {
+            const darkThemesColors = [
+                " 0, 129, 227", // themes: "Dark (standard)", "High Contrast (dark)", "Neptune"
+                " 0, 91, 161",
+                " 0, 97, 163", // themes: "Red (dark)", "Solar (dark)", "Tomorrow night"
+                " 0, 129, 227", // themes: Default dark theme
+            ];
+
+            const isDarkTheme = () => {
+                const currentPalettePrimaryValue = getComputedStyle(document.documentElement).getPropertyValue('--palette-primary');
+
+                for (const color of darkThemesColors) {
+                    if (currentPalettePrimaryValue === color) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            const removeCurrentThemeIcons = () => {
+                let existingScript = document.getElementById("tt-theme-icons-stylesheet");
+
+                if (!existingScript) {
+                    return;
+                }
+
+                existingScript.parentNode.removeChild(existingScript);
+            }
+
+            const applyThemeIcons = () => {
+                removeCurrentThemeIcons();
+
+                const themePrefix = isDarkTheme() ? "dark" : "light";
+                const linkHref = "content/{0}-theme-icons.css".replace("{0}", themePrefix);
+
+                const link = document.createElement("link");
+                link.id = "tt-theme-icons-stylesheet";
+                link.href = linkHref;
+                link.rel = "stylesheet";
+
+                document.getElementsByTagName("head")[0].appendChild(link);
+            }
+
+            const handleDevOpsThemeChangedEvent = () => {
+                window.addEventListener("message", event => {
+                    if (!event || !event.data) {
+                        return;
+                    }
+
+                    let deserializedData = null;
+
+                    try {
+                        deserializedData = JSON.parse(event.data)
+                    }
+                    catch {
+                        return;
+                    }
+
+                    if (deserializedData.instanceId !== "DevOps.SdkClient"
+                        || !deserializedData.params
+                        || deserializedData.params.length === 0
+                        || deserializedData.params[0] !== "themeChanged") {
+                        return;
+                    }
+
+                    // GM: pull new theme data from event data
+                    VSS.applyTheme(deserializedData.params[1].detail.data);
+                    applyThemeIcons();
+                });
+            }
+
+            applyThemeIcons();
+            handleDevOpsThemeChangedEvent();
+        });
+    </script>
+</body>
+</html>

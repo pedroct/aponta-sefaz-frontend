@@ -61,8 +61,11 @@
       var extensionContext = VSS.getExtensionContext();
       
       // Obter token de acesso OAuth
+      // Nota: VSS SDK usa Promises customizadas - usar segundo arg do then() para erros
       VSS.getAccessToken().then(function(tokenResult) {
         var accessToken = tokenResult.token;
+        
+        console.log('[Aponta Extension] Token obtido para atividades, tamanho:', accessToken.length);
         
         // URL fixa do servidor staging - rota de atividades
         var baseUrl = 'https://staging-aponta.treit.com.br';
@@ -93,8 +96,8 @@
         iframe.onerror = function() {
           loading.innerHTML = '<span style="color: #A80000;">Erro ao carregar a aplicação. Tente novamente.</span>';
         };
-      }).catch(function(err) {
-        console.error('Erro ao obter token:', err);
+      }, function(err) {
+        console.error('[Aponta Extension] Erro ao obter token:', err);
         document.getElementById('loading').innerHTML = '<span style="color: #A80000;">Erro de autenticação. Tente novamente.</span>';
       });
     });

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <script type='text/javascript' src='scripts/VSS.SDK.js'></script>
+    <script type='text/javascript' src='scripts/base64.js'></script>    
+    <script type='text/javascript' src='scripts/embeddedWorkItemPanel.js'></script>
+
+    <script type='text/javascript'>
+        VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformScripts: true,
+            usePlatformStyles: false,
+            applyTheme: true
+        });
+
+        const _asyncLoad = (scriptPath, onLoadCallback) => {
+            const e = document.createElement('script');
+            e.type = 'text/javascript';
+            e.async = true;
+            e.src = scriptPath;
+
+            e.addEventListener && e.addEventListener('load', function (e) { onLoadCallback(null, e) }, false);
+
+            const n = document.getElementsByTagName('script')[0];
+            n.parentNode.insertBefore(e, n);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            VSS.ready(() => {
+                const contributionProps = VSS.getContribution().properties;
+                const isCloud = contributionProps.isCloud;
+                
+                 if (!window.atatus) {
+                     const params = new Proxy(new URLSearchParams(window.location.search), {
+                         get: (searchParams, prop) => searchParams.get(prop),
+                     });
+
+                     // AD: Timetracker base url
+                     const host = params.host;
+                     // AD: Atatus config
+                     const code = params['code'];
+
+                     // AD: Obtain json configuration for Atatus from query parameter
+                     // DON'T REMOVE BASE 64. SOME USERS USE NON-LATIN CHARACTERS WHICH BREAK BTOA ATOB FUNCTIONS
+                     const config = code && JSON.parse(Base64.decode(code));
+
+                     if (isCloud && !window.atatus && config) {
+                         _asyncLoad('scripts/atatus.js', () => {
+                             window.atatusInit && window.atatusInit(window, document, config, host, 'embeddedPanel');
+                         });
+                     }
+                 }
+                
+                window.renderPanel(VSS);
+
+                if (!isCloud) {
+                    _asyncLoad('scripts/oldOnPremHelper.js', () => {
+                        window.onPremApplyTheme && window.onPremApplyTheme(VSS);
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id='panelRoot'></div>
+</body>
+</html>

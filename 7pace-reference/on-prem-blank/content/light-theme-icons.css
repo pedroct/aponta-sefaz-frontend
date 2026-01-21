@@ -1,0 +1,211 @@
+.network-icon.sst-stop-icon,
+.sst-stop-icon,
+#work-item-info .buttons .pannel-button.tracking {
+  background-image: url('/Content/images/ServerSideTracking/sst-stop.png');
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .network-icon.sst-stop-icon,
+  .sst-stop-icon,
+  #work-item-info .buttons .pannel-button.tracking {
+    background-image: url('/Content/images/ServerSideTracking/sst-stop@2.png');
+  }
+}
+/*preloading images to avoid blinking on Monthly page load*/
+div.month-calendar-weekend-day .approval-status::after {
+  content: url(/Content/images/Approval/appr-in-progress-w.png) url(/Content/images/Approval/appr-submitted-w.png) url(/Content/images/Approval/appr-reopened-w.png) url(/Content/images/Approval/appr-approved-w.png) url(/Content/images/Approval/close-sel.png) url(/Content/images/Approval/appr-locked-w.png);
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  div.month-calendar-weekend-day .approval-status::after {
+    content: url(/Content/images/Approval/appr-in-progress-w@2.png) url(/Content/images/Approval/appr-submitted-w@2.png) url(/Content/images/Approval/appr-reopened-w@2.png) url(/Content/images/Approval/appr-approved-w@2.png) url(/Content/images/Approval/close-sel@2x.png) url(/Content/images/Approval/appr-locked-w@2.png);
+  }
+}
+.whats-new-icon {
+  background-image: url(/Content/images/Whats-new-icon.svg);
+}
+.whats-new-cancel-icon {
+  background-image: url(/Content/images/whats-new-cancel.svg);
+}
+.whats-new-7pace-logo {
+  background-image: url(/Content/images/7pace-Logo.png);
+}
+.submittedforapproval:not(.future-week) {
+  background-image: url(/Content/images/Approval/appr-submitted.svg);
+}
+.inprocess:not(.future-week) {
+  background-image: url(/Content/images/Approval/appr-in-progress.svg);
+}
+.reopened:not(.future-week) {
+  background-image: url(/Content/images/Approval/appr-reopened.svg);
+}
+.approved:not(.future-week) {
+  background-image: url(/Content/images/Approval/appr-approved.svg);
+}
+.closed:not(.future-week) {
+  background-image: url(/Content/images/Approval/close-sel.png);
+}
+.locked:not(.future-week) {
+  background-image: url(/Content/images/Approval/appr-locked.svg);
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .submittedforapproval:not(.future-week) {
+    background-image: url(/Content/images/Approval/appr-submitted.svg);
+  }
+  .inprocess:not(.future-week) {
+    background-image: url(/Content/images/Approval/appr-in-progress.svg);
+  }
+  .reopened:not(.future-week) {
+    background-image: url(/Content/images/Approval/appr-reopened.svg);
+  }
+  .approved:not(.future-week) {
+    background-image: url(/Content/images/Approval/appr-approved.svg);
+  }
+  .closed:not(.future-week) {
+    background-image: url(/Content/images/Approval/close-sel@2x.png);
+  }
+  .locked:not(.future-week) {
+    background-image: url(/Content/images/Approval/appr-locked.svg);
+  }
+}
+.ttt-logon-content-block .ttt-logo2 {
+  background-image: url(images/7pace-text-logo-light.png);
+  background-size: 128px;
+  width:100%;height:42px;background-position:center;background-repeat:no-repeat
+}
+.ttt-logon-content-block .ttt-welcome-auth .welcome-left .privacy-illustration {
+  background-image: url("/Content/images/illustrations/privacy.png");
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .ttt-logon-content-block .ttt-welcome-auth .welcome-left .privacy-illustration {
+    background-image: url("/Content/images/illustrations/privacy@2x.png");
+  }
+}
+.ttt-notification-logo {
+  background-image: url("/Content/images/7p-white-theme.png");
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .ttt-notification-logo {
+    background-image: url("/Content/images/7p-white-theme@2x.png");
+  }
+}
+.ui-icon,
+.ui-widget-content .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_222222_256x240.png") /*{iconsContent}*/;
+}
+.ui-widget-header .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_222222_256x240.png") /*{iconsHeader}*/;
+}
+.ui-state-default .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_888888_256x240.png") /*{iconsDefault}*/;
+}
+.ui-state-hover .ui-icon,
+.ui-state-focus .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_454545_256x240.png") /*{iconsHover}*/;
+}
+.ui-state-active .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_454545_256x240.png") /*{iconsActive}*/;
+}
+.ui-state-highlight .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_2e83ff_256x240.png") /*{iconsHighlight}*/;
+}
+.ui-state-error .ui-icon,
+.ui-state-error-text .ui-icon {
+  background-image: url("/Content/themes/base/images/ui-icons_cd0a0a_256x240.png") /*{iconsError}*/;
+}
+.empty-dashboard {
+  background-image: url("/Content/images/Reporting/empty-layout-background.png");
+}
+.approver-search-container #person-selector .chosen-container.chosen-container-single .chosen-single div b {
+  background-image: url(/Content/images/ChevronDown.png);
+}
+@media only screen and (-o-min-device-pixel-ratio: 1.25), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .approver-search-container #person-selector .chosen-container.chosen-container-single .chosen-single div b {
+    background-image: url(/Content/images/ChevronDown.png) !important;
+  }
+}
+.apps-windows-icon {
+  background-image: url('/Content/images/windows.png') !important;
+}
+.apps-mac-icon {
+  background-image: url('/Content/images/mac.png') !important;
+}
+.apps-mac-icon.available {
+  background-image: url('/Content/images/mac-desktop.png') !important;
+}
+.apps-linux-icon {
+  background-image: url('/Content/images/linux.png') !important;
+}
+.apps-mob-apple-icon {
+  background-image: url('/Content/images/mob-apple-act.png') !important;
+}
+.apps-mob-android-icon {
+  background-image: url('/Content/images/mob-android-act.png') !important;
+}
+.apps-pair-account-icon {
+  background-image: url('/Content/images/pair-account.png') !important;
+}
+.apps-pairing-account-icon {
+  background-image: url('/Content/images/Apps/light/pairing-account.svg');
+}
+.apps-pair-mobile-app-icon {
+  background-image: url('/Content/images/Apps/light/pair-mobile-app.svg');
+}
+.apps-pair-pin-icon {
+  background-image: url('/Content/images/pair-pin.png') !important;
+}
+.apps-unapir-icon {
+  background-image: url('/Content/images/unapir.png') !important;
+}
+.apps-build-icon {
+  background-image: url('/Content/images/build.png') !important;
+}
+.popup-action .approval-btn.reopen {
+  background-image: url(/Content/images/Approval/revoke-btn.svg);
+}
+.popup-action .approval-btn.submit {
+  background-image: url(/Content/images/Approval/appr-submitted.svg);
+}
+.mightbelocked {
+  background: url('/Content/images/Approval/lock-on-hover.png') no-repeat center;
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .mightbelocked {
+    background: url('/Content/images/Approval/lock-on-hover@2x.png') no-repeat center;
+  }
+}
+.widget-tile .widget-image-class {
+  background-image: url('/Content/images/Reporting/widget-small.png');
+}
+.widget-tile:hover .widget-image-class {
+  background-image: url('/Content/images/Reporting/widget-active-small.png');
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .widget-tile .widget-image-class {
+    background-image: url('/Content/images/Reporting/widget.png');
+  }
+  .widget-tile:hover .widget-image-class {
+    background-image: url('/Content/images/Reporting/widget-active.png');
+  }
+}
+.monthly-layout-button {
+  background-image: url('/Content/images/timesexplorer/times-explorer-light.png');
+}
+.hub-title .montly-user-selector input:not(.bolt-textfield-input-with-suffix) {
+  background-image: url(/Content/images/ChevronDown.png);
+}
+@media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min--moz-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
+  .hub-title .montly-user-selector input:not(.bolt-textfield-input-with-suffix) {
+    background-image: url(/Content/images/ChevronDown.png) !important;
+  }
+}
+.apps-wrapper .third-row .mobile-apps-card .download-links .link.google-play {
+  background-image: url('/Content/images/Apps/light/google-play.svg');
+}
+.apps-wrapper .third-row .mobile-apps-card .download-links .link.app-store {
+  background-image: url('/Content/images/Apps/light/app-store.svg');
+}
+.rate-us-dialog-container .company-logo {
+  background-image: url("/Content/images/7pace-text-logo-light.svg");
+}
+.revoke-icon-svg-style {
+  fill: blue;
+}
