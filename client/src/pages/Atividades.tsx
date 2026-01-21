@@ -26,7 +26,7 @@ import {
   useExcluirAtividade,
   type Atividade,
 } from "@/hooks/use-atividades";
-import { useProjetos } from "@/hooks/use-projetos";
+import { useProjetos, useSincronizarProjetos } from "@/hooks/use-projetos";
 import { useAzureContext } from "@/contexts/AzureDevOpsContext";
 
 // --- Column Definitions ---
@@ -149,6 +149,7 @@ export default function Atividades() {
   const criarAtividade = useCriarAtividade();
   const atualizarAtividade = useAtualizarAtividade();
   const excluirAtividade = useExcluirAtividade();
+  const sincronizarProjetos = useSincronizarProjetos();
 
   // Dados
   const atividades = atividadesData?.items ?? [];
@@ -338,6 +339,34 @@ export default function Atividades() {
           onChange={setSelectedProjectIds}
           disabled={criarAtividade.isPending}
         />
+      </div>
+      <div className="flex items-end pb-0.5">
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              const result = await sincronizarProjetos.mutateAsync();
+              toast({
+                title: "Sincronização concluída",
+                description: result.message || "Projetos sincronizados com sucesso!",
+              });
+            } catch (err) {
+              const message = err instanceof Error ? err.message : "Erro ao sincronizar";
+              toast({
+                title: "Erro na sincronização",
+                description: message,
+                variant: "destructive",
+              });
+            }
+          }}
+          disabled={sincronizarProjetos.isPending}
+          className="p-2 rounded hover:bg-[#EDEBE9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Sincronizar projetos do Azure DevOps"
+        >
+          <RefreshCw
+            className={`w-5 h-5 text-[#0078D4] ${sincronizarProjetos.isPending ? "animate-spin" : ""}`}
+          />
+        </button>
       </div>
       <div className="flex items-end pb-0.5">
         <ADOButton
