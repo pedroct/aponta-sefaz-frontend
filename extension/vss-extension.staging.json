@@ -1,8 +1,8 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos-staging",
-  "version": "1.0.0",
-  "name": "Aponta Timetracker (Staging)",
+  "version": "1.0.1",
+  "name": "Aponta (Staging)",
   "description": "[STAGING] Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
   "targets": [
@@ -32,7 +32,6 @@
     "vso.work_write"
   ],
   "demands": [],
-  "baseUri": "https://staging-aponta.treit.com.br",
   "contributions": [
     {
       "id": "aponta-hub-group",

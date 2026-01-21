@@ -109,8 +109,8 @@
             var webContext = VSS.getWebContext();
             var extensionContext = VSS.getExtensionContext();
             
-            // Construir URL com parâmetros de contexto
-            var baseUrl = extensionContext.baseUri || 'https://staging-aponta.treit.com.br';
+            // URL fixa do servidor staging
+            var baseUrl = 'https://staging-aponta.treit.com.br';
             var params = new URLSearchParams({
               organization: webContext.account.name,
               project: webContext.project.name,
