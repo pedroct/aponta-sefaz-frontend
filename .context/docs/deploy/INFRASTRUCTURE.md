@@ -9,21 +9,101 @@
 | **SSH** | OpenSSH 10.0p2 |
 | **Docker** | Docker Compose v2+ |
 
+## 🌐 URLs Disponíveis
+
+### Produção
+
+| URL | Descrição |
+|-----|-----------|
+| https://aponta.treit.com.br | Frontend (Aplicação principal) |
+| https://aponta.treit.com.br/api/ | Backend API |
+| https://aponta.treit.com.br/docs | Swagger UI (documentação interativa) |
+| https://aponta.treit.com.br/redoc | ReDoc (documentação alternativa) |
+| https://aponta.treit.com.br/openapi.json | OpenAPI Schema |
+| https://aponta.treit.com.br/health | Health Check da API |
+
+### Staging
+
+| URL | Descrição |
+|-----|-----------|
+| https://staging-aponta.treit.com.br | Frontend (Aplicação staging) |
+| https://staging-aponta.treit.com.br/api/ | Backend API staging |
+| https://staging-aponta.treit.com.br/docs | Swagger UI |
+| https://staging-aponta.treit.com.br/redoc | ReDoc |
+| https://staging-aponta.treit.com.br/health | Health Check da API |
+
+### Acesso Direto (VPS)
+
+| URL | Descrição |
+|-----|-----------|
+| http://92.112.178.252 | nginx reverse proxy |
+| http://92.112.178.252:5432 | PostgreSQL (apenas interno) |
+
 ## Containers
 
 ### Staging
-| Container | Imagem | Porta |
-|-----------|--------|-------|
-| `fe-aponta-staging` | nginx:alpine | 80 → 3001 |
-| `api-aponta-staging` | python:3.12 | 8000 → 8001 |
+| Container | Imagem | Porta Interna |
+|-----------|--------|---------------|
+| `fe-aponta-staging` | nginx:alpine | 80 |
+| `api-aponta-staging` | python:3.12 | 8000 |
 
 ### Production
-| Container | Imagem | Porta |
-|-----------|--------|-------|
-| `fe-aponta-prod` | nginx:alpine | 80 → 3000 |
-| `api-aponta-prod` | python:3.12 | 8000 → 8000 |
+| Container | Imagem | Porta Interna |
+|-----------|--------|---------------|
+| `fe-aponta-prod` | nginx:alpine | 80 |
+| `api-aponta-prod` | python:3.12 | 8000 |
 
-## Rede
+### Infraestrutura
+| Container | Imagem | Porta Externa |
+|-----------|--------|---------------|
+| `nginx-aponta` | nginx | 80, 443 |
+| `postgres-aponta` | postgres | 5432 |
+
+## Arquitetura de Rede
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    Cloudflare                            │
+                    │              (SSL/CDN/DDoS Protection)                   │
+                    └─────────────────────────────────────────────────────────┘
+                                              │
+                                              ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              VPS (92.112.178.252)                                │
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+│  │                    nginx-aponta (Reverse Proxy)                          │    │
+│  │                         Portas: 80, 443                                  │    │
+│  └─────────────────────────────────────────────────────────────────────────┘    │
+│           │                                              │                       │
+│           │ aponta.treit.com.br                          │ staging-aponta...     │
+│           ▼                                              ▼                       │
+│  ┌─────────────────────┐                      ┌─────────────────────┐           │
+│  │     PRODUÇÃO        │                      │      STAGING        │           │
+│  │  ┌───────────────┐  │                      │  ┌───────────────┐  │           │
+│  │  │ fe-aponta-prod│  │                      │  │fe-aponta-stg  │  │           │
+│  │  │  nginx:alpine │  │                      │  │ nginx:alpine  │  │           │
+│  │  │    :80        │  │                      │  │    :80        │  │           │
+│  │  └───────────────┘  │                      │  └───────────────┘  │           │
+│  │         │           │                      │         │           │           │
+│  │  ┌───────────────┐  │                      │  ┌───────────────┐  │           │
+│  │  │api-aponta-prod│  │                      │  │api-aponta-stg │  │           │
+│  │  │  python:3.12  │  │                      │  │  python:3.12  │  │           │
+│  │  │    :8000      │  │                      │  │    :8000      │  │           │
+│  │  └───────────────┘  │                      │  └───────────────┘  │           │
+│  └─────────────────────┘                      └─────────────────────┘           │
+│                              │                                                   │
+│                              ▼                                                   │
+│                    ┌─────────────────────┐                                      │
+│                    │   postgres-aponta   │                                      │
+│                    │       :5432         │                                      │
+│                    └─────────────────────┘                                      │
+│                                                                                  │
+│                    ════════════════════════                                     │
+│                     aponta-shared-network                                       │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Rede Docker
 
 ```yaml
 networks:
@@ -32,29 +112,29 @@ networks:
     name: aponta-shared-network
 ```
 
-> A rede é **externa** e compartilhada entre frontend e backend.
+> A rede é **externa** e compartilhada entre todos os containers.
 
-## Nginx Configuration
+## Nginx Reverse Proxy
 
-```nginx
-upstream api_backend {
-    server api:8000;  # Nome do serviço Docker
-}
+O container `nginx-aponta` faz o roteamento:
 
-location /api/ {
-    proxy_pass http://api_backend/;
-}
+| Domínio | Destino |
+|---------|---------|
+| aponta.treit.com.br | frontend_prod → fe-aponta-prod:80 |
+| aponta.treit.com.br/api/ | api_prod → api-aponta-prod:8000 |
+| staging-aponta.treit.com.br | frontend_staging → fe-aponta-staging:80 |
+| staging-aponta.treit.com.br/api/ | api_staging → api-aponta-staging:8000 |
 
-location /health {
-    return 200 'OK';
-}
-```
+## SSL/TLS
+
+- **Provedor**: Cloudflare (Full SSL)
+- **Certificados**: Armazenados em `/etc/nginx/ssl/`
+- **Protocolos**: TLSv1.2, TLSv1.3
 
 ## SSH Keys
 
 ### GitHub Actions Deploy Key
 - **Tipo**: Ed25519
-- **Fingerprint**: `SHA256:...`
 - **Localização no VPS**: `/root/.ssh/authorized_keys`
 
 ### Gerar nova chave (se necessário)
@@ -62,49 +142,44 @@ location /health {
 ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github_deploy
 ```
 
-## Volumes e Persistência
+## Comandos Úteis
 
-- Frontend: Stateless (apenas arquivos estáticos)
-- Backend: Dados persistidos via Supabase (externo)
-
-## Monitoramento
-
-### Health Checks
-
-**Frontend**:
+### Ver status dos containers
 ```bash
-curl -sf http://localhost:3001/health
-# Retorna: OK
+docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}'
 ```
 
-**Backend**:
+### Logs de um container
 ```bash
-curl -sf http://localhost:8001/health
-# Retorna: {"status": "healthy"}
+docker logs fe-aponta-staging -f --tail 100
+docker logs api-aponta-staging -f --tail 100
+docker logs nginx-aponta -f --tail 100
 ```
 
-### Logs
+### Health checks
 ```bash
 # Frontend staging
-docker logs fe-aponta-staging -f --tail 100
+curl -sf https://staging-aponta.treit.com.br/health
 
-# Backend staging  
-docker logs api-aponta-staging -f --tail 100
+# Backend staging
+curl -sf https://staging-aponta.treit.com.br/api/health
+
+# Frontend prod
+curl -sf https://aponta.treit.com.br/health
+
+# Backend prod  
+curl -sf https://aponta.treit.com.br/api/health
 ```
 
-## Backup e Recovery
-
-### Rollback rápido
+### Restart de containers
 ```bash
+# Staging
 cd /home/ubuntu/aponta-sefaz/staging
-git checkout HEAD~1
 docker compose up -d --build --force-recreate --no-deps frontend
-```
 
-### Restart completo
-```bash
-docker compose down
-docker compose up -d
+# Production
+cd /home/ubuntu/aponta-sefaz/production
+docker compose up -d --build --force-recreate --no-deps frontend
 ```
 
 ---
