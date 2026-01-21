@@ -52,15 +52,19 @@ function detectAzureDevOpsEnvironment(): boolean {
     const referrer = document.referrer;
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Verificar referrer para domínios Azure
+    // Verificar referrer para domínios Azure (incluindo CDN de extensões)
     const isAzureReferrer = referrer.includes('dev.azure.com') ||
                             referrer.includes('visualstudio.com') ||
-                            referrer.includes('.azure.com');
+                            referrer.includes('.azure.com') ||
+                            referrer.includes('vsassets.io') ||
+                            referrer.includes('gallerycdn.vsassets.io');
 
     // Verificar parâmetros específicos do Azure DevOps na URL
     const hasAzureParams = urlParams.has('hostId') || 
                            urlParams.has('extensionId') ||
-                           urlParams.has('__ado');
+                           urlParams.has('__ado') ||
+                           urlParams.has('organization') ||
+                           urlParams.has('project');
 
     // Verificar path específico da extensão (dist/*.html)
     const isExtensionPath = window.location.pathname.startsWith('/dist/');
