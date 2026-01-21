@@ -40,5 +40,5 @@ jobs:
 
       - name: Health Check
         run: |
-          sleep 20
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker exec fe-aponta-prod wget --quiet --tries=1 --spider http://localhost/health || exit 1"
+          sleep 15
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker exec fe-aponta-prod curl -sf http://localhost/health || exit 1"
