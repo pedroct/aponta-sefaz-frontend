@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAzureContext } from "@/contexts/AzureDevOpsContext";
 
@@ -16,6 +16,9 @@ interface SearchResponse {
   count: number;
   results: WorkItemSearchResult[];
 }
+
+// Tipos de Work Items que podem receber apontamentos de horas
+const ALLOWED_WORK_ITEM_TYPES = ["Task", "Bug"];
 
 /**
  * Hook para buscar Work Items por título com debouncing
@@ -57,6 +60,14 @@ export function useSearchWorkItems(
     retry: 1,
   });
 
+  // Filtro no frontend como fallback caso backend não filtre
+  const filteredResults = useMemo(() => {
+    const results = query.data?.results || [];
+    return results.filter(item => 
+      ALLOWED_WORK_ITEM_TYPES.includes(item.type)
+    );
+  }, [query.data?.results]);
+
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
   }, []);
@@ -67,7 +78,7 @@ export function useSearchWorkItems(
 
   return {
     searchTerm,
-    results: query.data?.results || [],
+    results: filteredResults, // Usa resultados filtrados
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
