@@ -1,77 +1,77 @@
 /**
- * Hook para integração com Azure DevOps SDK
+ * Hook para integração com Azure DevOps
  *
- * Detecta automaticamente se está rodando dentro de um iframe do Azure DevOps
- * e fornece autenticação híbrida:
- * - Produção (iframe): usa SDK.getAccessToken() para Bearer OAuth
- * - Desenvolvimento (standalone): usa VITE_AZURE_PAT do .env
+ * Quando rodando dentro de um iframe do Azure DevOps (via extensão),
+ * o token OAuth e contexto são passados via URL query params pelo HTML wrapper.
+ * 
+ * Quando rodando standalone (desenvolvimento), usa VITE_AZURE_PAT do .env.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import * as SDK from 'azure-devops-extension-sdk';
-import { CommonServiceIds, IProjectPageService } from 'azure-devops-extension-api';
 
 export interface AzureContext {
   organization: string;
   project: string;
   projectId: string;
+  userId?: string;
+  userName?: string;
+  userEmail?: string;
+  workItemId?: string;
+  workItemTitle?: string;
+  workItemType?: string;
 }
 
 interface UseAzureDevOpsReturn {
   /** Se está rodando dentro do iframe do Azure DevOps */
   isInAzureDevOps: boolean;
-  /** Se está carregando/inicializando o SDK */
+  /** Se está carregando/inicializando */
   isLoading: boolean;
   /** Contexto com org/project (null se não disponível) */
   context: AzureContext | null;
   /** Token atual (OAuth ou PAT) */
   token: string | null;
-  /** Função para renovar token (reativa - chamar após 401) */
+  /** Função para renovar token (não implementada - token vem da URL) */
   refreshToken: () => Promise<string>;
   /** Erro de inicialização, se houver */
   error: Error | null;
 }
 
 /**
- * Detecta se está rodando em iframe do Azure DevOps
+ * Extrai parâmetros da URL passados pelo HTML wrapper da extensão
  */
-function detectAzureDevOpsEnvironment(): boolean {
-  if (typeof window === 'undefined') return false;
+function getUrlParams(): URLSearchParams {
+  if (typeof window === 'undefined') return new URLSearchParams();
+  return new URLSearchParams(window.location.search);
+}
 
-  const inIframe = window.parent !== window;
-
-  try {
-    const referrer = document.referrer;
-    const urlParams = new URLSearchParams(window.location.search);
-
-    const isAzureReferrer = referrer.includes('dev.azure.com') ||
-                            referrer.includes('visualstudio.com') ||
-                            referrer.includes('.azure.com') ||
-                            referrer.includes('vsassets.io') ||
-                            referrer.includes('gallerycdn.vsassets.io');
-
-    const hasAzureParams = urlParams.has('hostId') ||
-                           urlParams.has('extensionId') ||
-                           urlParams.has('__ado') ||
-                           urlParams.has('organization') ||
-                           urlParams.has('project');
-
-    const isExtensionPath = window.location.pathname.startsWith('/dist/');
-
-    console.log('[detectAzureDevOpsEnvironment]', {
-      inIframe,
-      referrer: referrer || '(empty)',
-      isAzureReferrer,
-      hasAzureParams,
-      isExtensionPath,
-      pathname: window.location.pathname,
-    });
-
-    return (inIframe && isAzureReferrer) || hasAzureParams || (inIframe && isExtensionPath);
-  } catch (err) {
-    console.error('[detectAzureDevOpsEnvironment] Erro:', err);
-    return false;
-  }
+/**
+ * Detecta se está rodando em iframe do Azure DevOps
+ * Verifica a presença de parâmetros específicos passados pelo wrapper HTML
+ */
+function detectAzureDevOpsEnvironment(): { isAzure: boolean; params: URLSearchParams } {
+  const params = getUrlParams();
+  
+  // O wrapper HTML passa 'embedded=true' e 'source=azdo-*' quando em Azure DevOps
+  const isEmbedded = params.get('embedded') === 'true';
+  const source = params.get('source') || '';
+  const isAzureSource = source.startsWith('azdo-');
+  
+  // Também verifica se tem token e organization (só presentes quando vem do Azure)
+  const hasToken = params.has('token') && params.get('token') !== '';
+  const hasOrg = params.has('organization') && params.get('organization') !== '';
+  
+  const isAzure = (isEmbedded && isAzureSource) || (hasToken && hasOrg);
+  
+  console.log('[detectAzureDevOpsEnvironment]', {
+    isEmbedded,
+    source,
+    isAzureSource,
+    hasToken,
+    hasOrg,
+    isAzure,
+  });
+  
+  return { isAzure, params };
 }
 
 export function useAzureDevOps(): UseAzureDevOpsReturn {
@@ -83,6 +83,9 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
 
   const initializationRef = useRef<'pending' | 'initializing' | 'done'>('pending');
 
+  /**
+   * Inicializa modo standalone (desenvolvimento local)
+   */
   const initializeStandalone = useCallback(() => {
     const pat = import.meta.env.VITE_AZURE_PAT || import.meta.env.VITE_API_TOKEN;
     const org = import.meta.env.VITE_AZURE_ORG || 'sefaz-ceara-lab';
@@ -104,81 +107,88 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
     });
   }, []);
 
-  const initializeAzureSDK = useCallback(async () => {
-    if (initializationRef.current !== 'pending') return;
-    initializationRef.current = 'initializing';
-
+  /**
+   * Inicializa usando parâmetros passados via URL pelo wrapper HTML
+   */
+  const initializeFromUrlParams = useCallback((params: URLSearchParams) => {
     try {
-      console.log('[useAzureDevOps] Inicializando SDK npm...');
-      
-      await SDK.init();
-      await SDK.ready();
-      
-      console.log('[useAzureDevOps] SDK.ready() concluído');
+      const accessToken = params.get('token') || '';
+      const organization = params.get('organization') || '';
+      const project = params.get('project') || '';
+      const projectId = params.get('projectId') || '';
+      const userId = params.get('userId') || '';
+      const userName = params.get('userName') || '';
+      const userEmail = params.get('userEmail') || '';
+      const workItemId = params.get('workItemId') || undefined;
+      const workItemTitle = params.get('workItemTitle') || undefined;
+      const workItemType = params.get('workItemType') || undefined;
 
-      const accessToken = await SDK.getAccessToken();
-      console.log('[useAzureDevOps] Token obtido:', !!accessToken);
-
-      const projectService = await SDK.getService<IProjectPageService>(
-        CommonServiceIds.ProjectPageService
-      );
-      const project = await projectService.getProject();
-      const host = SDK.getHost();
+      if (!accessToken) {
+        throw new Error('Token não encontrado nos parâmetros da URL');
+      }
 
       setIsInAzureDevOps(true);
       setToken(accessToken);
       setContext({
-        organization: host.name,
-        project: project?.name || '',
-        projectId: project?.id || '',
+        organization,
+        project,
+        projectId,
+        userId,
+        userName,
+        userEmail,
+        workItemId,
+        workItemTitle,
+        workItemType,
       });
+      setIsLoading(false);
 
-      SDK.notifyLoadSucceeded();
-
-      console.log('[useAzureDevOps] SDK inicializado com sucesso', {
-        organization: host.name,
-        project: project?.name,
+      console.log('[useAzureDevOps] Inicializado via URL params', {
+        hasToken: !!accessToken,
+        tokenLength: accessToken.length,
+        organization,
+        project,
+        userId,
+        workItemId,
       });
     } catch (err) {
-      console.error('[useAzureDevOps] Falha ao inicializar SDK:', err);
-      setError(err instanceof Error ? err : new Error('Falha ao inicializar Azure DevOps SDK'));
-      setIsInAzureDevOps(false);
+      console.error('[useAzureDevOps] Erro ao inicializar via URL:', err);
+      setError(err instanceof Error ? err : new Error('Falha ao inicializar'));
+      // Fallback para standalone
       initializeStandalone();
-    } finally {
-      setIsLoading(false);
-      initializationRef.current = 'done';
     }
   }, [initializeStandalone]);
 
+  /**
+   * Renova o token de acesso
+   * Nota: Quando em iframe, o token vem da URL e não pode ser renovado aqui.
+   */
   const refreshToken = useCallback(async (): Promise<string> => {
     if (isInAzureDevOps) {
-      try {
-        const newToken = await SDK.getAccessToken();
-        setToken(newToken);
-        console.log('[useAzureDevOps] Token renovado via SDK');
-        return newToken;
-      } catch (err) {
-        console.error('[useAzureDevOps] Falha ao renovar token:', err);
-        throw err;
-      }
+      console.warn('[useAzureDevOps] Token refresh não suportado em modo iframe. Token atual será retornado.');
+      return token || '';
     }
-
+    
     const pat = import.meta.env.VITE_AZURE_PAT || import.meta.env.VITE_API_TOKEN || '';
     return pat;
-  }, [isInAzureDevOps]);
+  }, [isInAzureDevOps, token]);
 
+  // Efeito de inicialização
   useEffect(() => {
-    const isAzureEnv = detectAzureDevOpsEnvironment();
+    if (initializationRef.current !== 'pending') return;
+    initializationRef.current = 'initializing';
 
-    if (isAzureEnv) {
-      console.log('[useAzureDevOps] Ambiente Azure DevOps detectado, inicializando SDK...');
-      initializeAzureSDK();
+    const { isAzure, params } = detectAzureDevOpsEnvironment();
+
+    if (isAzure) {
+      console.log('[useAzureDevOps] Ambiente Azure DevOps detectado, lendo parâmetros da URL...');
+      initializeFromUrlParams(params);
     } else {
       console.log('[useAzureDevOps] Ambiente standalone detectado');
       initializeStandalone();
-      initializationRef.current = 'done';
     }
-  }, [initializeAzureSDK, initializeStandalone]);
+
+    initializationRef.current = 'done';
+  }, [initializeFromUrlParams, initializeStandalone]);
 
   return {
     isInAzureDevOps,

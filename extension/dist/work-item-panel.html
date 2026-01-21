@@ -109,37 +109,47 @@
             var webContext = VSS.getWebContext();
             var extensionContext = VSS.getExtensionContext();
             
-            // URL fixa do servidor staging
-            var baseUrl = 'https://staging-aponta.treit.com.br';
-            var params = new URLSearchParams({
-              organization: webContext.account.name,
-              project: webContext.project.name,
-              projectId: webContext.project.id,
-              userId: webContext.user.id,
-              userName: webContext.user.name,
-              userEmail: webContext.user.email || '',
-              workItemId: workItemId,
-              workItemTitle: workItemTitle,
-              workItemType: workItemType,
-              embedded: 'true',
-              source: 'azdo-work-item-panel'
+            // Obter token de acesso OAuth
+            VSS.getAccessToken().then(function(tokenResult) {
+              var accessToken = tokenResult.token;
+              
+              // URL fixa do servidor staging
+              var baseUrl = 'https://staging-aponta.treit.com.br';
+              var params = new URLSearchParams({
+                organization: webContext.account.name,
+                project: webContext.project.name,
+                projectId: webContext.project.id,
+                userId: webContext.user.id,
+                userName: webContext.user.name,
+                userEmail: webContext.user.email || '',
+                workItemId: workItemId,
+                workItemTitle: workItemTitle,
+                workItemType: workItemType,
+                embedded: 'true',
+                source: 'azdo-work-item-panel',
+                token: accessToken
+              });
+              
+              var iframe = document.getElementById('app-frame');
+              var loading = document.getElementById('loading');
+              
+              iframe.src = baseUrl + '/work-item-panel?' + params.toString();
+              
+              iframe.onload = function() {
+                loading.style.display = 'none';
+                iframe.style.display = 'block';
+                VSS.notifyLoadSucceeded();
+              };
+              
+              iframe.onerror = function() {
+                loading.innerHTML = '<span class="error">Erro ao carregar. Tente novamente.</span>';
+                VSS.notifyLoadSucceeded();
+              };
+            }).catch(function(err) {
+              console.error('Erro ao obter token:', err);
+              loading.innerHTML = '<span class="error">Erro de autenticação. Tente novamente.</span>';
+              VSS.notifyLoadSucceeded();
             });
-            
-            var iframe = document.getElementById('app-frame');
-            var loading = document.getElementById('loading');
-            
-            iframe.src = baseUrl + '/work-item-panel?' + params.toString();
-            
-            iframe.onload = function() {
-              loading.style.display = 'none';
-              iframe.style.display = 'block';
-              VSS.notifyLoadSucceeded();
-            };
-            
-            iframe.onerror = function() {
-              loading.innerHTML = '<span class="error">Erro ao carregar. Tente novamente.</span>';
-              VSS.notifyLoadSucceeded();
-            };
           });
         });
       });

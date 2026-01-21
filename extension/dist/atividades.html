@@ -60,34 +60,43 @@
       var webContext = VSS.getWebContext();
       var extensionContext = VSS.getExtensionContext();
       
-      // URL fixa do servidor staging - rota de atividades
-      var baseUrl = 'https://staging-aponta.treit.com.br';
-      var params = new URLSearchParams({
-        organization: webContext.account.name,
-        project: webContext.project.name,
-        projectId: webContext.project.id,
-        userId: webContext.user.id,
-        userName: webContext.user.name,
-        userEmail: webContext.user.email || '',
-        embedded: 'true',
-        source: 'azdo-extension',
-        page: 'atividades'
+      // Obter token de acesso OAuth
+      VSS.getAccessToken().then(function(tokenResult) {
+        var accessToken = tokenResult.token;
+        
+        // URL fixa do servidor staging - rota de atividades
+        var baseUrl = 'https://staging-aponta.treit.com.br';
+        var params = new URLSearchParams({
+          organization: webContext.account.name,
+          project: webContext.project.name,
+          projectId: webContext.project.id,
+          userId: webContext.user.id,
+          userName: webContext.user.name,
+          userEmail: webContext.user.email || '',
+          embedded: 'true',
+          source: 'azdo-extension',
+          page: 'atividades',
+          token: accessToken
+        });
+        
+        var iframe = document.getElementById('app-frame');
+        var loading = document.getElementById('loading');
+        
+        iframe.src = baseUrl + '/atividades?' + params.toString();
+        
+        iframe.onload = function() {
+          loading.style.display = 'none';
+          iframe.style.display = 'block';
+          VSS.notifyLoadSucceeded();
+        };
+        
+        iframe.onerror = function() {
+          loading.innerHTML = '<span style="color: #A80000;">Erro ao carregar a aplicação. Tente novamente.</span>';
+        };
+      }).catch(function(err) {
+        console.error('Erro ao obter token:', err);
+        document.getElementById('loading').innerHTML = '<span style="color: #A80000;">Erro de autenticação. Tente novamente.</span>';
       });
-      
-      var iframe = document.getElementById('app-frame');
-      var loading = document.getElementById('loading');
-      
-      iframe.src = baseUrl + '/atividades?' + params.toString();
-      
-      iframe.onload = function() {
-        loading.style.display = 'none';
-        iframe.style.display = 'block';
-        VSS.notifyLoadSucceeded();
-      };
-      
-      iframe.onerror = function() {
-        loading.innerHTML = '<span style="color: #A80000;">Erro ao carregar a aplicação. Tente novamente.</span>';
-      };
     });
   </script>
 </body>
