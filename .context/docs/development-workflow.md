@@ -1,20 +1,120 @@
-# Workflow de desenvolvimento
+# Workflow de Desenvolvimento
 
-## Setup local
-- `npm install`
-- `npm run dev` inicia Express + Vite middleware
-- `npm run dev:client` inicia apenas Vite
+## Setup Local
 
-## Build e start
-- `npm run build` gera build
-- `npm run start` inicia servidor em modo producao
+```bash
+npm install
+npm run dev        # Inicia Express + Vite middleware
+npm run dev:client # Inicia apenas Vite
+```
 
-## Checagem de tipos
-- `npm run check` (tsc)
+## Build e Start
 
-## Contribuicao
-- Adotar commits pequenos e revisao focada
-- Adicionar testes em `client/src/*.test.tsx` quando houver logica
+```bash
+npm run build  # Gera build de produção
+npm run start  # Inicia servidor em modo produção
+```
+
+## Checagem de Tipos
+
+```bash
+npm run check  # TypeScript (tsc)
+```
+
+## Testes
+
+```bash
+npm run test        # Executa testes
+npm run test:watch  # Testes em modo watch
+```
 
 ## Porta
-- Padrao 5000 (override via `PORT`)
+
+- Padrão: 5000 (override via `PORT`)
+
+---
+
+## Git Workflow
+
+### Branches
+
+| Branch | Propósito | Deploy |
+|--------|-----------|--------|
+| `main` | Produção | Automático → VPS prod |
+| `develop` | Staging | Automático → VPS staging |
+| `feature/*` | Desenvolvimento | Nenhum |
+
+### Fluxo de Trabalho
+
+```
+feature/nova-funcionalidade
+       ↓ (PR + Review)
+   develop
+       ↓ (PR + Aprovação)
+     main
+```
+
+### Commits
+
+- Usar [Conventional Commits](https://www.conventionalcommits.org/):
+  - `feat:` nova funcionalidade
+  - `fix:` correção de bug
+  - `docs:` documentação
+  - `style:` formatação
+  - `refactor:` refatoração
+  - `test:` testes
+  - `chore:` manutenção
+
+### Exemplo
+
+```bash
+git checkout develop
+git checkout -b feature/minha-feature
+# ... desenvolve ...
+git add .
+git commit -m "feat: adiciona validação de horas"
+git push origin feature/minha-feature
+# Criar PR para develop
+```
+
+---
+
+## Deploy
+
+### Staging (Automático)
+
+```bash
+git checkout develop
+git pull origin develop
+git merge feature/minha-feature
+git push origin develop
+# GitHub Actions faz o deploy automaticamente
+```
+
+### Production (Automático)
+
+```bash
+git checkout main
+git pull origin main
+git merge develop
+git push origin main
+# GitHub Actions faz o deploy automaticamente
+```
+
+### Verificar Deploy
+
+1. Acessar: https://github.com/pedroct/aponta-sefaz-frontend/actions
+2. Verificar se o workflow passou
+3. Testar a aplicação no ambiente correspondente
+
+---
+
+## Contribuição
+
+- Adotar commits pequenos e revisão focada
+- Adicionar testes em `client/src/*.test.tsx` quando houver lógica
+- Documentar mudanças significativas
+
+---
+
+**Última atualização**: 21 de janeiro de 2026
