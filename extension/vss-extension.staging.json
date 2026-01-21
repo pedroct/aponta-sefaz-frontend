@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Aponta Timetracker (Staging)",
   "description": "[STAGING] Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
-  "publisher": "sefaz-ceara-lab",
+  "publisher": "sefaz-ceara",
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
