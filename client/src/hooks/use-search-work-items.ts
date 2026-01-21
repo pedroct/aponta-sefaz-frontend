@@ -48,6 +48,7 @@ export function useSearchWorkItems(
         project_id: project,
         limit: 10,
         organization_name: organizationName,
+        work_item_types: "Task,Bug", // Apenas Task e Bug podem receber apontamentos
       });
     },
     enabled: !!token && !isLoading && enabled && searchTerm.trim().length >= 2,

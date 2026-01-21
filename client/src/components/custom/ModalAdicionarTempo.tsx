@@ -157,15 +157,23 @@ export const ModalAdicionarTempo = ({
     const currentHours = parseInt(parts[0]) || 0;
     const currentMins = parseInt(parts[1]) || 0;
     
-    let totalMins = (currentHours * 60) + currentMins + (val * 60);
+    // Converter horas para minutos usando Math.round para evitar problemas de ponto flutuante
+    // 0.5h = 30min, 1h = 60min, 2h = 120min, 4h = 240min
+    const minutesToAdd = Math.round(val * 60);
+    let totalMins = (currentHours * 60) + currentMins + minutesToAdd;
     
     // Limite máximo de 08:00 (480 minutos)
     if (totalMins > 480) {
       totalMins = 480;
     }
     
+    // Limite mínimo de 00:15 (15 minutos)
+    if (totalMins > 0 && totalMins < 15) {
+      totalMins = 15;
+    }
+    
     const newHours = Math.floor(totalMins / 60);
-    const newMins = totalMins % 60;
+    const newMins = Math.round(totalMins % 60);
     
     setDuration(`${newHours.toString().padStart(2, '0')}:${newMins.toString().padStart(2, '0')}`);
   };
@@ -186,22 +194,37 @@ export const ModalAdicionarTempo = ({
     if (value.length < 4) value = value.padStart(4, '0');
     let h = parseInt(value.slice(0,2)) || 0;
     let m = parseInt(value.slice(2,4)) || 0;
-    if (h > 8) h = 8;
+    
+    // Limitar minutos a 59
     if (m > 59) m = 59;
+    
+    // Limitar horas a 8
+    if (h > 8) {
+      h = 8;
+      m = 0;
+    }
+    
+    // Se horas = 8, minutos deve ser 0
+    if (h === 8 && m > 0) {
+      m = 0;
+    }
+    
     let total = (h * 60) + m;
+    
+    // Máximo 08:00 (480 minutos)
     if (total > 480) {
       h = 8;
       m = 0;
       total = 480;
     }
-    if (total > 0 && total < 15) {
+    
+    // Mínimo 00:15 (15 minutos) - qualquer valor abaixo de 15 vira 15
+    // Isso inclui 00:00 ou campo vazio
+    if (total < 15) {
       h = 0;
       m = 15;
     }
-    if (total === 0) {
-      h = 0;
-      m = 15;
-    }
+    
     const formatted = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
     setDuration(formatted);
   };
