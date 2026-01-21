@@ -2,7 +2,24 @@
 
 **Data:** 21/01/2026  
 **Ambiente:** Staging (`https://staging-aponta.treit.com.br`)  
-**Status:** 401 Unauthorized em todas as requisições autenticadas
+**Status:** 401 Unauthorized - **PROBLEMA CONFIRMADO NO BACKEND**
+
+---
+
+## 🔴 CONFIRMAÇÃO: O PROBLEMA É NO BACKEND
+
+### Evidência dos Logs do Frontend (21/01/2026 - Última versão)
+
+```
+[Aponta Extension] Token obtido, tamanho: 1102                    ← ✅ Token obtido do Azure DevOps
+[useAzureDevOps] Inicializado via URL params {tokenLength: 1102}  ← ✅ Token passado para React
+[useCurrentUser] Executando queryFn, token disponível: true       ← ✅ Query executando
+[AzureDevOpsContext] getToken chamado: (1102 chars)               ← ✅ Token PRESENTE na requisição!
+GET /api/v1/user 401 (Unauthorized)                               ← ❌ Backend rejeita
+```
+
+**O frontend está enviando o token de 1102 caracteres corretamente.**
+**O backend está retornando 401.**
 
 ---
 
