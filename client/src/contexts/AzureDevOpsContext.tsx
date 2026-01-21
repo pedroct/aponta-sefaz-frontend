@@ -9,7 +9,7 @@
  */
 
 import { createContext, useContext, useMemo, useCallback, useRef, useEffect, type ReactNode } from 'react';
-import { useAzureDevOps } from '@/hooks/use-azure-devops';
+import { useAzureDevOps, type AzureContext } from '@/hooks/use-azure-devops';
 import { ApiClient } from '@/lib/api';
 
 export interface AzureDevOpsContextType {
@@ -33,6 +33,8 @@ export interface AzureDevOpsContextType {
   refreshToken: () => Promise<string>;
   /** Erro de inicialização, se houver */
   error: Error | null;
+  /** Contexto completo do Azure DevOps (userId, userName, userEmail, etc) */
+  context: AzureContext | null;
 }
 
 const AzureDevOpsContext = createContext<AzureDevOpsContextType | null>(null);
@@ -99,6 +101,7 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
     getToken,
     refreshToken: refreshTokenCallback,
     error,
+    context,
   }), [isInAzureDevOps, isLoading, context, api, token, getToken, refreshTokenCallback, error]);
 
   return (
