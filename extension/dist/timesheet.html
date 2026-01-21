@@ -60,12 +60,25 @@
       var webContext = VSS.getWebContext();
       var extensionContext = VSS.getExtensionContext();
       
-      // Obter token de acesso OAuth
-      // Nota: VSS SDK usa Promises customizadas - usar segundo arg do then() para erros
-      VSS.getAccessToken().then(function(tokenResult) {
-        var accessToken = tokenResult.token;
+      // IMPORTANTE: Usar getAppToken() para autenticação com backend próprio
+      // getAccessToken() é para chamar APIs do Azure DevOps diretamente
+      // getAppToken() gera um JWT assinado com o secret da extensão, validável pelo backend
+      VSS.getAppToken().then(function(appToken) {
+        console.log('[Aponta Extension] App Token obtido, tamanho:', appToken.length);
+        console.log('[Aponta Extension] App Token (primeiros 50 chars):', appToken.substring(0, 50));
         
-        console.log('[Aponta Extension] Token obtido, tamanho:', accessToken.length);
+        // Verificar estrutura do JWT
+        var parts = appToken.split('.');
+        console.log('[Aponta Extension] Token é JWT válido (3 partes):', parts.length === 3);
+        if (parts.length === 3) {
+          try {
+            var payload = JSON.parse(atob(parts[1]));
+            console.log('[Aponta Extension] Token claims:', JSON.stringify(payload, null, 2));
+          } catch (e) {
+            console.log('[Aponta Extension] Erro ao decodificar JWT:', e.message);
+          }
+        }
+        
         console.log('[Aponta Extension] WebContext:', JSON.stringify({
           account: webContext.account.name,
           project: webContext.project.name,
@@ -83,7 +96,7 @@
           userEmail: webContext.user.email || '',
           embedded: 'true',
           source: 'azdo-extension',
-          token: accessToken
+          token: appToken  // App token (JWT assinado com secret da extensão)
         });
         
         var iframe = document.getElementById('app-frame');
