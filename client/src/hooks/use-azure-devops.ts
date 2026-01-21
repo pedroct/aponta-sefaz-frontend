@@ -37,6 +37,26 @@ interface UseAzureDevOpsReturn {
 let sdkModule: typeof import('azure-devops-extension-sdk') | null = null;
 let apiModule: typeof import('azure-devops-extension-api') | null = null;
 
+// Interface para o SDK global VSS (carregado via script tag)
+interface VSSGlobal {
+  init: (options?: { usePlatformScripts?: boolean; usePlatformStyles?: boolean }) => void;
+  ready: (callback?: () => void) => Promise<void>;
+  getAccessToken: () => Promise<{ token: string }>;
+  getWebContext: () => {
+    account: { name: string; id: string };
+    project: { name: string; id: string };
+    user: { id: string; name: string; email: string };
+  };
+  notifyLoadSucceeded: () => void;
+  notifyLoadFailed: (error: string) => void;
+}
+
+declare global {
+  interface Window {
+    VSS?: VSSGlobal;
+  }
+}
+
 /**
  * Detecta se está rodando em iframe do Azure DevOps
  * Verifica tanto o iframe quanto a presença de indicadores específicos do Azure DevOps
@@ -97,13 +117,26 @@ function detectAzureDevOpsEnvironment(): boolean {
 }
 
 async function loadAzureSDK() {
-  if (!sdkModule) {
-    sdkModule = await import('azure-devops-extension-sdk');
+  // Primeiro, verificar se o SDK global VSS está disponível (carregado via script tag)
+  if (window.VSS) {
+    console.log('[loadAzureSDK] Usando SDK global VSS');
+    return { SDK: null, API: null, useGlobal: true };
   }
-  if (!apiModule) {
-    apiModule = await import('azure-devops-extension-api');
+  
+  // Fallback: tentar carregar via npm (para desenvolvimento)
+  try {
+    if (!sdkModule) {
+      sdkModule = await import('azure-devops-extension-sdk');
+    }
+    if (!apiModule) {
+      apiModule = await import('azure-devops-extension-api');
+    }
+    console.log('[loadAzureSDK] Usando SDK via npm');
+    return { SDK: sdkModule, API: apiModule, useGlobal: false };
+  } catch (err) {
+    console.error('[loadAzureSDK] Falha ao carregar SDK npm:', err);
+    throw new Error('Nem SDK global nem npm disponível');
   }
-  return { SDK: sdkModule, API: apiModule };
 }
 
 export function useAzureDevOps(): UseAzureDevOpsReturn {
@@ -148,40 +181,76 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
     initializationRef.current = 'initializing';
 
     try {
-      // Carregar SDK dinamicamente (só quando realmente precisar)
-      const { SDK, API } = await loadAzureSDK();
+      const { useGlobal, SDK, API } = await loadAzureSDK();
       
-      // Inicializar SDK
-      await SDK.init();
-      await SDK.ready();
+      if (useGlobal && window.VSS) {
+        // Usar SDK global VSS (carregado via script tag na extensão)
+        console.log('[useAzureDevOps] Inicializando SDK global VSS...');
+        
+        // Inicializar SDK - o VSS.init() não retorna promise
+        window.VSS.init({ usePlatformScripts: false, usePlatformStyles: false });
+        
+        // Aguardar SDK ficar pronto
+        await new Promise<void>((resolve) => {
+          window.VSS!.ready(() => resolve());
+        });
+        
+        console.log('[useAzureDevOps] VSS.ready() concluído');
+        
+        // Obter contexto web
+        const webContext = window.VSS.getWebContext();
+        console.log('[useAzureDevOps] WebContext:', webContext);
+        
+        // Obter token de acesso
+        const tokenResult = await window.VSS.getAccessToken();
+        const accessToken = tokenResult.token;
+        
+        setIsInAzureDevOps(true);
+        setToken(accessToken);
+        setContext({
+          organization: webContext.account?.name || '',
+          project: webContext.project?.name || '',
+          projectId: webContext.project?.id || '',
+        });
+        
+        // Notificar Azure DevOps que a extensão carregou com sucesso
+        window.VSS.notifyLoadSucceeded();
+        
+        console.log('[useAzureDevOps] SDK global inicializado com sucesso', {
+          organization: webContext.account?.name,
+          project: webContext.project?.name,
+          hasToken: !!accessToken,
+        });
+      } else if (SDK && API) {
+        // Usar SDK npm (fallback para desenvolvimento)
+        await SDK.init();
+        await SDK.ready();
 
-      // Obter token de acesso
-      const accessToken = await SDK.getAccessToken();
-      
-      // Obter contexto do projeto
-      const projectService = await SDK.getService<IProjectPageService>(
-        API.CommonServiceIds.ProjectPageService
-      );
-      const project = await projectService.getProject();
-      
-      // Obter nome da organização do host
-      const host = SDK.getHost();
-      
-      setIsInAzureDevOps(true);
-      setToken(accessToken);
-      setContext({
-        organization: host.name,
-        project: project?.name || '',
-        projectId: project?.id || '',
-      });
-      
-      // Notificar Azure DevOps que a extensão carregou com sucesso
-      SDK.notifyLoadSucceeded();
-      
-      console.log('[useAzureDevOps] SDK inicializado com sucesso', {
-        organization: host.name,
-        project: project?.name,
-      });
+        const accessToken = await SDK.getAccessToken();
+        
+        const projectService = await SDK.getService<IProjectPageService>(
+          API.CommonServiceIds.ProjectPageService
+        );
+        const project = await projectService.getProject();
+        const host = SDK.getHost();
+        
+        setIsInAzureDevOps(true);
+        setToken(accessToken);
+        setContext({
+          organization: host.name,
+          project: project?.name || '',
+          projectId: project?.id || '',
+        });
+        
+        SDK.notifyLoadSucceeded();
+        
+        console.log('[useAzureDevOps] SDK npm inicializado com sucesso', {
+          organization: host.name,
+          project: project?.name,
+        });
+      } else {
+        throw new Error('Nenhum SDK disponível');
+      }
     } catch (err) {
       console.error('[useAzureDevOps] Falha ao inicializar SDK:', err);
       setError(err instanceof Error ? err : new Error('Falha ao inicializar Azure DevOps SDK'));
@@ -201,9 +270,20 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
    * - Em desenvolvimento: retorna o PAT (não expira)
    */
   const refreshToken = useCallback(async (): Promise<string> => {
-    if (isInAzureDevOps && sdkModule) {
+    if (isInAzureDevOps) {
       try {
-        const newToken = await sdkModule.getAccessToken();
+        let newToken: string;
+        
+        // Usar SDK global se disponível
+        if (window.VSS) {
+          const tokenResult = await window.VSS.getAccessToken();
+          newToken = tokenResult.token;
+        } else if (sdkModule) {
+          newToken = await sdkModule.getAccessToken();
+        } else {
+          throw new Error('SDK não disponível para renovar token');
+        }
+        
         setToken(newToken);
         console.log('[useAzureDevOps] Token renovado via SDK');
         return newToken;
