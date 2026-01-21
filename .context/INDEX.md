@@ -16,8 +16,10 @@
 | Documento | Descrição |
 |-----------|-----------|
 | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) | TL;DR - Comece por aqui! |
+| [EXTENSION_AZURE_DEVOPS.md](./EXTENSION_AZURE_DEVOPS.md) | **NOVO!** Status e arquitetura da extensão |
 | [ANALISE_ENTRA_ID.md](./ANALISE_ENTRA_ID.md) | Análise técnica profunda do Entra ID |
 | [ESTRATEGIAS_OAUTH.md](./ESTRATEGIAS_OAUTH.md) | Padrões de autenticação documentados |
+| [BACKEND_AUTH_CONTEXT.md](./BACKEND_AUTH_CONTEXT.md) | Contexto de autenticação para backend |
 | [RELATORIO_FINAL.md](./RELATORIO_FINAL.md) | Implementação completa com código |
 
 ### 📁 Documentação Técnica
@@ -46,10 +48,14 @@ COMECE AQUI
      │      └─→ docs/architecture.md
      │
      ├─→ [AUTH] Problemas com autenticação?
-     │      └─→ QUICK_REFERENCE.md
+     │      ├─→ QUICK_REFERENCE.md
+     │      └─→ EXTENSION_AZURE_DEVOPS.md  ← NOVO!
+     │
+     ├─→ [EXTENSÃO] Trabalhando na extensão Azure DevOps?
+     │      └─→ EXTENSION_AZURE_DEVOPS.md  ← NOVO!
      │
      ├─→ [PROBLEMA] Algo não funciona?
-     │      └─→ docs/deploy/TROUBLESHOOTING.md  ← NOVO!
+     │      └─→ docs/deploy/TROUBLESHOOTING.md
      │
      └─→ [INFRA] Problemas no servidor?
             └─→ docs/deploy/INFRASTRUCTURE.md
@@ -80,8 +86,9 @@ COMECE AQUI
 
 | Ambiente | Status | Versão | Data |
 |----------|--------|--------|------|
-| **Staging** | ✅ Funcionando | v1.0.1 | 21/01/2026 |
+| **Staging** | ✅ Funcionando | v1.0.8 | 21/01/2026 |
 | **Production** | 🔄 Pronto para deploy | - | - |
+| **Extensão Azure DevOps** | ✅ Funcionando | v1.0.8 | 21/01/2026 |
 
 ### CI/CD Status
 
@@ -90,6 +97,8 @@ COMECE AQUI
 - ✅ Deploy automático production (branch `main`)
 - ✅ Health checks funcionando
 - ✅ Extensão Azure DevOps carregando em iframe
+- ✅ Autenticação JWT (getAppToken) funcionando
+- ✅ Work Items sendo carregados do Azure DevOps
 
 ---
 
@@ -141,6 +150,6 @@ COMECE AQUI
 
 ---
 
-**Versão**: 2.1
+**Versão**: 2.2
 **Última atualização**: 21 de janeiro de 2026
-**Status**: ✅ Staging v1.0.1 em produção
+**Status**: ✅ Staging v1.0.8 + Extensão Azure DevOps funcionando

@@ -1,7 +1,21 @@
 # Contexto para Backend: Autenticação OAuth do Azure DevOps Extension
 
 **Data:** 2026-01-21  
-**Problema:** 401 Unauthorized nas chamadas da extensão Azure DevOps para o backend
+**Status:** ✅ **RESOLVIDO** - Autenticação funcionando com getAppToken()
+
+---
+
+## 📊 Status Atual
+
+| Componente | Status | Observação |
+|------------|--------|------------|
+| Frontend - getAppToken() | ✅ OK | JWT de 421 chars |
+| Frontend - Passa token | ✅ OK | Via URL params para iframe |
+| Backend - Valida JWT | ✅ OK | Usa AZURE_EXTENSION_SECRET |
+| Backend - Chamadas Azure API | ✅ OK | Usa AZURE_DEVOPS_PAT |
+
+> **IMPORTANTE:** Usamos `getAppToken()`, **NÃO** `getAccessToken()`.
+> Ver documento [EXTENSION_AZURE_DEVOPS.md](./EXTENSION_AZURE_DEVOPS.md) para detalhes completos.
 
 ---
 
