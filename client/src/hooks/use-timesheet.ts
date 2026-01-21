@@ -29,7 +29,7 @@ import { useAzureContext } from "@/contexts/AzureDevOpsContext";
  */
 export function useTimesheet(params: TimesheetParams) {
   const { organization_name, project_id, week_start, only_my_items } = params;
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
   
   // Calcula week_start padrão se não fornecido
   const effectiveWeekStart = week_start || formatDateForApi(getMondayOfWeek(new Date()));
@@ -37,6 +37,7 @@ export function useTimesheet(params: TimesheetParams) {
   return useQuery({
     queryKey: ["timesheet", organization_name, project_id, effectiveWeekStart, only_my_items],
     queryFn: async (): Promise<TimesheetResponse> => {
+      console.log('[useTimesheet] Executando queryFn, token disponível:', !!token);
       return api.get<TimesheetResponse>("/timesheet", {
         organization_name,
         project_id,
@@ -44,7 +45,8 @@ export function useTimesheet(params: TimesheetParams) {
         only_my_items,
       });
     },
-    enabled: !!organization_name && !!project_id,
+    // Só executar quando tiver token, não estiver carregando E tiver os params obrigatórios
+    enabled: !!token && !isLoading && !!organization_name && !!project_id,
     staleTime: 2 * 60 * 1000, // Cache de 2 minutos
     refetchOnWindowFocus: false,
   });
@@ -63,11 +65,12 @@ export function useWorkItemStateCategory(
   organizationName: string,
   projectId: string
 ) {
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
 
   return useQuery({
     queryKey: ["timesheet", "state-category", workItemId, organizationName, projectId],
     queryFn: async (): Promise<StateCategoryResponse> => {
+      console.log('[useWorkItemStateCategory] Executando queryFn, token disponível:', !!token);
       return api.get<StateCategoryResponse>(
         `/timesheet/work-item/${workItemId}/state-category`,
         {
@@ -76,7 +79,7 @@ export function useWorkItemStateCategory(
         }
       );
     },
-    enabled: !!workItemId && !!organizationName && !!projectId,
+    enabled: !!token && !isLoading && !!workItemId && !!organizationName && !!projectId,
   });
 }
 

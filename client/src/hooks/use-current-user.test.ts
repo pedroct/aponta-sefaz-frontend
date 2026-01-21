@@ -12,6 +12,8 @@ vi.mock("@/contexts/AzureDevOpsContext", () => ({
     api: {
       get: mockApiGet,
     },
+    token: "mock-token-for-tests",
+    isLoading: false,
   }),
 }));
 

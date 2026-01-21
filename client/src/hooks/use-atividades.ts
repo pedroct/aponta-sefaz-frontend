@@ -36,11 +36,12 @@ export function useAtividades(params?: {
   skip?: number;
   limit?: number;
 }) {
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
 
   return useQuery({
     queryKey: ["atividades", params],
     queryFn: async () => {
+      console.log('[useAtividades] Executando queryFn, token disponível:', !!token);
       const data = await api.get("/atividades", {
         ativo: params?.ativo,
         id_projeto: params?.id_projeto,
@@ -49,6 +50,8 @@ export function useAtividades(params?: {
       });
       return normalizeAtividadesResponse(data);
     },
+    // Só executar quando tiver token e não estiver carregando
+    enabled: !!token && !isLoading,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }

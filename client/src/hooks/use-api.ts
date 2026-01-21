@@ -31,14 +31,15 @@ export function useCriarApontamento() {
 }
 
 export function useObterApontamento(id: string) {
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
   
   return useQuery({
     queryKey: ["apontamentos", id],
     queryFn: async () => {
+      console.log('[useObterApontamento] Executando queryFn, token disponível:', !!token);
       return api.get<Apontamento>(`/apontamentos/${id}`);
     },
-    enabled: !!id,
+    enabled: !!token && !isLoading && !!id,
   });
 }
 
@@ -78,11 +79,12 @@ export function useListarApontamentosPorWorkItem(
   projectId: string,
   params?: { skip?: number; limit?: number }
 ) {
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
 
   return useQuery({
     queryKey: ["apontamentos", "work-item", workItemId, organizationName, projectId, params],
     queryFn: async () => {
+      console.log('[useListarApontamentosPorWorkItem] Executando queryFn, token disponível:', !!token);
       return api.get(`/apontamentos/work-item/${workItemId}`, {
         organization_name: organizationName,
         project_id: projectId,
@@ -90,7 +92,7 @@ export function useListarApontamentosPorWorkItem(
         limit: params?.limit,
       });
     },
-    enabled: !!workItemId && !!organizationName && !!projectId,
+    enabled: !!token && !isLoading && !!workItemId && !!organizationName && !!projectId,
   });
 }
 
@@ -99,17 +101,18 @@ export function useResumoApontamentos(
   organizationName: string,
   projectId: string
 ) {
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
 
   return useQuery({
     queryKey: ["apontamentos", "resumo", workItemId, organizationName, projectId],
     queryFn: async () => {
+      console.log('[useResumoApontamentos] Executando queryFn, token disponível:', !!token);
       return api.get(`/apontamentos/work-item/${workItemId}/resumo`, {
         organization_name: organizationName,
         project_id: projectId,
       });
     },
-    enabled: !!workItemId && !!organizationName && !!projectId,
+    enabled: !!token && !isLoading && !!workItemId && !!organizationName && !!projectId,
   });
 }
 
@@ -118,16 +121,17 @@ export function useAzureInfo(
   organizationName: string,
   projectId: string
 ) {
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
 
   return useQuery({
     queryKey: ["apontamentos", "azure-info", workItemId, organizationName, projectId],
     queryFn: async () => {
+      console.log('[useAzureInfo] Executando queryFn, token disponível:', !!token);
       return api.get(`/apontamentos/work-item/${workItemId}/azure-info`, {
         organization_name: organizationName,
         project_id: projectId,
       });
     },
-    enabled: !!workItemId && !!organizationName && !!projectId,
+    enabled: !!token && !isLoading && !!workItemId && !!organizationName && !!projectId,
   });
 }

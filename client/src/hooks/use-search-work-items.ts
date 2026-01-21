@@ -28,11 +28,12 @@ export function useSearchWorkItems(
   organizationName?: string
 ) {
   const [searchTerm, setSearchTerm] = useState("");
-  const { api } = useAzureContext();
+  const { api, token, isLoading } = useAzureContext();
 
   const query = useQuery<SearchResponse>({
     queryKey: ["work-items-search", project, searchTerm],
     queryFn: async () => {
+      console.log('[useSearchWorkItems] Executando queryFn, token disponível:', !!token);
       if (!searchTerm || searchTerm.trim().length < 2) {
         return {
           query: "",
@@ -49,7 +50,7 @@ export function useSearchWorkItems(
         organization_name: organizationName,
       });
     },
-    enabled: enabled && searchTerm.trim().length >= 2,
+    enabled: !!token && !isLoading && enabled && searchTerm.trim().length >= 2,
     staleTime: 5 * 60 * 1000, // 5 minutos
     gcTime: 10 * 60 * 1000, // 10 minutos (antes: cacheTime)
     retry: 1,
