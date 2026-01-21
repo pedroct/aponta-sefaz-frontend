@@ -86,9 +86,18 @@ COMECE AQUI
 
 | Ambiente | Status | Versão | Data |
 |----------|--------|--------|------|
-| **Staging** | ✅ Funcionando | v1.0.8 | 21/01/2026 |
+| **Staging** | ✅ Funcionando | v1.0.9 | 21/01/2026 |
 | **Production** | 🔄 Pronto para deploy | - | - |
-| **Extensão Azure DevOps** | ✅ Funcionando | v1.0.8 | 21/01/2026 |
+| **Extensão Azure DevOps** | ✅ Funcionando | v1.0.9 | 21/01/2026 |
+
+### Funcionalidades Implementadas
+
+| Módulo | Status | Descrição |
+|--------|--------|-----------|
+| **Timesheet (Folha de Horas)** | ✅ Funcionando | Grid semanal com work items hierárquicos |
+| **Gestão de Atividades** | ✅ Novo | CRUD completo de atividades |
+| **Gestão de Projetos** | ✅ Novo | Sincronização com Azure DevOps |
+| **Modal Apontamento** | ✅ Funcionando | Criação/edição de apontamentos |
 
 ### CI/CD Status
 
@@ -96,9 +105,9 @@ COMECE AQUI
 - ✅ Deploy automático staging (branch `develop`)
 - ✅ Deploy automático production (branch `main`)
 - ✅ Health checks funcionando
-- ✅ Extensão Azure DevOps carregando em iframe
+- ✅ Extensão Azure DevOps (2 hubs: Timesheet + Atividades)
 - ✅ Autenticação JWT (getAppToken) funcionando
-- ✅ Work Items sendo carregados do Azure DevOps
+- ✅ Sincronização de projetos Azure DevOps
 
 ---
 
@@ -150,6 +159,6 @@ COMECE AQUI
 
 ---
 
-**Versão**: 2.2
+**Versão**: 2.3
 **Última atualização**: 21 de janeiro de 2026
-**Status**: ✅ Staging v1.0.8 + Extensão Azure DevOps funcionando
+**Status**: ✅ Staging v1.0.9 + Extensão Azure DevOps (Timesheet + Atividades)

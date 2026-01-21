@@ -2,66 +2,146 @@
 
 ## Visão Geral
 
-O projeto é um monorepo com client React e server Express. Em dev, o Express cria um server HTTP e injeta o Vite em modo middleware. Em produção, **nginx** serve os arquivos estáticos (SPA).
+Frontend React para apontamento de horas, embarcado como extensão Azure DevOps. O backend é uma API separada em FastAPI/Python.
 
-## Camadas
+## Arquitetura Geral
 
-- **Client**: `client/src` com React, rotas via Wouter, estado local e React Query.
-- **Server**: Backend separado (api-aponta-vps) em FastAPI/Python.
-- **Shared**: `shared/schema.ts` com tipos compartilhados.
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         Azure DevOps Portal                                 │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                    Extensão Aponta (Hub Group)                        │  │
+│  │  ┌────────────────────┐  ┌────────────────────┐                      │  │
+│  │  │ Hub: Timesheet     │  │ Hub: Atividades    │                      │  │
+│  │  │ (timesheet.html)   │  │ (atividades.html)  │                      │  │
+│  │  └────────┬───────────┘  └────────┬───────────┘                      │  │
+│  │           │                       │                                   │  │
+│  │           │    VSS.getAppToken() → JWT                               │  │
+│  │           │    VSS.getWebContext() → org, project, user              │  │
+│  │           │                       │                                   │  │
+│  │           └───────────┬───────────┘                                   │  │
+│  │                       │                                               │  │
+│  │                       ▼                                               │  │
+│  │  ┌──────────────────────────────────────────────────────────────┐   │  │
+│  │  │                  iframe (Frontend React)                      │   │  │
+│  │  │                                                               │   │  │
+│  │  │   URL: https://staging-aponta.treit.com.br?token=...         │   │  │
+│  │  │        &organization=...&project=...&userId=...&userName=... │   │  │
+│  │  │                                                               │   │  │
+│  │  │   Rotas:                                                      │   │  │
+│  │  │   - /          → FolhaDeHoras.tsx (Timesheet)                │   │  │
+│  │  │   - /atividades → Atividades.tsx (CRUD)                      │   │  │
+│  │  └──────────────────────────────────────────────────────────────┘   │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ Authorization: Bearer <JWT>
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                          VPS (Docker Compose)                               │
+│                                                                             │
+│  ┌─────────────────────┐           ┌─────────────────────┐                │
+│  │   nginx:alpine      │           │   python:3.12       │                │
+│  │   (frontend)        │──────────▶│   (FastAPI backend) │                │
+│  │   porta 3001        │   /api    │   porta 8000        │                │
+│  └─────────────────────┘           └─────────────────────┘                │
+│                                              │                             │
+│                                              ▼                             │
+│                                    ┌─────────────────────┐                │
+│                                    │     Supabase        │                │
+│                                    │   (PostgreSQL)      │                │
+│                                    └─────────────────────┘                │
+└────────────────────────────────────────────────────────────────────────────┘
+                                              │
+                                              │ PAT (Basic Auth)
+                                              ▼
+                                ┌─────────────────────────────┐
+                                │    Azure DevOps REST API    │
+                                │    - Work Items             │
+                                │    - Projects               │
+                                │    - User Profiles          │
+                                └─────────────────────────────┘
+```
+
+## Camadas do Frontend
+
+```
+client/src/
+├── components/
+│   ├── ado/              # Componentes estilo Azure DevOps
+│   │   ├── ADOButton     # Botões primários/secundários
+│   │   ├── ADOCard       # Cards com sombra
+│   │   ├── ADOHeader     # Cabeçalho de página
+│   │   ├── ADOInput      # Inputs com label
+│   │   ├── ADOModal      # Modais
+│   │   ├── ADOMultiSelect# Select múltiplo
+│   │   ├── ADOTable      # Tabelas com ações
+│   │   └── ADOToolbar    # Barra de ferramentas
+│   │
+│   ├── ui/               # Componentes base (shadcn/ui)
+│   ├── layouts/          # PageLayout
+│   └── custom/           # Modais específicos
+│
+├── contexts/
+│   └── AzureDevOpsContext  # Autenticação e API client
+│
+├── hooks/
+│   ├── use-atividades.ts   # CRUD atividades
+│   ├── use-projetos.ts     # Lista/Sync projetos
+│   ├── use-timesheet.ts    # Timesheet semanal
+│   └── use-current-user.ts # Dados do usuário
+│
+├── pages/
+│   ├── FolhaDeHoras.tsx    # Grid semanal
+│   └── Atividades.tsx      # CRUD atividades
+│
+└── lib/
+    ├── api-client.ts       # Fetch wrapper
+    └── timesheet-types.ts  # Tipos do timesheet
+```
+
+## Fluxo de Autenticação
+
+```
+1. Usuário acessa Azure DevOps → Hub Aponta
+2. timesheet.html/atividades.html executa:
+   - VSS.init()
+   - VSS.getAppToken() → JWT assinado com secret da extensão
+   - VSS.getWebContext() → org, project, user
+3. Monta URL com parâmetros e carrega iframe
+4. Frontend React lê parâmetros via AzureDevOpsContext
+5. Requisições à API incluem: Authorization: Bearer <JWT>
+6. Backend valida JWT com AZURE_EXTENSION_SECRET
+7. Backend usa PAT para chamar Azure DevOps API
+```
 
 ## Componentes Chave
 
-- `client/src/App.tsx`: rotas e providers
-- `client/src/pages/FolhaDeHoras.tsx`: tela principal de apontamentos
-- `client/src/lib/queryClient.ts`: wrapper de fetch e React Query
-- `client/src/hooks/use-*.ts`: hooks customizados (atividades, timesheet, etc.)
-
-## Arquitetura de Deploy
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                        VPS                               │
-│  ┌─────────────────┐       ┌─────────────────┐          │
-│  │   nginx:alpine  │       │  python:3.12    │          │
-│  │   (frontend)    │──────▶│  (backend API)  │          │
-│  │   porta 80      │  /api │  porta 8000     │          │
-│  └─────────────────┘       └─────────────────┘          │
-│           │                         │                    │
-│           └────────┬────────────────┘                    │
-│                    │                                     │
-│         aponta-shared-network                            │
-└─────────────────────────────────────────────────────────┘
-```
-
-## Comunicação
-
-1. **Browser** → nginx (porta 3001 staging / 3000 prod)
-2. **nginx** → arquivos estáticos (SPA React)
-3. **nginx** → proxy `/api/*` → backend (porta 8000)
-4. **Backend** → Supabase (banco de dados)
-5. **Backend** → Azure DevOps API (work items)
-
-## Decisões e Padrões
-
-- **SPA**: Single Page Application servida por nginx
-- **API Proxy**: nginx faz proxy de `/api` para o backend
-- **Containers Separados**: Frontend e backend são containers independentes
-- **Rede Compartilhada**: Comunicação via Docker network
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `App.tsx` | Rotas e providers |
+| `FolhaDeHoras.tsx` | Grid semanal de apontamentos |
+| `Atividades.tsx` | CRUD de atividades |
+| `AzureDevOpsContext.tsx` | Token, org, project, API client |
+| `use-timesheet.ts` | Queries do timesheet |
+| `use-atividades.ts` | Queries/mutations de atividades |
 
 ## Ambientes
 
-| Ambiente | Frontend | Backend |
-|----------|----------|---------|
-| Staging | `fe-aponta-staging` | `api-aponta-staging` |
-| Production | `fe-aponta-prod` | `api-aponta-prod` |
+| Ambiente | Frontend URL | Backend URL | Extensão |
+|----------|--------------|-------------|----------|
+| Staging | staging-aponta.treit.com.br | :3001/api | sefaz-ceara.aponta-projetos-staging |
+| Production | aponta.treit.com.br | :3000/api | sefaz-ceara.aponta-projetos |
 
-## Riscos e Trade-offs
+## Decisões Arquiteturais
 
-- Backend deve estar rodando para `/api` funcionar
-- nginx.conf deve usar nome do serviço Docker (`api`), não `localhost`
-- Health checks dependem do curl (não wget) no nginx:alpine
+1. **Iframe**: Azure DevOps carrega o frontend via iframe para isolamento
+2. **JWT (getAppToken)**: Autenticação validável pelo backend próprio
+3. **React Query**: Cache e sincronização de estado com servidor
+4. **Componentes ADO**: UI consistente com Azure DevOps
+5. **Hooks separados**: Cada entidade tem seu próprio hook
 
 ---
 
 **Última atualização**: 21 de janeiro de 2026
+**Versão**: 2.0

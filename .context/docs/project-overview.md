@@ -1,31 +1,56 @@
 # Visao geral do projeto
 
 ## Proposito
-Frontend do aplicativo de apontamento de horas no Azure DevOps. O repositorio inclui um servidor Express que serve o app React no modo desenvolvimento (Vite middleware) e no modo producao (assets estaticos).
+Frontend do aplicativo de apontamento de horas no Azure DevOps. O projeto inclui uma extensao Azure DevOps que carrega o frontend em um iframe dentro do portal.
 
 ## Principais capacidades
-- Tela principal de apontamentos com UI estilo Azure DevOps
-- Componentes reutilizaveis de UI em `client/src/components/ui`
-- Query client padrao com React Query para chamadas HTTP
-- Estrutura basica de storage e schema compartilhado
+- **Folha de Horas (Timesheet)**: Grid semanal com work items hierarquicos (Epic > Feature > Story > Task)
+- **Gestao de Atividades**: CRUD completo de atividades com multi-select de projetos
+- **Gestao de Projetos**: Sincronizacao com Azure DevOps
+- **Extensao Azure DevOps**: 2 hubs (Timesheet + Atividades) com autenticacao JWT
+- Componentes reutilizaveis estilo Azure DevOps em `client/src/components/ado`
+- Componentes UI base em `client/src/components/ui`
+- React Query para gerenciamento de estado e cache
 
 ## Stack
-- React + Vite (client)
-- Express (server)
+- React 18 + Vite 7 (client)
 - TypeScript
-- React Query
+- React Query (TanStack Query v5)
 - Tailwind CSS
-- Drizzle (schema compartilhado)
+- Radix UI + shadcn/ui
+- Wouter (roteamento)
 
-## Entrada da aplicacao
-- `client/src/main.tsx` monta `App`
-- `client/src/App.tsx` define rotas via Wouter
+## Estrutura de Pastas Principais
+```
+client/src/
+├── components/
+│   ├── ado/           # Componentes estilo Azure DevOps (ADOButton, ADOTable, etc)
+│   ├── ui/            # Componentes base (shadcn/ui)
+│   ├── layouts/       # PageLayout, etc
+│   └── custom/        # Modais e componentes especificos
+├── contexts/          # AzureDevOpsContext (autenticacao)
+├── hooks/             # React Query hooks (useAtividades, useProjetos, useTimesheet)
+├── pages/             # FolhaDeHoras, Atividades
+└── lib/               # Utilitarios e tipos
+```
+
+## Rotas do Frontend
+- `/` - Folha de Horas (Timesheet)
+- `/atividades` - Gestao de Atividades
+
+## Extensao Azure DevOps
+- Publisher: `sefaz-ceara`
+- ID: `aponta-projetos-staging` (staging) / `aponta-projetos` (producao)
+- Versao: 1.0.9
+- Hubs: Timesheet + Atividades
 
 ## Como iniciar
 - `npm install`
-- `npm run dev` (servidor Express + Vite middleware)
-- Alternativo: `npm run dev:client` (somente client em 5000)
+- `npm run dev` (Vite dev server)
+- `npm run build` (build de producao)
+- `npm run test` (testes com Vitest)
 
 ## Observacoes
-- Porta padrao: 5000 (variavel `PORT` tem prioridade)
-- API segue prefixo `/api` (rotas ainda vazias)
+- Backend: FastAPI em https://staging-aponta.treit.com.br
+- Autenticacao: JWT via VSS.getAppToken()
+- Deploy: GitHub Actions (develop → staging, main → production)

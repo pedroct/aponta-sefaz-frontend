@@ -9,12 +9,19 @@
 
 | Componente | Status | Observações |
 |------------|--------|-------------|
-| Extensão VSIX | ✅ v1.0.8 | Publicada no Marketplace (sefaz-ceara) |
+| Extensão VSIX | ✅ v1.0.9 | Publicada no Marketplace (sefaz-ceara) |
+| Hub Timesheet | ✅ Funcionando | Folha de horas semanal |
+| Hub Atividades | ✅ **NOVO** | CRUD de atividades |
 | VSS.SDK (getAppToken) | ✅ Funcionando | Token JWT de 421 chars |
 | Frontend (iframe) | ✅ Funcionando | React carrega corretamente |
-| Backend (validação JWT) | ✅ Funcionando | Valida com AZURE_EXTENSION_SECRET |
-| Work Items (timesheet) | ✅ Funcionando | Hierarquia completa exibida |
-| Nome do usuário | ✅ Corrigido | Usa webContext quando backend retorna ID |
+| Backend (validação JWT) | ⚠️ Pendente | App ID errado no token |
+| Sincronização Projetos | ✅ **NOVO** | Botão de sync na tela Atividades |
+
+### ⚠️ Problema Conhecido: Token com App ID Errado
+
+O token JWT está retornando `aud: f3855d44-0193-4bec-956b-31322cf8a205` mas o backend espera `560de67c-a2e8-408a-86ae-be7ea6bd0b7a`.
+
+**Solução:** Atualizar a extensão no Marketplace (Update, não Publish) ou ajustar o `AZURE_EXTENSION_SECRET` no backend.
 
 ---
 
@@ -97,14 +104,23 @@
 ```
 extension/
 ├── dist/
-│   ├── timesheet.html          # HTML wrapper com VSS.SDK
+│   ├── timesheet.html          # HTML wrapper para Folha de Horas
+│   ├── atividades.html         # HTML wrapper para Gestão de Atividades (NOVO)
 │   └── images/
-│       ├── icon.png            # Ícone da extensão
+│       ├── icon-16.png         # Ícone 16x16
+│       ├── icon-128.png        # Ícone 128x128
 │       └── logo.png            # Logo
 ├── vss-extension.json          # Manifest de produção
-├── vss-extension.staging.json  # Manifest de staging (v1.0.8)
+├── vss-extension.staging.json  # Manifest de staging (v1.0.9)
 └── README.md                   # Documentação da extensão
 ```
+
+### Hubs Disponíveis
+
+| Hub | Arquivo | Rota Frontend | Descrição |
+|-----|---------|---------------|-----------|
+| Timesheet | timesheet.html | `/` | Folha de horas semanal |
+| Atividades | atividades.html | `/atividades` | CRUD de atividades |
 
 ### timesheet.html - Pontos-chave
 
