@@ -4,9 +4,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useCurrentUser } from "./use-current-user";
 import React from "react";
 
-// Mock global fetch
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+// Mock do useAzureContext
+const mockApiGet = vi.fn();
+
+vi.mock("@/contexts/AzureDevOpsContext", () => ({
+  useAzureContext: () => ({
+    api: {
+      get: mockApiGet,
+    },
+  }),
+}));
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -30,10 +37,7 @@ describe("useCurrentUser", () => {
       emailAddress: "pedro@example.com",
     };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockUser),
-    });
+    mockApiGet.mockResolvedValueOnce(mockUser);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(),
@@ -53,36 +57,24 @@ describe("useCurrentUser", () => {
       emailAddress: "test@example.com",
     };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockUser),
-    });
+    mockApiGet.mockResolvedValueOnce(mockUser);
 
     renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/v1/user"),
-        expect.objectContaining({
-          headers: expect.any(Headers),
-        })
-      );
+      expect(mockApiGet).toHaveBeenCalledWith("/user");
     });
   });
 
   it("deve retornar valores padrão quando requisição falha", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-    });
+    mockApiGet.mockRejectedValueOnce(new Error("Network Error"));
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(),
     });
 
-    // O hook retorna valores padrão em caso de erro (não lança erro)
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
@@ -95,17 +87,14 @@ describe("useCurrentUser", () => {
     });
   });
 
-  it("deve ter staleTime de 10 minutos", async () => {
+  it("deve ter staleTime configurado", async () => {
     const mockUser = {
       id: "user-123",
       displayName: "Test User",
       emailAddress: "test@example.com",
     };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockUser),
-    });
+    mockApiGet.mockResolvedValueOnce(mockUser);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(),
@@ -119,7 +108,7 @@ describe("useCurrentUser", () => {
   });
 
   it("deve retornar isLoading true enquanto carrega", () => {
-    mockFetch.mockImplementationOnce(
+    mockApiGet.mockImplementationOnce(
       () => new Promise(() => {}) // Promise que nunca resolve
     );
 

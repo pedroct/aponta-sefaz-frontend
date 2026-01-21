@@ -4,9 +4,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAtividades } from "./use-atividades";
 import React from "react";
 
-// Mock global fetch
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+// Mock do useAzureContext
+const mockApiGet = vi.fn();
+
+vi.mock("@/contexts/AzureDevOpsContext", () => ({
+  useAzureContext: () => ({
+    api: {
+      get: mockApiGet,
+    },
+  }),
+}));
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -32,10 +39,7 @@ describe("useAtividades", () => {
       total: 2,
     };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockData),
-    });
+    mockApiGet.mockResolvedValueOnce(mockData);
 
     const { result } = renderHook(() => useAtividades(), {
       wrapper: createWrapper(),
@@ -54,10 +58,7 @@ describe("useAtividades", () => {
       total: 1,
     };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockData),
-    });
+    mockApiGet.mockResolvedValueOnce(mockData);
 
     const { result } = renderHook(() => useAtividades({ ativo: true }), {
       wrapper: createWrapper(),
@@ -67,10 +68,10 @@ describe("useAtividades", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("ativo=true"),
+    expect(mockApiGet).toHaveBeenCalledWith(
+      "/atividades",
       expect.objectContaining({
-        headers: expect.any(Headers),
+        ativo: true,
       })
     );
   });
@@ -81,10 +82,7 @@ describe("useAtividades", () => {
       total: 0,
     };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockData),
-    });
+    mockApiGet.mockResolvedValueOnce(mockData);
 
     const { result } = renderHook(
       () => useAtividades({ id_projeto: "projeto-123" }),
@@ -95,19 +93,16 @@ describe("useAtividades", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("id_projeto=projeto-123"),
+    expect(mockApiGet).toHaveBeenCalledWith(
+      "/atividades",
       expect.objectContaining({
-        headers: expect.any(Headers),
+        id_projeto: "projeto-123",
       })
     );
   });
 
   it("deve lidar com erro na requisição", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-    });
+    mockApiGet.mockRejectedValueOnce(new Error("Network Error"));
 
     const { result } = renderHook(() => useAtividades(), {
       wrapper: createWrapper(),
@@ -118,13 +113,10 @@ describe("useAtividades", () => {
     });
   });
 
-  it("deve ter staleTime de 5 minutos", async () => {
+  it("deve ter staleTime configurado", async () => {
     const mockData = { items: [], total: 0 };
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockData),
-    });
+    mockApiGet.mockResolvedValueOnce(mockData);
 
     const { result } = renderHook(() => useAtividades(), {
       wrapper: createWrapper(),
