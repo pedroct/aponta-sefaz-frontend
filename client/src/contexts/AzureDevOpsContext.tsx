@@ -55,10 +55,14 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
   // Isso permite que getToken sempre retorne o valor mais recente
   const tokenRef = useRef<string | null>(token);
   
-  // Atualizar a ref sempre que o token mudar
+  // ✅ CORREÇÃO CRÍTICA: Atualizar ref SINCRONAMENTE durante o render
+  // useEffect roda APÓS o render, mas TanStack Query dispara queries DURANTE o render
+  // Isso garante que getToken() retorne o valor correto imediatamente
+  tokenRef.current = token;
+  
+  // Log para debug (mantém useEffect só para logging)
   useEffect(() => {
-    tokenRef.current = token;
-    console.log('[AzureDevOpsContext] Token atualizado na ref:', token ? `(${token.length} chars)` : 'null');
+    console.log('[AzureDevOpsContext] Token disponível:', token ? `(${token.length} chars)` : 'null');
   }, [token]);
 
   // getToken usa a ref, então sempre retorna o valor atual
