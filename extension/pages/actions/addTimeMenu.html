@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>Apontar Tempo - Menu Handler</title>
+    <script type="text/javascript" src="../../lib/VSS.SDK.min.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        // Inicialização simples
+        VSS.init();
+        
+        VSS.ready(function() {
+            console.log("✅ Aponta: Menu handler inicializado");
+            
+            // Registrar o handler do menu action
+            VSS.register(VSS.getContributionId(), function(context) {
+                console.log("📋 Aponta: Menu action handler registrado", context);
+                
+                return {
+                    execute: function(actionContext) {
+                        console.log("🔔 Aponta: Ação executada!", actionContext);
+                        
+                        // Extrair work item ID
+                        var workItemId = actionContext.workItemId || 
+                                         actionContext.id || 
+                                         (actionContext.workItemIds && actionContext.workItemIds[0]);
+                        
+                        if (!workItemId) {
+                            alert("Erro: Work Item não encontrado");
+                            return;
+                        }
+                        
+                        if (actionContext.workItemIds && actionContext.workItemIds.length > 1) {
+                            alert("Por favor, selecione apenas um work item para apontar tempo.");
+                            return;
+                        }
+                        
+                        console.log("📍 Aponta: Abrindo dialog para Work Item ID:", workItemId);
+                        
+                        // Obter serviço de dialog
+                        VSS.getService(VSS.ServiceIds.Dialog).then(function(dialogService) {
+                            var extensionCtx = VSS.getExtensionContext();
+                            
+                            // Contribution ID completo
+                            var contributionId = extensionCtx.publisherId + 
+                                "." + extensionCtx.extensionId + 
+                                ".addApontaTimeDialog";
+                            
+                            console.log("📍 Aponta: Contribution ID:", contributionId);
+                            
+                            // Opções do dialog
+                            var dialogOptions = {
+                                title: "Apontar Tempo",
+                                width: 500,
+                                height: 600,
+                                resizable: false,
+                                buttons: null,
+                                urlReplacementObject: { id: workItemId }
+                            };
+                            
+                            // Abrir dialog
+                            dialogService.openDialog(contributionId, dialogOptions).then(function(dialog) {
+                                console.log("✅ Aponta: Dialog aberto com sucesso");
+                            }, function(error) {
+                                console.error("❌ Aponta: Erro ao abrir dialog:", error);
+                                alert("Erro ao abrir formulário: " + (error.message || error));
+                            });
+                        }, function(error) {
+                            console.error("❌ Aponta: Erro ao obter DialogService:", error);
+                        });
+                    }
+                };
+            });
+            
+            console.log("✅ Aponta: Menu action handler pronto");
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "name": "Aponta Timetracker",
   "description": "Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -86,14 +86,17 @@
     },
     {
       "id": "addApontaTimeAction",
-      "type": "ms.vss-web.action-provider",
-      "description": "Ação para abrir modal de apontamento",
+      "type": "ms.vss-web.action",
+      "description": "Ação para abrir modal de apontamento no menu de contexto",
       "targets": [
         "ms.vss-work-web.work-item-context-menu"
       ],
       "properties": {
-        "uri": "pages/actions/addTimeAction.html",
-        "registeredObjectId": "ApontaContextMenuItems"
+        "text": "Apontar Tempo",
+        "title": "Registrar tempo neste work item",
+        "toolbarText": "Apontar Tempo",
+        "icon": "images/icon-16.png",
+        "uri": "pages/actions/addTimeMenu.html"
       }
     }
   ],
