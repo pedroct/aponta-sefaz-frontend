@@ -21,6 +21,7 @@ export default defineConfig({
     },
   },
   root: path.resolve(import.meta.dirname, "client"),
+  base: './',  // Usar caminhos relativos para funcionar em extensões Azure DevOps
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
