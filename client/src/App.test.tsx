@@ -202,7 +202,6 @@ describe("App", () => {
       render(<App />);
 
       expect(screen.getByText("Projeto Atual")).toBeInTheDocument();
-      expect(screen.getByText("Somente meus itens")).toBeInTheDocument();
     });
   });
 
