@@ -14,26 +14,34 @@
 
         VSS.ready(function() {
             try {
-                // Obter contexto
-                const webContext = VSS.getWebContext();
-                const extensionContext = VSS.getExtensionContext();
-
                 console.log('✅ Action Provider pronto');
 
-                // Registrar ação
+                // Registrar o action provider para o menu de contexto
                 VSS.register(VSS.getContributionId(), {
                     getMenuItems: function(context) {
-                        // context.workItem contém os dados do item
+                        console.log('📋 Contexto recebido:', context);
+                        
+                        // context.workItem tem os dados do item
+                        if (!context || !context.workItem) {
+                            console.warn('⚠️ Contexto de work item não disponível');
+                            return [];
+                        }
+
                         return [{
                             title: "⏱️ Apontar Tempo",
-                            action: function(context) {
-                                openAddTimeDialog(context.id);
+                            action: function(actionContext) {
+                                console.log('🔔 Ação clicada:', actionContext);
+                                const workItemId = actionContext.id || context.workItem.id;
+                                const workItemTitle = context.workItem.title || '';
+                                openAddTimeDialog(workItemId, workItemTitle);
                             },
-                            disabled: false
+                            disabled: false,
+                            icon: "bowtie-icon bowtie-timer"
                         }];
                     }
                 });
 
+                console.log('✅ Action Provider registrado');
                 VSS.notifyLoadSucceeded();
 
             } catch (error) {
@@ -42,12 +50,15 @@
             }
         });
 
-        function openAddTimeDialog(workItemId) {
-            console.log('🔔 Abrindo dialog para work item:', workItemId);
+        function openAddTimeDialog(workItemId, workItemTitle) {
+            console.log('🔔 Abrindo dialog para work item:', workItemId, workItemTitle);
 
             try {
-                const baseUri = VSS.getExtensionContext().baseUri;
-                const dialogUrl = `${baseUri}pages/addTimePopupDialog/index.html?workItemId=${workItemId}`;
+                const extensionContext = VSS.getExtensionContext();
+                const baseUri = extensionContext.baseUri;
+                
+                // Construir URL com parâmetros
+                const dialogUrl = `${baseUri}pages/addTimePopupDialog/index.html?workItemId=${workItemId}&taskTitle=${encodeURIComponent(workItemTitle)}`;
 
                 console.log('📍 Dialog URL:', dialogUrl);
 
@@ -55,14 +66,18 @@
                     title: "⏱️ Apontar Tempo",
                     width: 600,
                     height: 700,
-                    buttons: []
+                    buttons: [],
+                    resizable: false
                 };
 
                 // Abrir dialog via VSS Service
                 VSS.getService(VSS.ServiceIds.Dialog).then(function(dialogService) {
-                    dialogService.openDialog(dialogUrl, dialogOptions).then(function() {
-                        console.log('✅ Dialog aberto com sucesso');
-                    });
+                    return dialogService.openDialog(dialogUrl, dialogOptions);
+                }).then(function(result) {
+                    console.log('✅ Dialog fechado com resultado:', result);
+                }).catch(function(error) {
+                    console.error('❌ Erro ao abrir dialog:', error);
+                    alert('Erro ao abrir modal: ' + error.message);
                 });
 
             } catch (error) {
