@@ -7,11 +7,11 @@ import { WorkItemRevision, ProcessStateMap } from './timesheet-types';
 
 /**
  * Determina se uma célula deve ser destacada em azul.
- * 
+ *
  * Uma célula é azul quando, na data correspondente:
  * 1. O Work Item estava em estado "InProgress"
  * 2. O Work Item estava atribuído ao usuário logado
- * 
+ *
  * @param revisions Lista de revisões do Work Item
  * @param cellDate Data da célula (YYYY-MM-DD)
  * @param userId ID do usuário logado no Azure DevOps
@@ -53,6 +53,11 @@ export function isBlueCell(
   const state = activeRevision.fields['System.State'];
   const assignedToId = activeRevision.fields['System.AssignedTo']?.id;
 
+  // Validar se state existe antes de usar como índice
+  if (!state) {
+    return false;
+  }
+
   // 3. Aplicar as regras de negócio
   const category = stateMap[state];
   const isInProgress = category === 'InProgress';
@@ -63,7 +68,7 @@ export function isBlueCell(
 
 /**
  * Determina quais células de uma linha devem ser azuis.
- * 
+ *
  * @param revisions Lista de revisões do Work Item
  * @param weekDates Array com as 7 datas da semana (YYYY-MM-DD)
  * @param userId ID do usuário logado
@@ -76,7 +81,7 @@ export function getBlueCellsForWeek(
   userId: string,
   stateMap: ProcessStateMap
 ): boolean[] {
-  return weekDates.map(date => 
+  return weekDates.map(date =>
     isBlueCell(revisions, date, userId, stateMap)
   );
 }
