@@ -1,9 +1,12 @@
 # Implementação - Coluna "S" (Saldo) no Timesheet
 
-## Status: ✅ CONCLUÍDO
+## Status: ✅ CONCLUÍDO + CORES SEMÂNTICAS
 
 **Data:** 22 de janeiro de 2026  
-**Commit:** `589d584`  
+**Commits:**
+- `589d584` - feat(timesheet): adicionar coluna S (Saldo) na grade semanal
+- `7ea9bc9` - feat(timesheet): cores semânticas para colunas E, H, S com saldo dinâmico
+
 **Deploy:** Staging (automático via GitHub Actions)
 
 ---
@@ -11,6 +14,8 @@
 ## Objetivo
 
 Adicionar a coluna **S (Saldo)** entre as colunas **H (Histórico)** e **SEG (Segunda-feira)** na grade do timesheet, exibindo o campo `remaining_work` retornado pelo backend.
+
+**Melhoria UX:** Implementar cores semânticas para as colunas E, H e S, com cor dinâmica para o saldo baseada no valor.
 
 ---
 
@@ -104,10 +109,67 @@ Adicionada célula vazia (saldo não tem soma total):
 
 ---
 
+---
+
+## Cores Semânticas (UX Enhancement)
+
+### Conceito
+
+As colunas E, H, S agora possuem cores semânticas para facilitar a leitura:
+
+| Coluna | Cor | Hex | Significado |
+|--------|-----|-----|-------------|
+| **E** (Esforço) | 🔵 Azul | `#0078D4` | Planejamento |
+| **H** (Histórico) | 🟢 Verde | `#107C10` | Progresso/Concluído |
+| **S** (Saldo) | Dinâmico | - | Ver abaixo |
+
+### Saldo Dinâmico
+
+O saldo muda de cor conforme o valor:
+
+| Condição | Cor | Hex | Significado |
+|----------|-----|-----|-------------|
+| `S = 0` | 🟢 Verde | `#107C10` | Completou o estimado |
+| `S > 0` | 🟠 Laranja | `#FF8C00` | Pendente |
+| `S < 0` | 🔴 Vermelho | `#D13438` | Excedeu estimativa |
+
+### Código Implementado
+
+```tsx
+{/* Cabeçalho E - Azul */}
+<th className="..." title="Esforço Estimado (Original Estimate)">
+  <div className="... text-[#0078D4] border-[#0078D4]">E</div>
+</th>
+
+{/* Cabeçalho H - Verde */}
+<th className="..." title="Histórico da Semana">
+  <div className="... text-[#107C10] border-[#107C10]">H</div>
+</th>
+
+{/* Cabeçalho S - Laranja */}
+<th className="..." title="Saldo - Trabalho Restante">
+  <div className="... text-[#FF8C00] border-[#FF8C00]">S</div>
+</th>
+
+{/* Célula S - Dinâmico */}
+<td className={cn(
+  "p-3 text-center border-r border-[#EDEBE9] font-bold text-[12px]",
+  item.remaining_work == null && "text-[#605E5C]",
+  item.remaining_work === 0 && "text-[#107C10]",
+  item.remaining_work != null && item.remaining_work > 0 && "text-[#FF8C00]",
+  item.remaining_work != null && item.remaining_work < 0 && "text-[#D13438]"
+)}>
+  {item.remaining_work != null ? item.remaining_work : ""}
+</td>
+```
+
+---
+
 ## Exemplo Visual
 
 ```
 | ESCOPO DE TRABALHO              | E | H    | S    | SEG | TER | QUA | QUI | SEX | SÁB | DOM | SEMANAL Σ |
+|                                 |🔵 | 🟢   |🟠/🟢/🔴|     |     |     |     |     |     |     |           |
 |--------------------------------|---|------|------|-----|-----|-----|-----|-----|-----|-----|-----------|
 | #4 C01. Implementar Extensão   | 8 | 2.5  | 5.5  |     |     |01:00|01:30|     |     |     | 02:30     |
 | #8 Testar Apontamento          | 2 |      | 2    |     |     |     |     |     |     |     |           |
@@ -125,6 +187,17 @@ Adicionada célula vazia (saldo não tem soma total):
 ```
 
 Todos os testes existentes continuam passando.
+
+### Testes Atualizados
+
+Os testes de acessibilidade foram atualizados para verificar os novos atributos `title`:
+
+```typescript
+// Verificar tooltips das colunas
+expect(screen.getByTitle("Esforço Estimado (Original Estimate)"))
+expect(screen.getByTitle("Histórico da Semana"))
+expect(screen.getByTitle("Saldo - Trabalho Restante (Remaining Work)"))
+```
 
 ---
 
@@ -150,4 +223,7 @@ Todos os testes existentes continuam passando.
 
 - **Backend Endpoint:** `GET /api/v1/timesheet`
 - **Interface:** `WorkItemTimesheet.remaining_work` em `timesheet-types.ts`
-- **Commit:** `589d584` - feat(timesheet): adicionar coluna S (Saldo) na grade semanal
+- **Commits:**
+  - `589d584` - feat(timesheet): adicionar coluna S (Saldo) na grade semanal
+  - `7ea9bc9` - feat(timesheet): cores semânticas para colunas E, H, S com saldo dinâmico
+- **Paleta de Cores:** Azure DevOps Fluent UI

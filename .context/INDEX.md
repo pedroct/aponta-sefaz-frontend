@@ -37,7 +37,9 @@
 
 | Documento | Descrição |
 |-----------|-----------|
-| [IMPLEMENTATION_COLUNA_SALDO.md](./IMPLEMENTATION_COLUNA_SALDO.md) | **NOVO!** Coluna S (Saldo) no Timesheet |
+| [IMPLEMENTATION_COLUNA_SALDO.md](./IMPLEMENTATION_COLUNA_SALDO.md) | **ATUALIZADO!** Coluna S (Saldo) + Cores Semânticas |
+| [IMPLEMENTATION_MODAL_PRESET.md](./IMPLEMENTATION_MODAL_PRESET.md) | **NOVO!** Botão +0.25h (15 min) no modal |
+| [IMPLEMENTATION_GESTAO_ATIVIDADES.md](./IMPLEMENTATION_GESTAO_ATIVIDADES.md) | **NOVO!** Fix endpoint /atividades/gestao |
 | [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) | Remoção do checkbox "Somente meus itens" |
 
 ---
@@ -93,7 +95,7 @@ COMECE AQUI
 
 | Ambiente | Status | Versão | Data |
 |----------|--------|--------|------|
-| **Staging** | ✅ Funcionando | v1.0.10 | 22/01/2026 |
+| **Staging** | ✅ Funcionando | v1.0.12 | 22/01/2026 |
 | **Production** | 🔄 Pronto para deploy | - | - |
 | **Extensão Azure DevOps** | ✅ Funcionando | v1.0.9 | 21/01/2026 |
 
@@ -103,9 +105,10 @@ COMECE AQUI
 |--------|--------|-----------|
 | **Timesheet (Folha de Horas)** | ✅ Funcionando | Grid semanal com colunas E, H, S e 7 dias |
 | **Coluna Saldo (S)** | ✅ Novo | Exibe remaining_work do Work Item |
+| **Cores Semânticas** | ✅ Novo | E=azul, H=verde, S=dinâmico (verde/laranja/vermelho) |
 | **Gestão de Atividades** | ✅ Funcionando | CRUD completo de atividades |
 | **Gestão de Projetos** | ✅ Funcionando | Sincronização com Azure DevOps |
-| **Modal Apontamento** | ✅ Funcionando | Criação/edição de apontamentos |
+| **Modal Apontamento** | ✅ Funcionando | Criação/edição com presets (+0.25h, +0.5h, +1h, +2h, +4h) |
 
 ### CI/CD Status
 
