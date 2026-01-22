@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Time Action</title>
+    <script src="https://cdn.vsassets.io/bundles/vss-bundle-common-vB1nw9Al5u049FXIN_-LtaSyedknnPkw7ouPrDxTDowE="></script>
 </head>
 <body>
     <script>
-        // VSS SDK já está disponível no contexto da página Azure DevOps
-        // Esperar que esteja pronto
-        if (typeof VSS !== 'undefined') {
-            initializeActionProvider();
-        } else {
-            // Se VSS ainda não está disponível, aguardar
-            window.addEventListener('load', function() {
-                if (typeof VSS !== 'undefined') {
-                    initializeActionProvider();
-                } else {
-                    console.error('❌ VSS SDK não está disponível');
-                }
-            });
-        }
+        // Aguardar VSS SDK carregar do CDN
+        (function waitForVSS() {
+            if (typeof VSS !== 'undefined') {
+                console.log('✅ VSS SDK carregado');
+                initializeActionProvider();
+            } else {
+                console.log('⏳ Aguardando VSS SDK...');
+                setTimeout(waitForVSS, 50);
+            }
+        })();
 
         function initializeActionProvider() {
             VSS.init({ 
@@ -71,26 +68,30 @@
 
             try {
                 const extensionContext = VSS.getExtensionContext();
-                const baseUri = extensionContext.baseUri;
+                const contributionId = extensionContext.publisherId + "." + extensionContext.extensionId + ".addApontaTimeDialog";
                 
-                // Construir URL com parâmetros
-                const dialogUrl = `${baseUri}pages/addTimePopupDialog/index.html?workItemId=${workItemId}&taskTitle=${encodeURIComponent(workItemTitle)}`;
-
-                console.log('📍 Dialog URL:', dialogUrl);
+                console.log('📍 Contribution ID:', contributionId);
 
                 const dialogOptions = {
                     title: "⏱️ Apontar Tempo",
                     width: 600,
                     height: 700,
                     buttons: [],
-                    resizable: false
+                    resizable: false,
+                    urlReplacementObject: {
+                        workItemId: workItemId,
+                        workItemTitle: encodeURIComponent(workItemTitle)
+                    }
                 };
 
-                // Abrir dialog via VSS Service
+                // Abrir dialog via VSS Service usando contribution
                 VSS.getService(VSS.ServiceIds.Dialog).then(function(dialogService) {
-                    return dialogService.openDialog(dialogUrl, dialogOptions);
-                }).then(function(result) {
-                    console.log('✅ Dialog fechado com resultado:', result);
+                    return dialogService.openDialog(contributionId, dialogOptions);
+                }).then(function(dialog) {
+                    console.log('✅ Dialog aberto');
+                    dialog.getDialogResult().then(function(result) {
+                        console.log('✅ Dialog fechado com resultado:', result);
+                    });
                 }).catch(function(error) {
                     console.error('❌ Erro ao abrir dialog:', error);
                     alert('Erro ao abrir modal: ' + error.message);
