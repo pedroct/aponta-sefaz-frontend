@@ -207,6 +207,11 @@ export default function FolhaDeHoras() {
             {item.total_semana_horas > 0 ? item.total_semana_horas : ""}
           </td>
 
+          {/* Coluna S (Saldo) */}
+          <td className="p-3 text-center border-r border-[#EDEBE9] text-[#605E5C] font-bold text-[12px]">
+            {item.remaining_work != null ? item.remaining_work : ""}
+          </td>
+
           {/* Células dos 7 dias */}
           {item.dias.map((dia, index) => (
             <td key={index} className="border-r border-[#EDEBE9] text-center p-0 relative">
@@ -258,6 +263,7 @@ export default function FolhaDeHoras() {
           </td>
           <td className="p-3 border-r border-[#EDEBE9]"><Skeleton className="h-4 w-8 mx-auto" /></td>
           <td className="p-3 border-r border-[#EDEBE9]"><Skeleton className="h-4 w-8 mx-auto" /></td>
+          <td className="p-3 border-r border-[#EDEBE9]"><Skeleton className="h-4 w-8 mx-auto" /></td>
           {[...Array(7)].map((_, j) => (
             <td key={j} className="p-3 border-r border-[#EDEBE9]"><Skeleton className="h-4 w-10 mx-auto" /></td>
           ))}
@@ -270,7 +276,7 @@ export default function FolhaDeHoras() {
   // Estado de erro
   const renderError = () => (
     <tr>
-      <td colSpan={11} className="p-8 text-center">
+      <td colSpan={12} className="p-8 text-center">
         <div className="flex flex-col items-center gap-3 text-[#A4262C]">
           <AlertCircle size={48} />
           <p className="text-sm font-semibold">Erro ao carregar dados</p>
@@ -293,7 +299,7 @@ export default function FolhaDeHoras() {
   // Estado vazio
   const renderEmpty = () => (
     <tr>
-      <td colSpan={11} className="p-8 text-center">
+      <td colSpan={12} className="p-8 text-center">
         <div className="flex flex-col items-center gap-3 text-[#605E5C]">
           <CalendarIcon size={48} className="text-[#C8C6C4]" />
           <p className="text-sm font-semibold">Nenhum Work Item encontrado</p>
@@ -389,6 +395,9 @@ export default function FolhaDeHoras() {
                 <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Histórico (History)">
                   <div className="w-6 h-6 mx-auto border-2 border-[#605E5C] rounded-full flex items-center justify-center text-[10px] text-[#605E5C] font-black">H</div>
                 </th>
+                <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Saldo - Trabalho Restante (Remaining Work)">
+                  <div className="w-6 h-6 mx-auto border-2 border-[#605E5C] rounded-full flex items-center justify-center text-[10px] text-[#605E5C] font-black">S</div>
+                </th>
                 {(timesheet?.totais_por_dia || []).length > 0 
                   ? timesheet!.totais_por_dia.map((dia, i) => (
                       <th key={i} className={cn(
@@ -437,6 +446,9 @@ export default function FolhaDeHoras() {
                 </td>
                 <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black">
                   {timesheet?.total_historico || ""}
+                </td>
+                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black">
+                  {/* Saldo não tem total */}
                 </td>
                 {(timesheet?.totais_por_dia || [...Array(7)]).map((dia, i) => (
                   <td key={i} className="p-4 text-center border-r border-[#EDEBE9] text-[#201F1E]">
