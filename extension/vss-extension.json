@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "name": "Aponta Timetracker",
   "description": "Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -33,7 +33,50 @@
   "baseUri": "https://aponta.treit.com.br",
   "contributions": [
     {
-      "id": "addTimePopupDialog",
+      "id": "aponta-hub-group",
+      "type": "ms.vss-web.hub-group",
+      "description": "Hub group para extensão Aponta",
+      "targets": [
+        "ms.vss-web.project-hub-groups-collection"
+      ],
+      "properties": {
+        "name": "Apontamentos",
+        "icon": "images/icon-128.png",
+        "order": 100
+      }
+    },
+    {
+      "id": "timesheet-hub",
+      "type": "ms.vss-web.hub",
+      "description": "Hub Folha de Horas",
+      "targets": [
+        "aponta-hub-group"
+      ],
+      "properties": {
+        "name": "Folha de Horas",
+        "title": "Folha de Horas",
+        "uri": "dist/public/index.html",
+        "icon": "images/icon-128.png",
+        "order": 1
+      }
+    },
+    {
+      "id": "atividades-hub",
+      "type": "ms.vss-web.hub",
+      "description": "Hub Atividades",
+      "targets": [
+        "aponta-hub-group"
+      ],
+      "properties": {
+        "name": "Atividades",
+        "title": "Atividades",
+        "uri": "dist/public/index.html",
+        "icon": "images/icon-128.png",
+        "order": 2
+      }
+    },
+    {
+      "id": "addApontaTimeDialog",
       "type": "ms.vss-web.control",
       "description": "Modal para apontar tempo em task/bug usando componente React",
       "targets": [],
@@ -42,7 +85,7 @@
       }
     },
     {
-      "id": "addTimeAction",
+      "id": "addApontaTimeAction",
       "type": "ms.vss-web.action-provider",
       "description": "Ação para abrir modal de apontamento",
       "targets": [

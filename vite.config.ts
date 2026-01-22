@@ -24,6 +24,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(import.meta.dirname, "client", "index.html"),
+        extension: path.resolve(import.meta.dirname, "client", "extension.html"),
+      },
+      output: {
+        entryFileNames: (chunkInfo) => {
+          return chunkInfo.name === "extension" ? "extension-[hash].js" : "[name]-[hash].js";
+        },
+      },
+    },
   },
   server: {
     host: "0.0.0.0",
