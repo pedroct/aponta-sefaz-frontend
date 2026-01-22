@@ -149,7 +149,7 @@ export const ModalAdicionarTempo = ({
     return name.substring(0, 2).toUpperCase();
   };
 
-  const presets = ["+0.5h", "+1h", "+2h", "+4h"];
+  const presets = ["+0.25h", "+0.5h", "+1h", "+2h", "+4h"];
 
   const handleAddPreset = (preset: string) => {
     const val = parseFloat(preset.replace("+", "").replace("h", ""));
