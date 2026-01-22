@@ -97,7 +97,10 @@ export function useAtividades(params?: {
         skip: params?.skip,
         limit: params?.limit,
       });
-      return normalizeAtividadesResponse(data);
+      console.log('[useAtividades] Dados recebidos (raw):', JSON.stringify(data, null, 2));
+      const normalized = normalizeAtividadesResponse(data);
+      console.log('[useAtividades] Dados normalizados:', JSON.stringify(normalized, null, 2));
+      return normalized;
     },
     // Só executar quando tiver token e não estiver carregando
     enabled: !!token && !isLoading,
@@ -135,7 +138,9 @@ export function useCriarAtividade() {
 
   return useMutation({
     mutationFn: async (data: AtividadeCreate) => {
+      console.log('[useCriarAtividade] Dados enviados:', JSON.stringify(data, null, 2));
       const response = await api.post("/atividades", data);
+      console.log('[useCriarAtividade] Resposta:', JSON.stringify(response, null, 2));
       return response as Atividade;
     },
     onSuccess: () => {
@@ -154,7 +159,10 @@ export function useAtualizarAtividade() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: AtividadeUpdate }) => {
+      console.log('[useAtualizarAtividade] ID:', id);
+      console.log('[useAtualizarAtividade] Dados enviados:', JSON.stringify(data, null, 2));
       const response = await api.put(`/atividades/${id}`, data);
+      console.log('[useAtualizarAtividade] Resposta:', JSON.stringify(response, null, 2));
       return response as Atividade;
     },
     onSuccess: (_, variables) => {
