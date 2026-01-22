@@ -10,3 +10,6 @@ mcp_config.json
 docs/migration/BACKEND_MIGRATION_GUIDE.md
 docs/migration/MIGRATION_INSTRUCTIONS.md
 testsprite_tests/tmp/
+
+# VSIX packages
+extension/*.vsix
