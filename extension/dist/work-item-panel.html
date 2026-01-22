@@ -90,54 +90,6 @@
     });
 
     VSS.ready(function() {
-      // Objeto com callbacks do work-item-form-group
-      // Isso é NECESSÁRIO para que o Azure DevOps reconheça a extensão
-      var workItemFormGroupHandler = {
-        // Callbacks opcionais do work-item-form-group
-        onLoaded: function(args) {
-          console.log('[Aponta Extension] Work item form loaded');
-        },
-        onFieldChanged: function(args) {
-          // Pode reagir a mudanças de campos se necessário
-        },
-        onSaved: function(args) {
-          console.log('[Aponta Extension] Work item saved');
-        },
-        onRefreshed: function(args) {
-          console.log('[Aponta Extension] Work item refreshed');
-        },
-        onReset: function(args) {
-          console.log('[Aponta Extension] Work item reset');
-        },
-        onUnloaded: function(args) {
-          console.log('[Aponta Extension] Work item unloaded');
-        }
-      };
-
-      // Registrar handler com múltiplos IDs para garantir compatibilidade
-      // O Azure DevOps pode enviar mensagens com diferentes formatos de ID
-      var extensionContext = VSS.getExtensionContext();
-      var fullContributionId = extensionContext.publisherId + "." + extensionContext.extensionId + ".work-item-form-group";
-      
-      // Registrar com ID completo (publisher.extension.contribution)
-      VSS.register(fullContributionId, workItemFormGroupHandler);
-      console.log('[Aponta Extension] Handler registrado para:', fullContributionId);
-
-      // Registrar com ID curto (apenas contribution)
-      VSS.register("work-item-form-group", workItemFormGroupHandler);
-      console.log('[Aponta Extension] Handler registrado para: work-item-form-group');
-      
-      // Tentar também com getContribution() se disponível
-      try {
-        var contribution = VSS.getContribution();
-        if (contribution && contribution.id && contribution.id !== fullContributionId && contribution.id !== "work-item-form-group") {
-          VSS.register(contribution.id, workItemFormGroupHandler);
-          console.log('[Aponta Extension] Handler registrado para (via getContribution):', contribution.id);
-        }
-      } catch (e) {
-        // Ignorar se getContribution não estiver disponível
-      }
-
       VSS.require(["TFS/WorkItemTracking/Services"], function(workItemServices) {
         workItemServices.WorkItemFormService.getService().then(function(service) {
           service.getFieldValues(["System.Id", "System.Title", "System.WorkItemType"]).then(function(fields) {
@@ -164,8 +116,8 @@
               
               console.log('[Aponta Extension] Token obtido para work-item-panel, tamanho:', accessToken.length);
               
-              // Usar aplicação React local (mesmo diretório dist/public)
-              var baseUrl = 'public/index.html';
+              // URL fixa do servidor staging
+              var baseUrl = 'https://staging-aponta.treit.com.br';
               var params = new URLSearchParams({
                 organization: webContext.account.name,
                 project: webContext.project.name,
@@ -184,7 +136,7 @@
               var iframe = document.getElementById('app-frame');
               var loading = document.getElementById('loading');
               
-              iframe.src = baseUrl + '?' + params.toString();
+              iframe.src = baseUrl + '/work-item-panel?' + params.toString();
               
               iframe.onload = function() {
                 loading.style.display = 'none';
