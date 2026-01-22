@@ -89,6 +89,19 @@
         "uri": "dist/work-item-panel.html",
         "height": 300
       }
+    },
+    {
+      "id": "aponta-tempo-toolbar-button",
+      "type": "ms.vss-work-web.work-item-toolbar-menu",
+      "targets": [
+        "ms.vss-work-web.work-item-form-menu"
+      ],
+      "properties": {
+        "name": "Aponta Tempo",
+        "title": "Registrar horas nesta atividade",
+        "icon": "images/icon-16.png",
+        "uri": "dist/aponta-tempo-toolbar.html"
+      }
     }
   ],
   "files": [

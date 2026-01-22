@@ -29,10 +29,13 @@ export default defineConfig({
       input: {
         main: path.resolve(import.meta.dirname, "client", "index.html"),
         extension: path.resolve(import.meta.dirname, "client", "extension.html"),
+        "aponta-tempo-toolbar": path.resolve(import.meta.dirname, "client", "aponta-tempo-toolbar.html"),
       },
       output: {
         entryFileNames: (chunkInfo) => {
-          return chunkInfo.name === "extension" ? "extension-[hash].js" : "[name]-[hash].js";
+          if (chunkInfo.name === "extension") return "extension-[hash].js";
+          if (chunkInfo.name === "aponta-tempo-toolbar") return "aponta-tempo-toolbar.js";
+          return "[name]-[hash].js";
         },
       },
     },

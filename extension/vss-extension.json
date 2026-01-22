@@ -98,6 +98,20 @@
         "icon": "images/icon-16.png",
         "uri": "pages/actions/addTimeMenu.html"
       }
+    },
+    {
+      "id": "aponta-tempo-toolbar-button",
+      "type": "ms.vss-work-web.work-item-toolbar-menu",
+      "description": "Botão na toolbar do Work Item para registrar tempo rapidamente",
+      "targets": [
+        "ms.vss-work-web.work-item-form-menu"
+      ],
+      "properties": {
+        "name": "Aponta Tempo",
+        "title": "Registrar horas nesta atividade",
+        "icon": "images/icon-16.png",
+        "uri": "dist/aponta-tempo-toolbar.html"
+      }
     }
   ],
   "files": [
