@@ -197,12 +197,6 @@ describe("App", () => {
 
       expect(screen.getByRole("table")).toBeInTheDocument();
     });
-
-    it("renderiza os filtros de projeto", () => {
-      render(<App />);
-
-      expect(screen.getByText("Projeto Atual")).toBeInTheDocument();
-    });
   });
 
   describe("Modal de Apontamento", () => {

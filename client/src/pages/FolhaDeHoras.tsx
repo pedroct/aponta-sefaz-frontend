@@ -7,7 +7,6 @@ import { CelulaApontamento } from "@/components/custom/CelulaApontamento";
 import { DialogConfirmarExclusao } from "@/components/custom/DialogConfirmarExclusao";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkItemIcon } from "@/components/ui/work-item-icon";
 import { useTimesheet } from "@/hooks/use-timesheet";
@@ -19,14 +18,8 @@ import {
   formatDateForApi 
 } from "@/lib/timesheet-types";
 
-// Chave para persistir filtros no localStorage
-const FILTERS_STORAGE_KEY = "folha-horas-filters";
+// Chave para persistir estado de expansão no localStorage
 const EXPANDED_STORAGE_KEY = "folha-horas-expanded";
-
-// Estado inicial dos filtros
-const DEFAULT_FILTERS = {
-  currentProject: true
-};
 
 export default function FolhaDeHoras() {
   // Contexto do Azure DevOps - organização e projeto dinâmicos
@@ -53,14 +46,6 @@ export default function FolhaDeHoras() {
       return {};
     }
   });
-  const [filters, setFilters] = useState(() => {
-    try {
-      const saved = localStorage.getItem(FILTERS_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_FILTERS;
-    } catch {
-      return DEFAULT_FILTERS;
-    }
-  });
 
   // Calcular week_start (segunda-feira da semana atual)
   const weekStart = getMondayOfWeek(currentDate);
@@ -77,11 +62,6 @@ export default function FolhaDeHoras() {
     project_id: project,
     week_start: weekStartFormatted,
   });
-
-  // Persistir filtros no localStorage
-  useEffect(() => {
-    localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
-  }, [filters]);
 
   // Persistir estado de expansão no localStorage
   useEffect(() => {
@@ -343,17 +323,6 @@ export default function FolhaDeHoras() {
           >
             <Plus size={16} /> Novo Apontamento
           </Button>
-          <div className="h-6 w-[1px] bg-[#EDEBE9] mx-1" />
-          
-          <div className="flex items-center gap-5 ml-2">
-            <label className="flex items-center gap-2 text-xs text-[#605E5C] cursor-pointer hover:text-[#201F1E] group">
-              <Checkbox 
-                checked={filters.currentProject} 
-                onCheckedChange={(checked) => setFilters({...filters, currentProject: !!checked})}
-              />
-              <span className="group-hover:underline">Projeto Atual</span>
-            </label>
-          </div>
         </div>
         
         <div className="flex items-center gap-3 text-[#605E5C]">

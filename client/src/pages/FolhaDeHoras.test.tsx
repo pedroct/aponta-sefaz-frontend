@@ -174,12 +174,6 @@ describe("FolhaDeHoras", () => {
       expect(screen.getByRole("button", { name: "Hoje" })).toBeInTheDocument();
     });
 
-    it("deve renderizar os checkboxes de filtros", () => {
-      render(<FolhaDeHoras />, { wrapper: createWrapper() });
-
-      expect(screen.getByText("Projeto Atual")).toBeInTheDocument();
-    });
-
     it("deve renderizar a tabela de timesheet", () => {
       render(<FolhaDeHoras />, { wrapper: createWrapper() });
 
@@ -332,39 +326,6 @@ describe("FolhaDeHoras", () => {
       const saveButton = screen.getByRole("button", { name: "Salvar" });
       expect(saveButton).toBeInTheDocument();
     });
-  });
-
-  describe("Filtros", () => {
-    it("deve ter checkbox Projeto Atual marcado por padrão", () => {
-      render(<FolhaDeHoras />, { wrapper: createWrapper() });
-
-      const projectLabel = screen.getByText("Projeto Atual");
-      const checkbox = projectLabel.closest("label")?.querySelector('[role="checkbox"]');
-      
-      expect(checkbox).toHaveAttribute("data-state", "checked");
-    });
-
-
-    it("deve alternar checkbox Projeto Atual ao clicar", async () => {
-      render(<FolhaDeHoras />, { wrapper: createWrapper() });
-
-      const projectLabel = screen.getByText("Projeto Atual");
-      const checkbox = projectLabel.closest("label")?.querySelector('[role="checkbox"]');
-      
-      if (checkbox) {
-        // Inicialmente marcado
-        expect(checkbox).toHaveAttribute("data-state", "checked");
-        
-        // Clica para desmarcar
-        await userEvent.click(checkbox);
-        expect(checkbox).toHaveAttribute("data-state", "unchecked");
-        
-        // Clica para marcar novamente
-        await userEvent.click(checkbox);
-        expect(checkbox).toHaveAttribute("data-state", "checked");
-      }
-    });
-
   });
 
   describe("Exibição de Horas", () => {
