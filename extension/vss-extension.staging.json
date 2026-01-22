@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos-staging",
-  "version": "1.1.12",
+  "version": "1.1.13",
   "name": "Aponta (Staging)",
   "description": "[STAGING] Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -37,68 +37,57 @@
     {
       "id": "aponta-hub-group",
       "type": "ms.vss-web.hub-group",
-      "description": "Hub group para extensão Aponta",
       "targets": [
         "ms.vss-web.project-hub-groups-collection"
       ],
       "properties": {
-        "name": "Apontamentos",
-        "icon": "images/icon-128.png",
-        "order": 100
+        "name": "Aponta (Staging)",
+        "order": 100,
+        "icon": "images/icon-16.png"
       }
     },
     {
       "id": "timesheet-hub",
       "type": "ms.vss-web.hub",
-      "description": "Hub Folha de Horas",
       "targets": [
-        "aponta-hub-group"
+        ".aponta-hub-group"
       ],
       "properties": {
-        "name": "Folha de Horas",
-        "title": "Folha de Horas",
-        "uri": "dist/public/index.html",
-        "icon": "images/icon-128.png",
-        "order": 1
+        "name": "Meus Apontamentos",
+        "order": 100,
+        "uri": "dist/timesheet.html",
+        "icon": {
+          "light": "images/icon-16.png",
+          "dark": "images/icon-16-dark.png"
+        }
       }
     },
     {
       "id": "atividades-hub",
       "type": "ms.vss-web.hub",
-      "description": "Hub Atividades",
       "targets": [
-        "aponta-hub-group"
+        ".aponta-hub-group"
       ],
       "properties": {
         "name": "Atividades",
-        "title": "Atividades",
-        "uri": "dist/public/index.html",
-        "icon": "images/icon-128.png",
-        "order": 2
+        "order": 200,
+        "uri": "dist/atividades.html",
+        "icon": {
+          "light": "images/icon-16.png",
+          "dark": "images/icon-16-dark.png"
+        }
       }
     },
     {
-      "id": "addApontaTimeDialog",
-      "type": "ms.vss-web.control",
-      "description": "Modal para apontar tempo em task/bug usando componente React",
-      "targets": [],
-      "properties": {
-        "uri": "dist/public/extension.html?workItemId={{id}}"
-      }
-    },
-    {
-      "id": "addApontaTimeAction",
-      "type": "ms.vss-web.action",
-      "description": "Ação para abrir modal de apontamento no menu de contexto",
+      "id": "work-item-form-group",
+      "type": "ms.vss-work-web.work-item-form-group",
       "targets": [
-        "ms.vss-work-web.work-item-context-menu"
+        "ms.vss-work-web.work-item-form"
       ],
       "properties": {
-        "text": "Apontar Tempo",
-        "title": "Registrar tempo neste work item",
-        "toolbarText": "Apontar Tempo",
-        "icon": "images/icon-16.png",
-        "uri": "pages/actions/addTimeMenu.html"
+        "name": "Apontamentos (Staging)",
+        "uri": "dist/work-item-panel.html",
+        "height": 300
       }
     }
   ],
@@ -108,15 +97,7 @@
       "addressable": true
     },
     {
-      "path": "pages",
-      "addressable": true
-    },
-    {
       "path": "images",
-      "addressable": true
-    },
-    {
-      "path": "lib",
       "addressable": true
     }
   ],
