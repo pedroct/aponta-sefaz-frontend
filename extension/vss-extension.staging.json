@@ -100,7 +100,7 @@
         "name": "Aponta Tempo",
         "title": "Registrar horas nesta atividade",
         "icon": "images/icon-16.png",
-        "uri": "dist/aponta-tempo-toolbar.html"
+        "uri": "dist/public/aponta-tempo-toolbar.html"
       }
     }
   ],
