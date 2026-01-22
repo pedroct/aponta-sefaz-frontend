@@ -38,7 +38,7 @@ export function useWorkItemRevisions({
       });
 
       const response = await fetch(
-        /api/v1/timesheet/work-item//revisions?
+        `/api/v1/timesheet/work-item/${workItemId}/revisions?${params}`
       );
 
       if (!response.ok) {
@@ -83,7 +83,7 @@ export function useProcessStates({
       });
 
       const response = await fetch(
-        /api/v1/timesheet/process-states?
+        `/api/v1/timesheet/process-states?${params}`
       );
 
       if (!response.ok) {
