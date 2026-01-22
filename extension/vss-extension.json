@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "name": "Aponta Timetracker",
   "description": "Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
