@@ -197,18 +197,24 @@ export default function FolhaDeHoras() {
             </div>
           </td>
 
-          {/* Coluna E (Esforço) */}
-          <td className="p-3 text-center border-r border-[#EDEBE9] text-[#605E5C] font-bold text-[12px]">
+          {/* Coluna E (Esforço) - Azul */}
+          <td className="p-3 text-center border-r border-[#EDEBE9] text-[#0078D4] font-bold text-[12px]">
             {item.original_estimate != null ? item.original_estimate : ""}
           </td>
 
-          {/* Coluna H (Histórico) */}
-          <td className="p-3 text-center border-r border-[#EDEBE9] text-[#605E5C] font-bold text-[12px]">
+          {/* Coluna H (Histórico) - Verde */}
+          <td className="p-3 text-center border-r border-[#EDEBE9] text-[#107C10] font-bold text-[12px]">
             {item.total_semana_horas > 0 ? item.total_semana_horas : ""}
           </td>
 
-          {/* Coluna S (Saldo) */}
-          <td className="p-3 text-center border-r border-[#EDEBE9] text-[#605E5C] font-bold text-[12px]">
+          {/* Coluna S (Saldo) - Dinâmico: Verde (0), Vermelho (<0), Laranja (>0) */}
+          <td className={cn(
+            "p-3 text-center border-r border-[#EDEBE9] font-bold text-[12px]",
+            item.remaining_work == null && "text-[#605E5C]",
+            item.remaining_work === 0 && "text-[#107C10]",
+            item.remaining_work != null && item.remaining_work > 0 && "text-[#FF8C00]",
+            item.remaining_work != null && item.remaining_work < 0 && "text-[#D13438]"
+          )}>
             {item.remaining_work != null ? item.remaining_work : ""}
           </td>
 
@@ -389,14 +395,14 @@ export default function FolhaDeHoras() {
                 <th className="p-3 font-bold text-[#605E5C] border-r border-[#EDEBE9] min-w-[240px] max-w-[300px] uppercase tracking-wider">
                   Escopo de Trabalho
                 </th>
-                <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Esforço (Effort)">
-                  <div className="w-6 h-6 mx-auto border-2 border-[#605E5C] rounded-full flex items-center justify-center text-[10px] text-[#605E5C] font-black">E</div>
+                <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Esforço - Estimativa Original (Original Estimate)">
+                  <div className="w-6 h-6 mx-auto border-2 border-[#0078D4] rounded-full flex items-center justify-center text-[10px] text-[#0078D4] font-black">E</div>
                 </th>
-                <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Histórico (History)">
-                  <div className="w-6 h-6 mx-auto border-2 border-[#605E5C] rounded-full flex items-center justify-center text-[10px] text-[#605E5C] font-black">H</div>
+                <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Histórico - Trabalho Completado (Completed Work)">
+                  <div className="w-6 h-6 mx-auto border-2 border-[#107C10] rounded-full flex items-center justify-center text-[10px] text-[#107C10] font-black">H</div>
                 </th>
                 <th className="w-12 p-3 border-r border-[#EDEBE9] text-center" title="Saldo - Trabalho Restante (Remaining Work)">
-                  <div className="w-6 h-6 mx-auto border-2 border-[#605E5C] rounded-full flex items-center justify-center text-[10px] text-[#605E5C] font-black">S</div>
+                  <div className="w-6 h-6 mx-auto border-2 border-[#FF8C00] rounded-full flex items-center justify-center text-[10px] text-[#FF8C00] font-black">S</div>
                 </th>
                 {(timesheet?.totais_por_dia || []).length > 0 
                   ? timesheet!.totais_por_dia.map((dia, i) => (
@@ -441,13 +447,13 @@ export default function FolhaDeHoras() {
                 <td className="p-4 border-r border-[#EDEBE9] font-black uppercase tracking-widest text-[#605E5C]">
                   TOTAL GERAL
                 </td>
-                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black">
+                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black text-[#0078D4]">
                   {timesheet?.total_esforco || ""}
                 </td>
-                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black">
+                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black text-[#107C10]">
                   {timesheet?.total_historico || ""}
                 </td>
-                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black">
+                <td className="p-4 text-center border-r border-[#EDEBE9] bg-[#F3F2F1] font-black text-[#FF8C00]">
                   {/* Saldo não tem total */}
                 </td>
                 {(timesheet?.totais_por_dia || [...Array(7)]).map((dia, i) => (

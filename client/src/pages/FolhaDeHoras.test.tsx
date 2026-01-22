@@ -373,7 +373,7 @@ describe("FolhaDeHoras", () => {
 
       // Verifica se a coluna de esforço está renderizada
       const table = screen.getByRole("table");
-      const effortHeader = within(table).getByTitle("Esforço (Effort)");
+      const effortHeader = within(table).getByTitle("Esforço - Estimativa Original (Original Estimate)");
       expect(effortHeader).toBeInTheDocument();
     });
 
@@ -382,7 +382,7 @@ describe("FolhaDeHoras", () => {
 
       // Verifica se a coluna de histórico está renderizada
       const table = screen.getByRole("table");
-      const historyHeader = within(table).getByTitle("Histórico (History)");
+      const historyHeader = within(table).getByTitle("Histórico - Trabalho Completado (Completed Work)");
       expect(historyHeader).toBeInTheDocument();
     });
   });
