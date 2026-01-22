@@ -116,8 +116,8 @@
               
               console.log('[Aponta Extension] Token obtido para work-item-panel, tamanho:', accessToken.length);
               
-              // URL fixa do servidor staging
-              var baseUrl = 'https://staging-aponta.treit.com.br';
+              // Usar aplicação React local (mesmo diretório dist/public)
+              var baseUrl = 'public/index.html';
               var params = new URLSearchParams({
                 organization: webContext.account.name,
                 project: webContext.project.name,
@@ -136,7 +136,7 @@
               var iframe = document.getElementById('app-frame');
               var loading = document.getElementById('loading');
               
-              iframe.src = baseUrl + '/work-item-panel?' + params.toString();
+              iframe.src = baseUrl + '?' + params.toString();
               
               iframe.onload = function() {
                 loading.style.display = 'none';

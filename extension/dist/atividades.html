@@ -98,8 +98,8 @@
           user: webContext.user.id
         }));
         
-        // URL fixa do servidor staging - rota de atividades
-        var baseUrl = 'https://staging-aponta.treit.com.br/atividades';
+        // Usar aplicação React local - rota de atividades
+        var baseUrl = 'public/index.html';
         var params = new URLSearchParams({
           organization: webContext.account.name,
           project: webContext.project.name,
@@ -109,6 +109,7 @@
           userEmail: webContext.user.email || '',
           embedded: 'true',
           source: 'azdo-extension',
+          page: 'atividades',
           token: appToken  // App token (JWT assinado com secret da extensão)
         });
         

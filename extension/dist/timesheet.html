@@ -98,8 +98,8 @@
           user: webContext.user.id
         }));
         
-        // URL fixa do servidor staging
-        var baseUrl = 'https://staging-aponta.treit.com.br';
+        // Usar aplicação React local (mesmo diretório dist/public)
+        var baseUrl = 'public/index.html';
         var params = new URLSearchParams({
           organization: webContext.account.name,
           project: webContext.project.name,
