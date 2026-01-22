@@ -15,34 +15,31 @@ import { useAzureContext } from "@/contexts/AzureDevOpsContext";
  * @param params.organization_name - Nome da organização no Azure DevOps
  * @param params.project_id - ID ou nome do projeto
  * @param params.week_start - Data de início da semana (segunda-feira, YYYY-MM-DD)
- * @param params.only_my_items - Filtrar apenas Work Items atribuídos ao usuário
  * 
  * @example
  * ```tsx
  * const { data, isLoading, error } = useTimesheet({
  *   organization_name: "minha-org",
  *   project_id: "meu-projeto",
- *   week_start: "2026-01-19",
- *   only_my_items: true
+ *   week_start: "2026-01-19"
  * });
  * ```
  */
 export function useTimesheet(params: TimesheetParams) {
-  const { organization_name, project_id, week_start, only_my_items } = params;
+  const { organization_name, project_id, week_start } = params;
   const { api, token, isLoading } = useAzureContext();
   
   // Calcula week_start padrão se não fornecido
   const effectiveWeekStart = week_start || formatDateForApi(getMondayOfWeek(new Date()));
   
   return useQuery({
-    queryKey: ["timesheet", organization_name, project_id, effectiveWeekStart, only_my_items],
+    queryKey: ["timesheet", organization_name, project_id, effectiveWeekStart],
     queryFn: async (): Promise<TimesheetResponse> => {
       console.log('[useTimesheet] Executando queryFn, token disponível:', !!token);
       return api.get<TimesheetResponse>("/timesheet", {
         organization_name,
         project_id,
         week_start: effectiveWeekStart,
-        only_my_items,
       });
     },
     // Só executar quando tiver token, não estiver carregando E tiver os params obrigatórios

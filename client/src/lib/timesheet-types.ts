@@ -127,7 +127,6 @@ export interface TimesheetParams {
   organization_name: string;
   project_id: string;
   week_start?: string;             // YYYY-MM-DD (segunda-feira)
-  only_my_items?: boolean;
 }
 
 // ============================================================================

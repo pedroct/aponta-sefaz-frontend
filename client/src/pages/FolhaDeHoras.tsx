@@ -25,8 +25,7 @@ const EXPANDED_STORAGE_KEY = "folha-horas-expanded";
 
 // Estado inicial dos filtros
 const DEFAULT_FILTERS = {
-  currentProject: true,
-  myItems: false
+  currentProject: true
 };
 
 export default function FolhaDeHoras() {
@@ -77,7 +76,6 @@ export default function FolhaDeHoras() {
     organization_name: organization,
     project_id: project,
     week_start: weekStartFormatted,
-    only_my_items: filters.myItems,
   });
 
   // Persistir filtros no localStorage
@@ -300,10 +298,7 @@ export default function FolhaDeHoras() {
           <CalendarIcon size={48} className="text-[#C8C6C4]" />
           <p className="text-sm font-semibold">Nenhum Work Item encontrado</p>
           <p className="text-xs">
-            {filters.myItems 
-              ? "Não há Work Items atribuídos a você nesta semana."
-              : "Não há Work Items disponíveis para esta semana."
-            }
+            Não há Work Items disponíveis para esta semana.
           </p>
         </div>
       </td>
@@ -337,13 +332,6 @@ export default function FolhaDeHoras() {
                 onCheckedChange={(checked) => setFilters({...filters, currentProject: !!checked})}
               />
               <span className="group-hover:underline">Projeto Atual</span>
-            </label>
-            <label className="flex items-center gap-2 text-xs text-[#605E5C] cursor-pointer hover:text-[#201F1E] group">
-              <Checkbox 
-                checked={filters.myItems} 
-                onCheckedChange={(checked) => setFilters({...filters, myItems: !!checked})}
-              />
-              <span className="group-hover:underline">Somente meus itens</span>
             </label>
           </div>
         </div>

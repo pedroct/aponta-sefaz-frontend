@@ -178,7 +178,6 @@ describe("FolhaDeHoras", () => {
       render(<FolhaDeHoras />, { wrapper: createWrapper() });
 
       expect(screen.getByText("Projeto Atual")).toBeInTheDocument();
-      expect(screen.getByText("Somente meus itens")).toBeInTheDocument();
     });
 
     it("deve renderizar a tabela de timesheet", () => {
@@ -345,14 +344,6 @@ describe("FolhaDeHoras", () => {
       expect(checkbox).toHaveAttribute("data-state", "checked");
     });
 
-    it("deve ter checkbox Somente meus itens desmarcado por padrão", () => {
-      render(<FolhaDeHoras />, { wrapper: createWrapper() });
-
-      const myItemsLabel = screen.getByText("Somente meus itens");
-      const checkbox = myItemsLabel.closest("label")?.querySelector('[role="checkbox"]');
-      
-      expect(checkbox).toHaveAttribute("data-state", "unchecked");
-    });
 
     it("deve alternar checkbox Projeto Atual ao clicar", async () => {
       render(<FolhaDeHoras />, { wrapper: createWrapper() });
@@ -374,25 +365,6 @@ describe("FolhaDeHoras", () => {
       }
     });
 
-    it("deve alternar checkbox Somente meus itens ao clicar", async () => {
-      render(<FolhaDeHoras />, { wrapper: createWrapper() });
-
-      const myItemsLabel = screen.getByText("Somente meus itens");
-      const checkbox = myItemsLabel.closest("label")?.querySelector('[role="checkbox"]');
-      
-      if (checkbox) {
-        // Inicialmente desmarcado
-        expect(checkbox).toHaveAttribute("data-state", "unchecked");
-        
-        // Clica para marcar
-        await userEvent.click(checkbox);
-        expect(checkbox).toHaveAttribute("data-state", "checked");
-        
-        // Clica para desmarcar
-        await userEvent.click(checkbox);
-        expect(checkbox).toHaveAttribute("data-state", "unchecked");
-      }
-    });
   });
 
   describe("Exibição de Horas", () => {
