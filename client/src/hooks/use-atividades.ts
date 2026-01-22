@@ -77,7 +77,7 @@ function normalizeAtividadesResponse(data: unknown): AtividadeListResponse {
 // ============================================
 
 /**
- * Hook para listar atividades
+ * Hook para listar atividades (endpoint simples - sem projetos populados)
  */
 export function useAtividades(params?: {
   ativo?: boolean;
@@ -90,17 +90,13 @@ export function useAtividades(params?: {
   return useQuery({
     queryKey: atividadesKeys.list(params),
     queryFn: async () => {
-      console.log('[useAtividades] Executando queryFn, token disponível:', !!token);
       const data = await api.get("/atividades", {
         ativo: params?.ativo,
         id_projeto: params?.id_projeto,
         skip: params?.skip,
         limit: params?.limit,
       });
-      console.log('[useAtividades] Dados recebidos (raw):', JSON.stringify(data, null, 2));
-      const normalized = normalizeAtividadesResponse(data);
-      console.log('[useAtividades] Dados normalizados:', JSON.stringify(normalized, null, 2));
-      return normalized;
+      return normalizeAtividadesResponse(data);
     },
     // Só executar quando tiver token e não estiver carregando
     enabled: !!token && !isLoading,
@@ -108,6 +104,35 @@ export function useAtividades(params?: {
   });
 }
 
+/**
+ * Hook para listar atividades com projetos populados (para tela de Gestão)
+ * Usa o endpoint /atividades/gestao que retorna projetos[] corretamente
+ */
+export function useAtividadesGestao(params?: {
+  ativo?: boolean;
+  id_projeto?: string;
+  skip?: number;
+  limit?: number;
+}) {
+  const { api, token, isLoading } = useAzureContext();
+
+  return useQuery({
+    queryKey: [...atividadesKeys.lists(), "gestao", params] as const,
+    queryFn: async () => {
+      console.log('[useAtividadesGestao] Buscando atividades com projetos populados');
+      const data = await api.get("/atividades/gestao", {
+        ativo: params?.ativo,
+        id_projeto: params?.id_projeto,
+        skip: params?.skip,
+        limit: params?.limit,
+      });
+      console.log('[useAtividadesGestao] Dados recebidos:', JSON.stringify(data, null, 2));
+      return normalizeAtividadesResponse(data);
+    },
+    enabled: !!token && !isLoading,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+}
 /**
  * Hook para obter uma atividade específica por ID
  */

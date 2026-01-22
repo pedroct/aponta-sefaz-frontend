@@ -126,6 +126,17 @@ client/src/
 | `use-timesheet.ts` | Queries do timesheet |
 | `use-atividades.ts` | Queries/mutations de atividades |
 
+## Estrutura do Timesheet (Colunas)
+
+| Coluna | Campo | Descrição |
+|--------|-------|-----------|
+| **ESCOPO DE TRABALHO** | `title` | Título do Work Item (hierárquico) |
+| **E** | `original_estimate` | Esforço estimado (Original Estimate) |
+| **H** | `total_semana_horas` | Histórico - Total da semana |
+| **S** | `remaining_work` | Saldo - Trabalho restante |
+| **SEG-DOM** | `dias[0-6]` | Células de apontamento por dia |
+| **SEMANAL Σ** | soma | Total semanal de horas |
+
 ## Ambientes
 
 | Ambiente | Frontend URL | Backend URL | Extensão |
@@ -143,5 +154,5 @@ client/src/
 
 ---
 
-**Última atualização**: 21 de janeiro de 2026
-**Versão**: 2.0
+**Última atualização**: 22 de janeiro de 2026
+**Versão**: 2.1

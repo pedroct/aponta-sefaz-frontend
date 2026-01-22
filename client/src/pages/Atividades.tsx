@@ -20,7 +20,7 @@ import type { ADOTableColumn } from "@/components/ado";
 
 // Hooks da API
 import {
-  useAtividades,
+  useAtividadesGestao,
   useCriarAtividade,
   useAtualizarAtividade,
   useExcluirAtividade,
@@ -138,7 +138,7 @@ export default function Atividades() {
     isLoading: isLoadingAtividades,
     error: errorAtividades,
     refetch: refetchAtividades
-  } = useAtividades();
+  } = useAtividadesGestao();
 
   const {
     data: projetosData,

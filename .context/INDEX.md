@@ -33,6 +33,13 @@
 | [testing-strategy.md](./docs/testing-strategy.md) | Estratégia de testes |
 | [tooling.md](./docs/tooling.md) | Ferramentas utilizadas |
 
+### 📝 Implementações Recentes
+
+| Documento | Descrição |
+|-----------|-----------|
+| [IMPLEMENTATION_COLUNA_SALDO.md](./IMPLEMENTATION_COLUNA_SALDO.md) | **NOVO!** Coluna S (Saldo) no Timesheet |
+| [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) | Remoção do checkbox "Somente meus itens" |
+
 ---
 
 ## 🗺️ Mapa de Navegação
@@ -86,7 +93,7 @@ COMECE AQUI
 
 | Ambiente | Status | Versão | Data |
 |----------|--------|--------|------|
-| **Staging** | ✅ Funcionando | v1.0.9 | 21/01/2026 |
+| **Staging** | ✅ Funcionando | v1.0.10 | 22/01/2026 |
 | **Production** | 🔄 Pronto para deploy | - | - |
 | **Extensão Azure DevOps** | ✅ Funcionando | v1.0.9 | 21/01/2026 |
 
@@ -94,9 +101,10 @@ COMECE AQUI
 
 | Módulo | Status | Descrição |
 |--------|--------|-----------|
-| **Timesheet (Folha de Horas)** | ✅ Funcionando | Grid semanal com work items hierárquicos |
-| **Gestão de Atividades** | ✅ Novo | CRUD completo de atividades |
-| **Gestão de Projetos** | ✅ Novo | Sincronização com Azure DevOps |
+| **Timesheet (Folha de Horas)** | ✅ Funcionando | Grid semanal com colunas E, H, S e 7 dias |
+| **Coluna Saldo (S)** | ✅ Novo | Exibe remaining_work do Work Item |
+| **Gestão de Atividades** | ✅ Funcionando | CRUD completo de atividades |
+| **Gestão de Projetos** | ✅ Funcionando | Sincronização com Azure DevOps |
 | **Modal Apontamento** | ✅ Funcionando | Criação/edição de apontamentos |
 
 ### CI/CD Status
@@ -159,6 +167,6 @@ COMECE AQUI
 
 ---
 
-**Versão**: 2.3
-**Última atualização**: 21 de janeiro de 2026
-**Status**: ✅ Staging v1.0.9 + Extensão Azure DevOps (Timesheet + Atividades)
+**Versão**: 2.4
+**Última atualização**: 22 de janeiro de 2026
+**Status**: ✅ Staging v1.0.10 + Coluna Saldo (S) + Extensão Azure DevOps
