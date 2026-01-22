@@ -208,15 +208,23 @@ export default function FolhaDeHoras() {
           </td>
 
           {/* Coluna S (Saldo) - Dinâmico: Verde (0), Vermelho (<0), Laranja (>0) */}
-          <td className={cn(
-            "p-3 text-center border-r border-[#EDEBE9] font-bold text-[12px]",
-            item.remaining_work == null && "text-[#605E5C]",
-            item.remaining_work === 0 && "text-[#107C10]",
-            item.remaining_work != null && item.remaining_work > 0 && "text-[#FF8C00]",
-            item.remaining_work != null && item.remaining_work < 0 && "text-[#D13438]"
-          )}>
-            {item.remaining_work != null ? item.remaining_work : ""}
-          </td>
+          {/* Calcula saldo real: E - completed_work (permite negativos) */}
+          {(() => {
+            const saldoReal = item.original_estimate != null && item.completed_work != null
+              ? Number((item.original_estimate - item.completed_work).toFixed(2))
+              : item.remaining_work;
+            return (
+              <td className={cn(
+                "p-3 text-center border-r border-[#EDEBE9] font-bold text-[12px]",
+                saldoReal == null && "text-[#605E5C]",
+                saldoReal === 0 && "text-[#107C10]",
+                saldoReal != null && saldoReal > 0 && "text-[#FF8C00]",
+                saldoReal != null && saldoReal < 0 && "text-[#D13438]"
+              )}>
+                {saldoReal != null ? saldoReal : ""}
+              </td>
+            );
+          })()}
 
           {/* Células dos 7 dias */}
           {item.dias.map((dia, index) => (
