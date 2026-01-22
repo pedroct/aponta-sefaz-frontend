@@ -38,19 +38,21 @@
             return null;
         }
 
-        // Provider do menu de contexto - seguindo padrão 7pace
+        // Provider do menu de contexto - seguindo padrão 7pace EXATO
         var apontaContextMenuItems = (function() {
             return {
-                getMenuItems: function(context) {
+                getMenuItems: async function(context) {
                     console.log("📋 Aponta: getMenuItems chamado com contexto:", context);
+                    
+                    await VSS.ready();
+                    console.log("📋 Aponta: VSS.ready() concluído");
                     
                     var menuItems = [{
                         text: "Apontar Tempo",
                         title: "Clique para registrar tempo neste work item",
-                        description: "Registrar horas trabalhadas neste work item",
+                        description: "Clique para registrar tempo neste work item",
                         icon: "/images/icon-16.png",
-                        disabled: false,
-                        action: function(actionContext) {
+                        action: async function(actionContext) {
                             console.log("🔔 Aponta: Ação clicada!", actionContext);
                             
                             // Usar o contexto principal se actionContext não tiver o ID
@@ -63,38 +65,35 @@
 
                             console.log("📍 Aponta: Abrindo dialog para Work Item ID:", workItemId);
 
-                            VSS.ready().then(function() {
-                                VSS.getService(VSS.ServiceIds.Dialog).then(function(dialogService) {
-                                    var extensionCtx = VSS.getExtensionContext();
-                                    
-                                    // Montar contribution ID completo
-                                    var contributionId = extensionCtx.publisherId + 
-                                        "." + extensionCtx.extensionId + 
-                                        ".addApontaTimeDialog";
-                                    
-                                    console.log("📍 Aponta: Contribution ID:", contributionId);
+                            await VSS.ready();
+                            var dialogService = await VSS.getService(VSS.ServiceIds.Dialog);
+                            var extensionCtx = VSS.getExtensionContext();
+                            
+                            // Montar contribution ID completo
+                            var contributionId = extensionCtx.publisherId + 
+                                "." + extensionCtx.extensionId + 
+                                ".addApontaTimeDialog";
+                            
+                            console.log("📍 Aponta: Contribution ID:", contributionId);
 
-                                    // Opções do dialog
-                                    var dialogOptions = {
-                                        title: "Apontar Tempo",
-                                        width: 500,
-                                        height: 600,
-                                        resizable: false,
-                                        buttons: null,
-                                        urlReplacementObject: { id: workItemId }
-                                    };
+                            // Opções do dialog
+                            var dialogOptions = {
+                                title: "Apontar Tempo",
+                                width: 500,
+                                height: 600,
+                                resizable: false,
+                                buttons: null,
+                                urlReplacementObject: { id: workItemId }
+                            };
 
-                                    // Abrir o dialog
-                                    dialogService.openDialog(contributionId, dialogOptions).then(function(dialog) {
-                                        console.log("✅ Aponta: Dialog aberto com sucesso");
-                                    }).catch(function(error) {
-                                        console.error("❌ Aponta: Erro ao abrir dialog:", error);
-                                        alert("Erro ao abrir formulário: " + (error.message || error));
-                                    });
-                                }).catch(function(error) {
-                                    console.error("❌ Aponta: Erro ao obter DialogService:", error);
-                                });
-                            });
+                            try {
+                                // Abrir o dialog
+                                var dialog = await dialogService.openDialog(contributionId, dialogOptions);
+                                console.log("✅ Aponta: Dialog aberto com sucesso");
+                            } catch (error) {
+                                console.error("❌ Aponta: Erro ao abrir dialog:", error);
+                                alert("Erro ao abrir formulário: " + (error.message || error));
+                            }
                         }
                     }];
                     
@@ -109,7 +108,5 @@
         
         console.log("✅ Aponta: Action Provider registrado como 'ApontaContextMenuItems'");
     </script>
-</body>
-</html>
 </body>
 </html>
