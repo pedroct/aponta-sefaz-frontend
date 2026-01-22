@@ -12,6 +12,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={FolhaDeHoras} />
+      <Route path="/index.html" component={FolhaDeHoras} />
       <Route path="/timesheet" component={FolhaDeHoras} />
       <Route path="/atividades" component={Atividades} />
       <Route component={NotFound} />
