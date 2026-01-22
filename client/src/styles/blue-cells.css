@@ -1,0 +1,32 @@
+/**
+ * Estilos para células azuis (Blue Cells)
+ * Destaque visual para células onde o usuário deveria ter apontado horas
+ */
+
+.blue-cell {
+  background-color: #DEECF9 !important;
+  border: 2px solid #0078D4;
+  transition: all 0.2s ease;
+}
+
+.blue-cell:hover {
+  background-color: #C7E0F4 !important;
+  border-color: #005A9E;
+}
+
+/* Quando a célula azul tem apontamentos (amarelo + azul) */
+.blue-cell.has-hours {
+  background: linear-gradient(135deg, #FFF4CE 0%, #DEECF9 100%) !important;
+  border: 2px solid #0078D4;
+}
+
+.blue-cell.has-hours:hover {
+  background: linear-gradient(135deg, #FFE8A3 0%, #C7E0F4 100%) !important;
+}
+
+/* Garantir legibilidade do texto em células azuis */
+.blue-cell,
+.blue-cell.has-hours {
+  color: #201F1E;
+  font-weight: 600;
+}

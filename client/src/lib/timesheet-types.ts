@@ -158,3 +158,36 @@ export function formatDateForApi(date: Date): string {
 export function canEditByStateCategory(stateCategory: StateCategory): boolean {
   return !["Completed", "Removed"].includes(stateCategory);
 }
+
+// ============================================================================
+// BLUE CELLS - Work Item Revisions
+// ============================================================================
+
+export interface WorkItemRevisionFields {
+  'System.ChangedDate': string;
+  'System.State': string | null;
+  'System.AssignedTo'?: {
+    id: string;
+    displayName?: string;
+  } | null;
+}
+
+export interface WorkItemRevision {
+  rev: number;
+  fields: WorkItemRevisionFields;
+}
+
+export interface WorkItemRevisionsResponse {
+  work_item_id: number;
+  revisions: WorkItemRevision[];
+}
+
+// ============================================================================
+// BLUE CELLS - Process State Mapping
+// ============================================================================
+
+export type ProcessStateMap = Record<string, string>;
+
+export interface ProcessStateMappingResponse {
+  state_map: ProcessStateMap;
+}
