@@ -79,10 +79,9 @@
 
           VSS.ready(async function () {
             try {
-              // Extrair parâmetros da URL
+              // Extrair workItemId da URL (passado via urlReplacementObject)
               const params = new URLSearchParams(window.location.search);
               const workItemId = params.get("workItemId");
-              const taskTitle = params.get("taskTitle") || "";
 
               const webContext = VSS.getWebContext();
               const organizationName = webContext.account.name;
@@ -90,7 +89,6 @@
 
               console.log("✅ Contexto do Azure DevOps carregado:", {
                 workItemId,
-                taskTitle,
                 organizationName,
                 projectId,
               });
@@ -104,12 +102,11 @@
               const token = await VSS.getAccessToken();
               console.log("✅ Token obtido com sucesso");
 
-              // Injetar token no localStorage para a aplicação React usar
+              // Injetar dados no localStorage para a aplicação React usar
               localStorage.setItem("vss_token", token.token);
               localStorage.setItem("vss_organization", organizationName);
               localStorage.setItem("vss_project", projectId);
               localStorage.setItem("vss_workitem_id", workItemId);
-              localStorage.setItem("vss_workitem_title", taskTitle);
 
               // Executar script de extensão
               const script = document.createElement("script");

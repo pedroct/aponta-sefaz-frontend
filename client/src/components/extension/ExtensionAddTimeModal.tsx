@@ -9,26 +9,22 @@ import { ModalAdicionarTempo } from "@/components/custom/ModalAdicionarTempo";
 export const ExtensionAddTimeModal = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [workItemId, setWorkItemId] = useState<string>("");
-  const [taskTitle, setTaskTitle] = useState<string>("");
   const [organizationName, setOrganizationName] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
 
   useEffect(() => {
-    // Ler dados do localStorage (injetados pelo VSS SDK em index.html)
+    // Ler dados do localStorage (injetados pelo extension.html via VSS SDK)
     const id = localStorage.getItem("vss_workitem_id") || "";
-    const title = localStorage.getItem("vss_workitem_title") || "";
     const org = localStorage.getItem("vss_organization") || "";
     const proj = localStorage.getItem("vss_project") || "";
 
-    console.log("📋 Dados da extensão carregados:", {
+    console.log("📋 ExtensionAddTimeModal - Dados carregados:", {
       id,
-      title,
       org,
       proj,
     });
 
     setWorkItemId(id);
-    setTaskTitle(title);
     setOrganizationName(org);
     setProjectId(proj);
   }, []);
@@ -46,7 +42,7 @@ export const ExtensionAddTimeModal = () => {
       isOpen={isOpen}
       onClose={handleClose}
       taskId={workItemId}
-      taskTitle={taskTitle}
+      taskTitle=""
       organizationName={organizationName}
       projectId={projectId}
       mode="create"
