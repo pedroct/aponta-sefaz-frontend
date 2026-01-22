@@ -15,6 +15,7 @@ export interface AzureContext {
   projectId: string;
   userId?: string;
   userName?: string;
+  userUniqueName?: string; // uniqueName do Azure (geralmente é o email)
   userEmail?: string;
   workItemId?: string;
   workItemTitle?: string;
@@ -118,6 +119,7 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
       const projectId = params.get('projectId') || '';
       const userId = params.get('userId') || '';
       const userName = params.get('userName') || '';
+      const userUniqueName = params.get('userUniqueName') || '';
       const userEmail = params.get('userEmail') || '';
       const workItemId = params.get('workItemId') || undefined;
       const workItemTitle = params.get('workItemTitle') || undefined;
@@ -135,6 +137,7 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
         projectId,
         userId,
         userName,
+        userUniqueName,
         userEmail,
         workItemId,
         workItemTitle,
@@ -148,6 +151,8 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
         organization,
         project,
         userId,
+        userName,
+        userUniqueName,
         workItemId,
       });
     } catch (err) {
