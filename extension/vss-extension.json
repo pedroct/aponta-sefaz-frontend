@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "name": "Aponta Timetracker",
   "description": "Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -33,65 +33,34 @@
   "baseUri": "https://aponta.treit.com.br",
   "contributions": [
     {
-      "id": "aponta-hub-group",
-      "type": "ms.vss-web.hub-group",
-      "targets": [
-        "ms.vss-web.project-hub-groups-collection"
-      ],
+      "id": "addTimePopupDialog",
+      "type": "ms.vss-web.control",
+      "description": "Modal para apontar tempo em task/bug usando componente React",
+      "targets": [],
       "properties": {
-        "name": "Aponta",
-        "order": 100,
-        "icon": "images/icon-16.png"
+        "uri": "dist/public/extension.html?workItemId={{id}}"
       }
     },
     {
-      "id": "timesheet-hub",
-      "type": "ms.vss-web.hub",
+      "id": "addTimeAction",
+      "type": "ms.vss-web.action-provider",
+      "description": "Ação para abrir modal de apontamento",
       "targets": [
-        ".aponta-hub-group"
+        "ms.vss-work-web.work-item-context-menu"
       ],
       "properties": {
-        "name": "Timesheet",
-        "order": 100,
-        "uri": "dist/timesheet.html",
-        "icon": {
-          "light": "images/icon-16.png",
-          "dark": "images/icon-16-dark.png"
-        }
-      }
-    },
-    {
-      "id": "atividades-hub",
-      "type": "ms.vss-web.hub",
-      "targets": [
-        ".aponta-hub-group"
-      ],
-      "properties": {
-        "name": "Atividades",
-        "order": 200,
-        "uri": "dist/atividades.html",
-        "icon": {
-          "light": "images/icon-16.png",
-          "dark": "images/icon-16-dark.png"
-        }
-      }
-    },
-    {
-      "id": "work-item-form-group",
-      "type": "ms.vss-work-web.work-item-form-group",
-      "targets": [
-        "ms.vss-work-web.work-item-form"
-      ],
-      "properties": {
-        "name": "Apontamentos",
-        "uri": "dist/work-item-panel.html",
-        "height": 300
+        "title": "⏱️ Apontar Tempo",
+        "uri": "pages/actions/addTimeAction.html"
       }
     }
   ],
   "files": [
     {
       "path": "dist",
+      "addressable": true
+    },
+    {
+      "path": "pages",
       "addressable": true
     },
     {

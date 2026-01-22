@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Add Time Action</title>
+    <script src="https://vsscode.dev/scripts/VSS.SDK.js"></script>
+</head>
+<body>
+    <script>
+        VSS.init({ 
+            usePlatformScripts: true,
+            explicitNotifyLoaded: true
+        });
+
+        VSS.ready(function() {
+            try {
+                // Obter contexto
+                const webContext = VSS.getWebContext();
+                const extensionContext = VSS.getExtensionContext();
+
+                console.log('✅ Action Provider pronto');
+
+                // Registrar ação
+                VSS.register(VSS.getContributionId(), {
+                    getMenuItems: function(context) {
+                        // context.workItem contém os dados do item
+                        return [{
+                            title: "⏱️ Apontar Tempo",
+                            action: function(context) {
+                                openAddTimeDialog(context.id);
+                            },
+                            disabled: false
+                        }];
+                    }
+                });
+
+                VSS.notifyLoadSucceeded();
+
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                VSS.notifyLoadFailed(error);
+            }
+        });
+
+        function openAddTimeDialog(workItemId) {
+            console.log('🔔 Abrindo dialog para work item:', workItemId);
+
+            try {
+                const baseUri = VSS.getExtensionContext().baseUri;
+                const dialogUrl = `${baseUri}pages/addTimePopupDialog/index.html?workItemId=${workItemId}`;
+
+                console.log('📍 Dialog URL:', dialogUrl);
+
+                const dialogOptions = {
+                    title: "⏱️ Apontar Tempo",
+                    width: 600,
+                    height: 700,
+                    buttons: []
+                };
+
+                // Abrir dialog via VSS Service
+                VSS.getService(VSS.ServiceIds.Dialog).then(function(dialogService) {
+                    dialogService.openDialog(dialogUrl, dialogOptions).then(function() {
+                        console.log('✅ Dialog aberto com sucesso');
+                    });
+                });
+
+            } catch (error) {
+                console.error('❌ Erro ao abrir dialog:', error);
+                alert('Erro ao abrir modal: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
