@@ -312,8 +312,11 @@
                     return true;
                 },
                 okCallback: function(result) {
-                    console.log('[WorkItemGroup] Dialog OK callback');
-                    // O salvamento é feito pelo iframe via postMessage
+                    console.log('[WorkItemGroup] Dialog OK callback, resultado:', result);
+                    // Atualizar campos do Work Item se houver duração
+                    if (result && result.duration && result.duration > 0) {
+                        atualizarCamposWorkItem(result.duration);
+                    }
                 }
             };
             
@@ -322,6 +325,17 @@
 
             dialogService.openDialog(contributionId, dialogOptions).then(function(dialog) {
                 console.log('[WorkItemGroup] Dialog aberto com sucesso');
+                
+                // Escutar quando o dialog fechar para processar o resultado
+                dialog.getDialogResult().then(function(result) {
+                    console.log('[WorkItemGroup] Dialog fechou com resultado:', result);
+                    // Atualizar campos do Work Item se houver duração
+                    if (result && result.duration && result.duration > 0) {
+                        atualizarCamposWorkItem(result.duration);
+                    }
+                }, function(err) {
+                    console.log('[WorkItemGroup] Dialog cancelado ou fechado sem salvar');
+                });
                 
                 // Obter instância do dialog para comunicação
                 dialog.getContributionInstance(contributionId).then(function(dialogInstance) {
@@ -340,6 +354,64 @@
                 console.error('[WorkItemGroup] Erro ao abrir dialog:', err);
                 // Fallback para popup se o dialog falhar
                 abrirPopupFallback();
+            });
+        }
+
+        /**
+         * Atualiza os campos CompletedWork e RemainingWork do Work Item
+         * Similar ao que o 7pace faz quando registra horas
+         */
+        function atualizarCamposWorkItem(horasAdicionadas) {
+            console.log('[WorkItemGroup] Atualizando campos do Work Item, horas adicionadas:', horasAdicionadas);
+
+            VSS.require(["TFS/WorkItemTracking/Services"], function(WorkItemServices) {
+                WorkItemServices.WorkItemFormService.getService().then(function(service) {
+                    // Obter valores atuais dos campos
+                    service.getFieldValues([
+                        "Microsoft.VSTS.Scheduling.CompletedWork",
+                        "Microsoft.VSTS.Scheduling.RemainingWork",
+                        "Microsoft.VSTS.Scheduling.OriginalEstimate"
+                    ]).then(function(values) {
+                        var completedWork = parseFloat(values["Microsoft.VSTS.Scheduling.CompletedWork"]) || 0;
+                        var remainingWork = parseFloat(values["Microsoft.VSTS.Scheduling.RemainingWork"]) || 0;
+                        var originalEstimate = parseFloat(values["Microsoft.VSTS.Scheduling.OriginalEstimate"]) || 0;
+
+                        console.log('[WorkItemGroup] Valores atuais:', {
+                            completedWork: completedWork,
+                            remainingWork: remainingWork,
+                            originalEstimate: originalEstimate
+                        });
+
+                        // Calcular novos valores
+                        var novoCompletedWork = completedWork + horasAdicionadas;
+                        var novoRemainingWork = Math.max(0, remainingWork - horasAdicionadas);
+
+                        // Se não tinha remaining definido mas tinha original estimate, usar o estimate como base
+                        if (remainingWork === 0 && originalEstimate > 0 && completedWork === 0) {
+                            novoRemainingWork = Math.max(0, originalEstimate - horasAdicionadas);
+                        }
+
+                        console.log('[WorkItemGroup] Novos valores:', {
+                            completedWork: novoCompletedWork,
+                            remainingWork: novoRemainingWork
+                        });
+
+                        // Atualizar os campos no formulário
+                        var fieldsToUpdate = {};
+                        fieldsToUpdate["Microsoft.VSTS.Scheduling.CompletedWork"] = novoCompletedWork;
+                        fieldsToUpdate["Microsoft.VSTS.Scheduling.RemainingWork"] = novoRemainingWork;
+
+                        service.setFieldValues(fieldsToUpdate).then(function() {
+                            console.log('[WorkItemGroup] Campos atualizados com sucesso!');
+                        }, function(err) {
+                            console.error('[WorkItemGroup] Erro ao atualizar campos:', err);
+                        });
+                    }, function(err) {
+                        console.error('[WorkItemGroup] Erro ao obter valores dos campos:', err);
+                    });
+                }, function(err) {
+                    console.error('[WorkItemGroup] Erro ao obter WorkItemFormService:', err);
+                });
             });
         }
 

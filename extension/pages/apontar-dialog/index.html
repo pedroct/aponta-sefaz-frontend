@@ -61,6 +61,61 @@
         .error-icon {
             font-size: 48px;
         }
+        /* Toast de sucesso/erro */
+        .toast-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            pointer-events: none;
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out;
+            pointer-events: auto;
+        }
+        .toast-success {
+            background: #107c10;
+            color: white;
+        }
+        .toast-error {
+            background: #d13438;
+            color: white;
+        }
+        .toast-icon {
+            font-size: 18px;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -231,13 +286,24 @@
                         break;
 
                     case 'FORM_SAVED':
-                        console.log('[ApontarDialog] Formulário salvo com sucesso');
-                        // Fechar o dialog
-                        closeDialog(true, data.result);
+                        console.log('[ApontarDialog] Formulário salvo com sucesso', data.result);
+                        // Mostrar toast de sucesso
+                        var duration = data.result && data.result.duration ? data.result.duration : 0;
+                        showToast('success', 'Apontamento registrado! ' + duration.toFixed(1) + 'h salvas.');
+                        // Aguardar um pouco para o usuário ver o feedback, depois fechar
+                        setTimeout(function() {
+                            // Passar os dados de duração para o parent poder atualizar os campos do WI
+                            closeDialog(true, {
+                                success: true,
+                                duration: duration,
+                                workItemId: dialogContext.workItemId
+                            });
+                        }, 1500);
                         break;
 
                     case 'FORM_ERROR':
                         console.error('[ApontarDialog] Erro no formulário:', data.error);
+                        showToast('error', data.error || 'Erro ao salvar apontamento');
                         break;
 
                     case 'CLOSE_FORM':
@@ -262,6 +328,36 @@
                         config.dialog.close();
                     }
                 }
+            }
+
+            function showToast(type, message) {
+                // Remover toast existente se houver
+                var existingToast = document.querySelector('.toast-container');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                var container = document.createElement('div');
+                container.className = 'toast-container';
+                
+                var toast = document.createElement('div');
+                toast.className = 'toast toast-' + type;
+                
+                var icon = type === 'success' ? '✓' : '✕';
+                toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span>' + message + '</span>';
+                
+                container.appendChild(toast);
+                document.body.appendChild(container);
+
+                // Auto-remover após 3 segundos (se não for removido pelo closeDialog)
+                setTimeout(function() {
+                    if (container.parentNode) {
+                        toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                        setTimeout(function() {
+                            container.remove();
+                        }, 300);
+                    }
+                }, 3000);
             }
 
             function showError(message) {
