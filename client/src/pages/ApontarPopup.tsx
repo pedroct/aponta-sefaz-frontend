@@ -205,7 +205,7 @@ export default function ApontarPopup() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Carregando...</p>
-          <p className="mt-1 text-xs text-gray-400">ApontarPopup v1.1.74</p>
+          <p className="mt-1 text-xs text-gray-400">ApontarPopup v1.1.84</p>
         </div>
       </div>
     );
