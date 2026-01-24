@@ -4,7 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apontar Tempo</title>
-    <script src="https://vsscode.dev/scripts/VSS.SDK.js"></script>
+    <script src="../../lib/VSS.SDK.min.js"></script>
+    <script>
+        // Fallback: se VSS SDK local falhar, carregar do CDN
+        if (typeof VSS === 'undefined') {
+            console.warn('[AddTimePopup] VSS SDK local nao carregou, tentando CDN...');
+            (function loadFallbackSDK() {
+                var sources = [
+                    'https://cdn.jsdelivr.net/npm/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js',
+                    'https://unpkg.com/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js'
+                ];
+                var index = 0;
+                function tryNext() {
+                    if (index >= sources.length) {
+                        console.error('[AddTimePopup] Todas as fontes de VSS SDK falharam');
+                        return;
+                    }
+                    var script = document.createElement('script');
+                    script.src = sources[index];
+                    script.onload = function() {
+                        console.log('[AddTimePopup] VSS SDK carregado do CDN');
+                    };
+                    script.onerror = function() {
+                        index++;
+                        tryNext();
+                    };
+                    document.head.appendChild(script);
+                }
+                tryNext();
+            })();
+        }
+    </script>
     <style>
         * {
             margin: 0;

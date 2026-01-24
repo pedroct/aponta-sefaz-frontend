@@ -163,11 +163,45 @@
         initializeExtension();
       }
 
+      // Lista de CDNs para fallback do VSS SDK
+      var VSS_SDK_SOURCES = [
+        'https://cdn.jsdelivr.net/npm/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js',
+        'https://unpkg.com/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js'
+      ];
+
+      // Tenta carregar o VSS SDK de CDN alternativo
+      function loadVSSFromCDN(sources, index) {
+        if (index >= sources.length) {
+          console.error('❌ Todas as fontes de VSS SDK falharam');
+          document.getElementById("root").innerHTML = `
+            <div class="loading" style="color: #d13438;">
+              <span>Erro ao carregar VSS SDK - verifique sua conexão</span>
+            </div>
+          `;
+          return;
+        }
+
+        var src = sources[index];
+        console.log('⏳ Tentando carregar VSS SDK de:', src);
+
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = function() {
+          console.log('✅ VSS SDK carregado de CDN alternativo:', src);
+          initializeExtension();
+        };
+        script.onerror = function() {
+          console.warn('⚠️ Falha ao carregar de:', src);
+          loadVSSFromCDN(sources, index + 1);
+        };
+        document.head.appendChild(script);
+      }
+
       // Se VSS ainda não está carregado quando o script executar,
-      // usar fallback para quando ele estiver disponível
+      // aguardar brevemente e depois tentar CDN alternativo
       if (typeof VSS === 'undefined') {
         console.log('⏳ VSS SDK ainda não carregado, aguardando...');
-        const checkVSS = setInterval(function() {
+        var checkVSS = setInterval(function() {
           if (typeof VSS !== 'undefined') {
             clearInterval(checkVSS);
             console.log('✅ VSS SDK agora disponível');
@@ -175,18 +209,14 @@
           }
         }, 100);
 
-        // Timeout de 5 segundos
+        // Timeout de 2 segundos para tentar CDN alternativo
         setTimeout(function() {
           clearInterval(checkVSS);
           if (typeof VSS === 'undefined') {
-            console.error('❌ VSS SDK não carregou em tempo');
-            document.getElementById("root").innerHTML = `
-              <div class="loading" style="color: #d13438;">
-                <span>VSS SDK timeout</span>
-              </div>
-            `;
+            console.warn('⚠️ VSS SDK não carregou do Azure DevOps, tentando CDN alternativo...');
+            loadVSSFromCDN(VSS_SDK_SOURCES, 0);
           }
-        }, 5000);
+        }, 2000);
       }
     </script>
   </body>

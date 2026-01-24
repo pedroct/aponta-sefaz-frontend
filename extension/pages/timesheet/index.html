@@ -45,25 +45,46 @@
 
     <script>
         console.log('[Timesheet Wrapper] Iniciando...');
-        
+
+        // Lista de CDNs para fallback do VSS SDK
+        var VSS_SDK_SOURCES = [
+            '../../lib/VSS.SDK.min.js',
+            'https://cdn.jsdelivr.net/npm/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js',
+            'https://unpkg.com/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js'
+        ];
+
+        // Tenta carregar o VSS SDK de múltiplas fontes
+        function loadVSSSDK(sources, index) {
+            if (index >= sources.length) {
+                console.error('[Timesheet Wrapper] Todas as fontes de VSS SDK falharam');
+                showError('Erro ao carregar Azure DevOps SDK - verifique sua conexão');
+                return;
+            }
+
+            var src = sources[index];
+            console.log('[Timesheet Wrapper] Tentando carregar VSS SDK de:', src);
+
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = function() {
+                console.log('[Timesheet Wrapper] VSS SDK carregado de:', src);
+                setupVSS();
+            };
+            script.onerror = function() {
+                console.warn('[Timesheet Wrapper] Falha ao carregar de:', src);
+                loadVSSSDK(sources, index + 1);
+            };
+            document.head.appendChild(script);
+        }
+
         // Verificar se VSS está disponível ou carregá-lo
         function initializeExtension() {
             if (typeof VSS !== 'undefined') {
                 console.log('[Timesheet Wrapper] VSS já disponível');
                 setupVSS();
             } else {
-                console.log('[Timesheet Wrapper] Carregando VSS SDK...');
-                const script = document.createElement('script');
-                script.src = 'https://www.vsassets.io/VSS.SDK.min.js';
-                script.onload = () => {
-                    console.log('[Timesheet Wrapper] VSS SDK carregado');
-                    setupVSS();
-                };
-                script.onerror = () => {
-                    console.error('[Timesheet Wrapper] Erro ao carregar VSS SDK');
-                    showError('Erro ao carregar Azure DevOps SDK');
-                };
-                document.head.appendChild(script);
+                console.log('[Timesheet Wrapper] Carregando VSS SDK com fallback...');
+                loadVSSSDK(VSS_SDK_SOURCES, 0);
             }
         }
 
