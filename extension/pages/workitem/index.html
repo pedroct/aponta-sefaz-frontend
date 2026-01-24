@@ -241,34 +241,33 @@
                 return;
             }
 
-            // Construir URL com parâmetros
+            // Construir URL com parâmetros para popup
             var params = new URLSearchParams({
-                embedded: 'true',
+                embedded: 'false',  // Popup = não embedded
                 source: 'azdo-workitem-form',
                 workItemId: workItemContext.id,
                 workItemTitle: workItemContext.title || '',
                 organization: workItemContext.organization,
                 project: workItemContext.project,
                 projectId: workItemContext.projectId,
-                token: workItemContext.token,
-                mode: 'modal'
+                token: workItemContext.token
             });
 
             var baseUrl = 'https://staging-aponta.treit.com.br';
             var targetUrl = baseUrl + '/#/apontar?' + params.toString();
 
-            console.log('[WorkItemGroup] Abrindo modal:', targetUrl);
+            console.log('[WorkItemGroup] Abrindo popup:', targetUrl);
 
-            // Abrir em nova janela/popup
-            var width = 600;
-            var height = 700;
+            // Abrir popup centralizada
+            var width = 450;
+            var height = 620;
             var left = (screen.width - width) / 2;
             var top = (screen.height - height) / 2;
-            
+
             window.open(
                 targetUrl,
                 'ApontarTempo',
-                'width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes'
+                'width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no'
             );
         }
 

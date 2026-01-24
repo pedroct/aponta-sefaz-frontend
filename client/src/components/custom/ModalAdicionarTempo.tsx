@@ -43,12 +43,14 @@ interface ModalAdicionarTempoProps {
   apontamentoParaEditar?: ApontamentoDia | null;
   dataApontamento?: string; // YYYY-MM-DD
   podeEditar?: boolean;
+  // Modo embedded (iframe inline sem backdrop)
+  embedded?: boolean;
 }
 
-export const ModalAdicionarTempo = ({ 
-  isOpen, 
-  onClose, 
-  taskTitle = "", 
+export const ModalAdicionarTempo = ({
+  isOpen,
+  onClose,
+  taskTitle = "",
   taskId = "",
   organizationName = "",
   projectId = "",
@@ -56,6 +58,7 @@ export const ModalAdicionarTempo = ({
   apontamentoParaEditar = null,
   dataApontamento,
   podeEditar = true,
+  embedded = false,
 }: ModalAdicionarTempoProps) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -320,8 +323,18 @@ export const ModalAdicionarTempo = ({
   const showBlockedWarning = isEditMode && !podeEditar;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-      <div className="bg-white w-[400px] shadow-2xl rounded-sm border border-[#C8C6C4] flex flex-col animate-in fade-in zoom-in duration-200">
+    <div className={cn(
+      "z-[100] flex items-center justify-center",
+      embedded
+        ? "w-full h-full"
+        : "fixed inset-0 bg-black/40 backdrop-blur-[1px]"
+    )}>
+      <div className={cn(
+        "bg-white shadow-2xl rounded-sm border border-[#C8C6C4] flex flex-col",
+        embedded
+          ? "w-full max-w-[420px] mx-auto"
+          : "w-[400px] animate-in fade-in zoom-in duration-200"
+      )}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-[#EAEAEA]">
           <h2 className="text-sm font-semibold text-[#201F1E]">

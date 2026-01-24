@@ -15,6 +15,7 @@ interface PopupParams {
   project: string;
   projectId: string;
   token: string;
+  embedded: boolean;
 }
 
 export default function ApontarPopup() {
@@ -42,6 +43,7 @@ export default function ApontarPopup() {
       const project = searchParams.get("project") || "";
       const projectId = searchParams.get("projectId") || "";
       const token = searchParams.get("token") || "";
+      const embedded = searchParams.get("embedded") === "true";
 
       console.log("[ApontarPopup] Parâmetros extraídos:", {
         workItemId,
@@ -50,7 +52,8 @@ export default function ApontarPopup() {
         project,
         projectId,
         hasToken: !!token,
-        tokenLength: token.length
+        tokenLength: token.length,
+        embedded
       });
 
       // Validar parâmetros essenciais
@@ -82,7 +85,8 @@ export default function ApontarPopup() {
         organization,
         project,
         projectId,
-        token
+        token,
+        embedded
       });
     } catch (err) {
       console.error("[ApontarPopup] Erro ao processar parâmetros:", err);
@@ -92,6 +96,14 @@ export default function ApontarPopup() {
 
   const handleClose = () => {
     console.log("[ApontarPopup] Fechando modal/popup");
+
+    // Se estiver em modo embedded (iframe), comunicar com parent
+    if (params?.embedded && window.parent !== window) {
+      console.log("[ApontarPopup] Enviando CLOSE_FORM para parent");
+      window.parent.postMessage({ type: "CLOSE_FORM" }, "*");
+      return;
+    }
+
     // Tentar fechar a janela popup
     try {
       window.close();
@@ -128,14 +140,14 @@ export default function ApontarPopup() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Carregando...</p>
-          <p className="mt-1 text-xs text-gray-400">ApontarPopup v1.1.70</p>
+          <p className="mt-1 text-xs text-gray-400">ApontarPopup v1.1.73</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={params.embedded ? "h-full bg-white" : "min-h-screen bg-white"}>
       <ModalAdicionarTempo
         isOpen={true}
         onClose={handleClose}
@@ -144,6 +156,7 @@ export default function ApontarPopup() {
         organizationName={params.organization}
         projectId={params.projectId}
         mode="create"
+        embedded={params.embedded}
       />
     </div>
   );
