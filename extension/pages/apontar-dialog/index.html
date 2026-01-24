@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apontar Tempo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .dialog-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .dialog-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #0078d4;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e1e1e1;
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #d13438;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .error-icon {
+            font-size: 48px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="dialog-container">
+        <div class="loading">
+            <div class="spinner"></div>
+            <span>Carregando formulário...</span>
+        </div>
+    </div>
+
+    <script src="../../lib/VSS.SDK.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            console.log('[ApontarDialog] Iniciando...');
+
+            var dialogContext = {
+                workItemId: null,
+                workItemTitle: '',
+                organization: '',
+                project: '',
+                projectId: '',
+                token: '',
+                formData: null,
+                isValid: false
+            };
+
+            var iframeElement = null;
+            var formCallbacks = [];
+
+            // Inicializar VSS SDK
+            VSS.init({
+                explicitNotifyLoaded: true,
+                usePlatformScripts: true,
+                usePlatformStyles: true
+            });
+
+            VSS.ready(function() {
+                console.log('[ApontarDialog] VSS ready');
+
+                // Obter configuração passada pelo opener
+                var contribution = VSS.getContribution();
+                var config = VSS.getConfiguration();
+
+                console.log('[ApontarDialog] Contribution:', contribution);
+                console.log('[ApontarDialog] Configuration:', config);
+
+                // Extrair parâmetros da configuração ou URL
+                if (config && config.dialog) {
+                    // Configuração passada via dialogOptions
+                    dialogContext.workItemId = config.workItemId || '';
+                    dialogContext.workItemTitle = config.workItemTitle || '';
+                    dialogContext.organization = config.organization || '';
+                    dialogContext.project = config.project || '';
+                    dialogContext.projectId = config.projectId || '';
+                    dialogContext.token = config.token || '';
+                } else {
+                    // Fallback: extrair da URL
+                    var urlParams = new URLSearchParams(window.location.search);
+                    dialogContext.workItemId = urlParams.get('workItemId') || '';
+                    dialogContext.workItemTitle = decodeURIComponent(urlParams.get('workItemTitle') || '');
+                    dialogContext.organization = urlParams.get('organization') || '';
+                    dialogContext.project = urlParams.get('project') || '';
+                    dialogContext.projectId = urlParams.get('projectId') || '';
+                    dialogContext.token = urlParams.get('token') || '';
+                }
+
+                console.log('[ApontarDialog] Context:', {
+                    workItemId: dialogContext.workItemId,
+                    hasToken: !!dialogContext.token
+                });
+
+                // Renderizar iframe com o formulário React
+                renderIframe();
+
+                // Registrar objeto para comunicação com o opener
+                VSS.register(VSS.getContribution().id, {
+                    // Chamado pelo opener para verificar se form é válido
+                    isFormValid: function() {
+                        return dialogContext.isValid;
+                    },
+                    // Chamado pelo opener para obter dados do formulário
+                    getFormData: function() {
+                        return dialogContext.formData;
+                    },
+                    // Permite registrar callbacks para mudanças no form
+                    attachFormChanged: function(callback) {
+                        formCallbacks.push(callback);
+                    },
+                    // Chamado quando o dialog deve salvar
+                    save: function() {
+                        if (iframeElement && iframeElement.contentWindow) {
+                            iframeElement.contentWindow.postMessage({ type: 'SAVE_FORM' }, '*');
+                        }
+                        return dialogContext.formData;
+                    }
+                });
+
+                VSS.notifyLoadSucceeded();
+            });
+
+            function renderIframe() {
+                var root = document.getElementById('root');
+
+                // Construir URL do formulário React
+                var params = new URLSearchParams({
+                    embedded: 'true',
+                    source: 'azdo-host-dialog',
+                    workItemId: dialogContext.workItemId,
+                    workItemTitle: dialogContext.workItemTitle,
+                    organization: dialogContext.organization,
+                    project: dialogContext.project,
+                    projectId: dialogContext.projectId,
+                    token: dialogContext.token,
+                    mode: 'dialog'
+                });
+
+                var baseUrl = 'https://staging-aponta.treit.com.br';
+                var iframeSrc = baseUrl + '/#/apontar?' + params.toString();
+
+                console.log('[ApontarDialog] Carregando iframe:', iframeSrc);
+
+                root.innerHTML = '<iframe id="apontar-iframe" class="dialog-iframe" src="' + iframeSrc + '"></iframe>';
+                iframeElement = document.getElementById('apontar-iframe');
+
+                // Listener para mensagens do iframe
+                window.addEventListener('message', handleIframeMessage);
+            }
+
+            function handleIframeMessage(event) {
+                // Verificar origem
+                if (!event.origin.includes('staging-aponta.treit.com.br')) {
+                    return;
+                }
+
+                var data = event.data;
+                console.log('[ApontarDialog] Mensagem do iframe:', data);
+
+                if (!data || !data.type) return;
+
+                switch (data.type) {
+                    case 'FORM_VALID_CHANGED':
+                        dialogContext.isValid = !!data.isValid;
+                        // Notificar callbacks registrados
+                        formCallbacks.forEach(function(cb) {
+                            try { cb(dialogContext.isValid); } catch(e) { console.error(e); }
+                        });
+                        // Atualizar botão OK do dialog host
+                        updateDialogOkButton(dialogContext.isValid);
+                        break;
+
+                    case 'FORM_DATA_CHANGED':
+                        dialogContext.formData = data.formData;
+                        break;
+
+                    case 'FORM_SAVED':
+                        console.log('[ApontarDialog] Formulário salvo com sucesso');
+                        // Fechar o dialog
+                        closeDialog(true, data.result);
+                        break;
+
+                    case 'FORM_ERROR':
+                        console.error('[ApontarDialog] Erro no formulário:', data.error);
+                        break;
+
+                    case 'CLOSE_FORM':
+                        closeDialog(false);
+                        break;
+                }
+            }
+
+            function updateDialogOkButton(enabled) {
+                var config = VSS.getConfiguration();
+                if (config && config.dialog) {
+                    config.dialog.updateOkButton(enabled);
+                }
+            }
+
+            function closeDialog(success, result) {
+                var config = VSS.getConfiguration();
+                if (config && config.dialog) {
+                    if (success) {
+                        config.dialog.close(result);
+                    } else {
+                        config.dialog.close();
+                    }
+                }
+            }
+
+            function showError(message) {
+                var root = document.getElementById('root');
+                root.innerHTML = 
+                    '<div class="error">' +
+                        '<div class="error-icon">⚠️</div>' +
+                        '<div>' + message + '</div>' +
+                    '</div>';
+            }
+        })();
+    </script>
+</body>
+</html>

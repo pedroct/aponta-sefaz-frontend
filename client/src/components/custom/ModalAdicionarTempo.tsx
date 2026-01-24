@@ -45,6 +45,9 @@ interface ModalAdicionarTempoProps {
   podeEditar?: boolean;
   // Modo embedded (iframe inline sem backdrop)
   embedded?: boolean;
+  // Callbacks para comunicação com host dialog
+  onSaveSuccess?: (result: unknown) => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
 export const ModalAdicionarTempo = ({
@@ -59,6 +62,8 @@ export const ModalAdicionarTempo = ({
   dataApontamento,
   podeEditar = true,
   embedded = false,
+  onSaveSuccess,
+  onValidationChange,
 }: ModalAdicionarTempoProps) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -249,6 +254,14 @@ export const ModalAdicionarTempo = ({
     return totalMins > 0; // Duração deve ser maior que zero
   };
 
+  // Notifica mudanças de validação para o host dialog
+  const isFormValid = canSave();
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(isFormValid);
+    }
+  }, [isFormValid, onValidationChange]);
+
   // Função para salvar apontamento
   const handleSave = async () => {
     if (!canSave() || !selectedWorkItem || !date || !currentUser) return;
@@ -307,6 +320,16 @@ export const ModalAdicionarTempo = ({
           title: "Apontamento criado",
         description: `${totalHours.toFixed(1)}h registradas com sucesso!`,
       });
+      }
+
+      // Notifica sucesso para o host dialog (se callback fornecido)
+      if (onSaveSuccess) {
+        onSaveSuccess({
+          success: true,
+          mode: isEditMode ? "edit" : "create",
+          workItemId: selectedWorkItem.id,
+          duration: totalHours,
+        });
       }
 
       onClose();

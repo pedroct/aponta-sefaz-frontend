@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { ModalAdicionarTempo } from "@/components/custom/ModalAdicionarTempo";
 
 /**
@@ -6,6 +6,10 @@ import { ModalAdicionarTempo } from "@/components/custom/ModalAdicionarTempo";
  * Usada quando acessada via popup do Work Item Form Group do Azure DevOps.
  * 
  * URL esperada: /#/apontar?workItemId=123&workItemTitle=...&organization=...&projectId=...&token=...
+ * 
+ * Modos:
+ * - popup: Janela popup tradicional (window.open)
+ * - dialog: Host Dialog nativo do Azure DevOps (iframe dentro do dialog)
  */
 
 interface PopupParams {
@@ -16,6 +20,17 @@ interface PopupParams {
   projectId: string;
   token: string;
   embedded: boolean;
+  mode: "popup" | "dialog";
+  source: string;
+}
+
+// Helper para enviar mensagens para o parent (dialog host)
+function sendToParent(type: string, data?: Record<string, unknown>) {
+  if (window.parent !== window) {
+    const message = { type, ...data };
+    console.log("[ApontarPopup] Enviando para parent:", message);
+    window.parent.postMessage(message, "*");
+  }
 }
 
 export default function ApontarPopup() {
@@ -44,6 +59,8 @@ export default function ApontarPopup() {
       const projectId = searchParams.get("projectId") || "";
       const token = searchParams.get("token") || "";
       const embedded = searchParams.get("embedded") === "true";
+      const mode = (searchParams.get("mode") as "popup" | "dialog") || "popup";
+      const source = searchParams.get("source") || "unknown";
 
       console.log("[ApontarPopup] Parâmetros extraídos:", {
         workItemId,
@@ -53,7 +70,9 @@ export default function ApontarPopup() {
         projectId,
         hasToken: !!token,
         tokenLength: token.length,
-        embedded
+        embedded,
+        mode,
+        source
       });
 
       // Validar parâmetros essenciais
@@ -86,8 +105,30 @@ export default function ApontarPopup() {
         project,
         projectId,
         token,
-        embedded
+        embedded,
+        mode,
+        source
       });
+
+      // Se estiver em modo dialog, configurar listener para mensagens do host
+      if (mode === "dialog") {
+        const handleHostMessage = (event: MessageEvent) => {
+          const data = event.data;
+          if (!data || !data.type) return;
+          
+          console.log("[ApontarPopup] Mensagem do host:", data);
+          
+          if (data.type === "SAVE_FORM") {
+            // O host está solicitando salvar o formulário
+            // Isso será tratado pelo ModalAdicionarTempo via callback onSave
+            const saveEvent = new CustomEvent("apontar:save-form");
+            window.dispatchEvent(saveEvent);
+          }
+        };
+
+        window.addEventListener("message", handleHostMessage);
+        return () => window.removeEventListener("message", handleHostMessage);
+      }
     } catch (err) {
       console.error("[ApontarPopup] Erro ao processar parâmetros:", err);
       setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -96,6 +137,13 @@ export default function ApontarPopup() {
 
   const handleClose = () => {
     console.log("[ApontarPopup] Fechando modal/popup");
+
+    // Se estiver em modo dialog, comunicar com o host
+    if (params?.mode === "dialog" && window.parent !== window) {
+      console.log("[ApontarPopup] Enviando CLOSE_FORM para host dialog");
+      sendToParent("CLOSE_FORM");
+      return;
+    }
 
     // Se estiver em modo embedded (iframe), comunicar com parent
     if (params?.embedded && window.parent !== window) {
@@ -113,6 +161,23 @@ export default function ApontarPopup() {
       window.location.href = "/#/";
     }
   };
+
+  // Callback para quando o formulário salvar com sucesso
+  const handleSaveSuccess = useCallback((result: unknown) => {
+    console.log("[ApontarPopup] Formulário salvo com sucesso:", result);
+    
+    // Se estiver em modo dialog, comunicar com o host
+    if (params?.mode === "dialog" && window.parent !== window) {
+      sendToParent("FORM_SAVED", { result, success: true });
+    }
+  }, [params?.mode]);
+
+  // Callback para notificar mudanças de validação do formulário
+  const handleValidationChange = useCallback((isValid: boolean) => {
+    if (params?.mode === "dialog" && window.parent !== window) {
+      sendToParent("FORM_VALID_CHANGED", { isValid });
+    }
+  }, [params?.mode]);
 
   // Estado de erro
   if (error) {
@@ -140,14 +205,17 @@ export default function ApontarPopup() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Carregando...</p>
-          <p className="mt-1 text-xs text-gray-400">ApontarPopup v1.1.73</p>
+          <p className="mt-1 text-xs text-gray-400">ApontarPopup v1.1.74</p>
         </div>
       </div>
     );
   }
 
+  // Modo dialog: não mostrar o fundo modal, apenas o conteúdo
+  const isDialogMode = params.mode === "dialog";
+
   return (
-    <div className={params.embedded ? "h-full bg-white" : "min-h-screen bg-white"}>
+    <div className={isDialogMode ? "h-full bg-white" : params.embedded ? "h-full bg-white" : "min-h-screen bg-white"}>
       <ModalAdicionarTempo
         isOpen={true}
         onClose={handleClose}
@@ -156,7 +224,9 @@ export default function ApontarPopup() {
         organizationName={params.organization}
         projectId={params.projectId}
         mode="create"
-        embedded={params.embedded}
+        embedded={params.embedded || isDialogMode}
+        onSaveSuccess={handleSaveSuccess}
+        onValidationChange={handleValidationChange}
       />
     </div>
   );
