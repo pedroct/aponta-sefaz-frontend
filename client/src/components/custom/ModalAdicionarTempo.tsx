@@ -146,6 +146,22 @@ export const ModalAdicionarTempo = ({
     return () => clearTimeout(timer);
   }, [searchTerm, handleSearch, selectedWorkItem]);
 
+  // Notifica mudanças de validação para o host dialog
+  // Calcula validação baseada nos estados atuais
+  const isFormValid = !!selectedWorkItem && !!date && !!activity && (() => {
+    const parts = duration.split(":");
+    if (parts.length !== 2) return false;
+    const h = parseInt(parts[0]) || 0;
+    const m = parseInt(parts[1]) || 0;
+    return (h * 60) + m > 0;
+  })();
+
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(isFormValid);
+    }
+  }, [isFormValid, onValidationChange]);
+
   if (!isOpen) return null;
 
   // Obtém iniciais do usuário
@@ -253,14 +269,6 @@ export const ModalAdicionarTempo = ({
     
     return totalMins > 0; // Duração deve ser maior que zero
   };
-
-  // Notifica mudanças de validação para o host dialog
-  const isFormValid = canSave();
-  useEffect(() => {
-    if (onValidationChange) {
-      onValidationChange(isFormValid);
-    }
-  }, [isFormValid, onValidationChange]);
 
   // Função para salvar apontamento
   const handleSave = async () => {
