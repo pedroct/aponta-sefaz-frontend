@@ -39,10 +39,29 @@ interface UseAzureDevOpsReturn {
 
 /**
  * Extrai parâmetros da URL passados pelo HTML wrapper da extensão
+ *
+ * Suporta dois formatos de URL:
+ * 1. Query params normais: https://example.com?token=xxx
+ * 2. Params após hash (hash routing): https://example.com/#/page?token=xxx
  */
 function getUrlParams(): URLSearchParams {
   if (typeof window === 'undefined') return new URLSearchParams();
-  return new URLSearchParams(window.location.search);
+
+  // Primeiro tenta os query params normais
+  if (window.location.search) {
+    return new URLSearchParams(window.location.search);
+  }
+
+  // Se não há search params, verifica se há params no hash (após ?)
+  // URL format: https://example.com/#/atividades?embedded=true&token=xxx
+  const hash = window.location.hash;
+  const hashQueryIndex = hash.indexOf('?');
+  if (hashQueryIndex !== -1) {
+    const hashQuery = hash.substring(hashQueryIndex);
+    return new URLSearchParams(hashQuery);
+  }
+
+  return new URLSearchParams();
 }
 
 /**
