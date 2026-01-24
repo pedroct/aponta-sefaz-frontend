@@ -12,7 +12,20 @@
       "mcp__TestSprite__testsprite_generate_code_summary",
       "mcp__TestSprite__testsprite_generate_standardized_prd",
       "mcp__TestSprite__testsprite_generate_frontend_test_plan",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh run list:*)",
+      "Bash(where:*)",
+      "Bash(npm run create:vsix:*)",
+      "Bash(npx tfx extension publish:*)",
+      "Bash(npx tfx login --help:*)",
+      "Bash(powershell -Command \"Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [System.IO.Compression.ZipFile]::OpenRead\\(''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix''\\); $lib = $zip.Entries | Where-Object { $_.FullName -match ''lib/'' }; Write-Host ''Arquivos em lib/:''; $lib | ForEach-Object { Write-Host ''  '' $_.FullName }; $zip.Dispose\\(\\)\")",
+      "Bash(powershell -Command \"Add-Type -AssemblyName System.IO.Compression.FileSystem; $z = [System.IO.Compression.ZipFile]::OpenRead\\(''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix''\\); $z.Entries | Where-Object { $_FullName -match ''lib|SDK'' } | Select-Object -ExpandProperty FullName; $z.Dispose\\(\\)\")",
+      "Bash(powershell \"Expand-Archive -Path ''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix'' -DestinationPath ''./vsix-check-temp'' -Force; Get-ChildItem -Recurse ./vsix-check-temp/extension/lib 2>$null | Select-Object -ExpandProperty Name; Remove-Item -Recurse -Force ./vsix-check-temp\")",
+      "Bash(powershell \"Expand-Archive -Path ''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix'' -DestinationPath ''./vsix-temp'' -Force; if \\(Test-Path ''./vsix-temp/extension/lib''\\) { Get-ChildItem ''./vsix-temp/extension/lib'' | Select-Object -ExpandProperty Name } else { Write-Host ''lib folder not found'' }; Remove-Item -Recurse -Force ''./vsix-temp''\")",
+      "Bash(npm run type-check:*)"
     ]
   }
 }
