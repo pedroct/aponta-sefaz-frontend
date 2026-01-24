@@ -8,9 +8,9 @@ import { useQuery } from '@tanstack/react-query';
 import {
   WorkItemRevisionsResponse,
   ProcessStateMappingResponse,
-  ProcessStateMap,
 } from '@/lib/timesheet-types';
 import { getBlueCellsForWeek } from '@/lib/blue-cells-logic';
+import { useAzureContext } from '@/contexts/AzureDevOpsContext';
 
 // ============================================================================
 // Hook para buscar revisões de um Work Item
@@ -29,25 +29,20 @@ export function useWorkItemRevisions({
   project,
   enabled = true,
 }: UseWorkItemRevisionsParams) {
+  const { api, token, isLoading: isLoadingContext } = useAzureContext();
+
   return useQuery({
     queryKey: ['work-item-revisions', workItemId, organization, project],
     queryFn: async (): Promise<WorkItemRevisionsResponse> => {
-      const params = new URLSearchParams({
-        organization_name: organization,
-        project_id: project,
-      });
-
-      const response = await fetch(
-        `/api/v1/timesheet/work-item/${workItemId}/revisions?${params}`
+      return api.get<WorkItemRevisionsResponse>(
+        `/timesheet/work-item/${workItemId}/revisions`,
+        {
+          organization_name: organization,
+          project_id: project,
+        }
       );
-
-      if (!response.ok) {
-        throw new Error('Erro ao buscar revisões do Work Item');
-      }
-
-      return response.json();
     },
-    enabled,
+    enabled: enabled && !!token && !isLoadingContext,
     staleTime: 5 * 60 * 1000, // 5 minutos
     gcTime: 30 * 60 * 1000, // 30 minutos
   });
@@ -72,27 +67,19 @@ export function useProcessStates({
   workItemType,
   enabled = true,
 }: UseProcessStatesParams) {
+  const { api, token, isLoading: isLoadingContext } = useAzureContext();
+
   return useQuery({
     queryKey: ['process-states', organization, processId, workItemType],
     queryFn: async (): Promise<ProcessStateMappingResponse> => {
-      const params = new URLSearchParams({
+      return api.get<ProcessStateMappingResponse>('/timesheet/process-states', {
         organization_name: organization,
         project_id: project,
         process_id: processId,
         work_item_type: workItemType,
       });
-
-      const response = await fetch(
-        `/api/v1/timesheet/process-states?${params}`
-      );
-
-      if (!response.ok) {
-        throw new Error('Erro ao buscar estados do processo');
-      }
-
-      return response.json();
     },
-    enabled,
+    enabled: enabled && !!token && !isLoadingContext,
     staleTime: 60 * 60 * 1000, // 1 hora (raramente muda)
     gcTime: 24 * 60 * 60 * 1000, // 24 horas
   });
