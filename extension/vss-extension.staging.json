@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos-staging",
-  "version": "1.1.50",
+  "version": "1.1.51",
   "name": "Aponta (Staging)",
   "description": "[STAGING] Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -53,25 +53,9 @@
         ".aponta-hub-group"
       ],
       "properties": {
-        "name": "Meus Apontamentos",
+        "name": "Gestão de Atividades",
         "order": 100,
-        "uri": "dist/timesheet.html",
-        "icon": {
-          "light": "images/icon-16.png",
-          "dark": "images/icon-16-dark.png"
-        }
-      }
-    },
-    {
-      "id": "atividades-hub",
-      "type": "ms.vss-web.hub",
-      "targets": [
-        ".aponta-hub-group"
-      ],
-      "properties": {
-        "name": "Atividades",
-        "order": 200,
-        "uri": "dist/atividades.html",
+        "uri": "dist/public/index.html",
         "icon": {
           "light": "images/icon-16.png",
           "dark": "images/icon-16-dark.png"
@@ -86,8 +70,8 @@
       ],
       "properties": {
         "name": "Apontamentos (Staging)",
-        "uri": "dist/work-item-panel.html",
-        "height": 300
+        "uri": "dist/public/extension.html",
+        "height": 400
       }
     }
   ],
