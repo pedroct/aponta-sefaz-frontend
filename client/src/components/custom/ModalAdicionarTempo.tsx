@@ -45,6 +45,8 @@ interface ModalAdicionarTempoProps {
   podeEditar?: boolean;
   // Modo embedded (iframe inline sem backdrop)
   embedded?: boolean;
+  // Modo Host Dialog do Azure DevOps (sem header/footer próprios)
+  hostDialog?: boolean;
   // Callbacks para comunicação com host dialog
   onSaveSuccess?: (result: unknown) => void;
   onValidationChange?: (isValid: boolean) => void;
@@ -62,6 +64,7 @@ export const ModalAdicionarTempo = ({
   dataApontamento,
   podeEditar = true,
   embedded = false,
+  hostDialog = false,
   onSaveSuccess,
   onValidationChange,
 }: ModalAdicionarTempoProps) => {
@@ -356,17 +359,22 @@ export const ModalAdicionarTempo = ({
   return (
     <div className={cn(
       "z-[100] flex items-center justify-center",
-      embedded
+      hostDialog
         ? "w-full h-full"
-        : "fixed inset-0 bg-black/40 backdrop-blur-[1px]"
+        : embedded
+          ? "w-full h-full"
+          : "fixed inset-0 bg-black/40 backdrop-blur-[1px]"
     )}>
       <div className={cn(
-        "bg-white shadow-2xl rounded-sm border border-[#C8C6C4] flex flex-col",
-        embedded
-          ? "w-full max-w-[420px] mx-auto"
-          : "w-[400px] animate-in fade-in zoom-in duration-200"
+        "bg-white flex flex-col",
+        hostDialog
+          ? "w-full h-full max-w-none border-0 shadow-none rounded-none"
+          : embedded
+            ? "w-full max-w-[420px] mx-auto shadow-2xl rounded-sm border border-[#C8C6C4]"
+            : "w-[400px] animate-in fade-in zoom-in duration-200 shadow-2xl rounded-sm border border-[#C8C6C4]"
       )}>
-        {/* Header */}
+        {/* Header - oculto no modo Host Dialog */}
+        {!hostDialog && (
         <div className="flex items-center justify-between px-4 py-2 border-b border-[#EAEAEA]">
           <h2 className="text-sm font-semibold text-[#201F1E]">
             {isEditMode ? "Editar Apontamento" : "Apontar Tempo Trabalhado"}
@@ -375,6 +383,7 @@ export const ModalAdicionarTempo = ({
             <X size={16} />
           </button>
         </div>
+        )}
 
         {/* Aviso de Work Item bloqueado */}
         {showBlockedWarning && (
@@ -539,7 +548,8 @@ export const ModalAdicionarTempo = ({
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer - oculto no modo Host Dialog */}
+        {!hostDialog && (
         <div className="flex items-center justify-end gap-2 px-4 py-3 bg-[#FAF9F8] border-t border-[#EAEAEA]">
            <button 
              onClick={onClose}
@@ -568,6 +578,7 @@ export const ModalAdicionarTempo = ({
              )}
            </button>
         </div>
+        )}
       </div>
     </div>
   );

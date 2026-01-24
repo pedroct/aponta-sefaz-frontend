@@ -225,6 +225,7 @@ export default function ApontarPopup() {
         projectId={params.projectId}
         mode="create"
         embedded={params.embedded || isDialogMode}
+        hostDialog={isDialogMode}
         onSaveSuccess={handleSaveSuccess}
         onValidationChange={handleValidationChange}
       />
