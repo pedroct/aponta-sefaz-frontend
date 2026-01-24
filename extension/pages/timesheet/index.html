@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folha de Horas</title>
+    <script src="https://vsscode.dev/scripts/VSS.SDK.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #0078d4;
+            gap: 12px;
+        }
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <svg class="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" opacity="0.2"></circle>
+            <path d="M22 12a10 10 0 0 1-20 0"></path>
+        </svg>
+        <span>Inicializando Folha de Horas...</span>
+    </div>
+
+    <script>
+        // Inicializar VSS SDK
+        VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformStyles: true,
+            usePlatformScripts: true
+        });
+
+        VSS.ready(function() {
+            console.log('[Timesheet Wrapper] Azure DevOps SDK inicializado');
+            
+            try {
+                // Obter contexto do Azure DevOps
+                const webContext = VSS.getWebContext();
+                console.log('[Timesheet Wrapper] Contexto obtido:', webContext);
+
+                // Obter token de acesso
+                VSS.getAccessToken().then(function(token) {
+                    console.log('[Timesheet Wrapper] Token obtido:', token ? 'Sim' : 'Não');
+                    
+                    // Construir URL com parâmetros
+                    const params = new URLSearchParams({
+                        embedded: 'true',
+                        source: 'azdo-timesheet-hub',
+                        token: token.token,
+                        organization: webContext.account.name,
+                        project: webContext.project.name,
+                        projectId: webContext.project.id,
+                        userId: webContext.user.id,
+                        userName: webContext.user.name,
+                        userUniqueName: webContext.user.uniqueName,
+                        userEmail: webContext.user.email || webContext.user.uniqueName
+                    });
+
+                    // URL base da aplicação React
+                    const baseUrl = 'https://staging-aponta.treit.com.br';
+                    const targetUrl = `${baseUrl}/#/timesheet?${params.toString()}`;
+                    
+                    console.log('[Timesheet Wrapper] Redirecionando para:', targetUrl);
+                    
+                    // Criar iframe para carregar a aplicação
+                    const iframe = document.createElement('iframe');
+                    iframe.src = targetUrl;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100vh';
+                    iframe.style.border = 'none';
+                    
+                    // Ocultar loading e mostrar iframe
+                    document.getElementById('loading').style.display = 'none';
+                    document.body.appendChild(iframe);
+                    
+                    // Notificar que a extensão foi carregada
+                    VSS.notifyLoadSucceeded();
+                    
+                }).catch(function(error) {
+                    console.error('[Timesheet Wrapper] Erro ao obter token:', error);
+                    showError('Erro ao obter token de acesso do Azure DevOps');
+                });
+                
+            } catch (error) {
+                console.error('[Timesheet Wrapper] Erro na inicialização:', error);
+                showError('Erro ao inicializar extensão');
+            }
+        });
+
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            loading.innerHTML = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <span style="color: #dc2626;">${message}</span>
+            `;
+        }
+    </script>
+</body>
+</html>
