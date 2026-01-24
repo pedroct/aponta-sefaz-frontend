@@ -9,7 +9,7 @@
     "build:extension": "npm run build && npm run create:vsix",
     "validate:build": "node scripts/validate-build.js",
     "validate:vsix": "powershell -Command \"Add-Type -AssemblyName System.IO.Compression.FileSystem; $vsix = Get-ChildItem -Filter '*.vsix' | Sort-Object LastWriteTime -Descending | Select-Object -First 1; Write-Host '📦 Validando:' $vsix.Name; $zip = [System.IO.Compression.ZipFile]::OpenRead($vsix.FullName); $html = $zip.Entries | Where-Object { $_.FullName -match '\\.html$' }; Write-Host '📄 Arquivos HTML:'; $html | ForEach-Object { Write-Host '  ✅' $_.FullName }; $zip.Dispose(); Write-Host '✅ VSIX validado!'\"",
-    "create:vsix": "npx tfx extension create --root extension --manifests vss-extension.staging.json --output-path ./ && npm run validate:vsix",
+    "create:vsix": "node scripts/move-vsix.js && npx tfx extension create --root extension --manifests vss-extension.staging.json --output-path ./ && npm run validate:vsix",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "test": "vitest",

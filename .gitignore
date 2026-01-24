@@ -13,3 +13,5 @@ testsprite_tests/tmp/
 
 # VSIX packages
 extension/*.vsix
+extension/vsix/*.vsix
+*.vsix
