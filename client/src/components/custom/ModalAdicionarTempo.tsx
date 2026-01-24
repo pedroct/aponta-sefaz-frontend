@@ -343,7 +343,11 @@ export const ModalAdicionarTempo = ({
         });
       }
 
-      onClose();
+      // Se estiver em modo hostDialog, o fechamento é controlado pelo apontar-dialog
+      // após processar o FORM_SAVED. Não chamar onClose() aqui.
+      if (!hostDialog) {
+        onClose();
+      }
     } catch (error) {
       toast({
         title: isEditMode ? "Erro ao atualizar" : "Erro ao salvar",

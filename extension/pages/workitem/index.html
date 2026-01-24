@@ -134,7 +134,6 @@
 
         // Variável global para o Dialog Service
         var dialogService = null;
-        var globalMessagesService = null;
 
         function setupVSS() {
             try {
@@ -157,14 +156,6 @@
                         console.log('[WorkItemGroup] Dialog Service obtido');
                     }, function(err) {
                         console.error('[WorkItemGroup] Erro ao obter Dialog Service:', err);
-                    });
-
-                    // Obter o Global Messages Service para toasts nativos
-                    VSS.getService(VSS.ServiceIds.GlobalMessages).then(function(service) {
-                        globalMessagesService = service;
-                        console.log('[WorkItemGroup] GlobalMessages Service obtido');
-                    }, function(err) {
-                        console.error('[WorkItemGroup] Erro ao obter GlobalMessages Service:', err);
                     });
 
                     // Registrar o contribution
@@ -300,8 +291,8 @@
                 modal: true,
                 draggable: true,
                 resizable: false,
-                okText: "Salvar",
-                cancelText: "Cancelar",
+                // Não usar botões nativos - o React controla o fluxo de salvar
+                buttons: [],
                 // Passa os valores para substituir os placeholders {{...}} na URI do manifesto
                 urlReplacementObject: {
                     workItemId: String(workItemContext.id || ''),
@@ -315,17 +306,6 @@
                     userName: encodeURIComponent(workItemContext.userName || ''),
                     userUniqueName: encodeURIComponent(workItemContext.userUniqueName || ''),
                     userEmail: encodeURIComponent(workItemContext.userEmail || '')
-                },
-                getDialogResult: function() {
-                    // Retorna os dados quando o usuário clica em Salvar
-                    return true;
-                },
-                okCallback: function(result) {
-                    console.log('[WorkItemGroup] Dialog OK callback, resultado:', result);
-                    // Atualizar campos do Work Item se houver duração
-                    if (result && result.duration && result.duration > 0) {
-                        atualizarCamposWorkItem(result.duration);
-                    }
                 }
             };
             
@@ -336,30 +316,16 @@
                 console.log('[WorkItemGroup] Dialog aberto com sucesso');
                 
                 // Escutar quando o dialog fechar para processar o resultado
+                // O resultado vem do apontar-dialog quando chama config.dialog.close(result)
                 dialog.getDialogResult().then(function(result) {
                     console.log('[WorkItemGroup] Dialog fechou com resultado:', result);
                     // Atualizar campos do Work Item se houver duração
-                    if (result && result.duration && result.duration > 0) {
+                    if (result && result.success && result.duration && result.duration > 0) {
+                        console.log('[WorkItemGroup] Atualizando campos do Work Item com duração:', result.duration);
                         atualizarCamposWorkItem(result.duration);
-                        // Mostrar toast nativo de sucesso
-                        mostrarToastNativo('Apontamento registrado! ' + result.duration.toFixed(1) + 'h salvas.', 'success');
                     }
                 }, function(err) {
                     console.log('[WorkItemGroup] Dialog cancelado ou fechado sem salvar');
-                });
-                
-                // Obter instância do dialog para comunicação
-                dialog.getContributionInstance(contributionId).then(function(dialogInstance) {
-                    console.log('[WorkItemGroup] Instância do dialog obtida');
-                    
-                    // Escutar mudanças no formulário para habilitar/desabilitar botão OK
-                    if (dialogInstance && dialogInstance.attachFormChanged) {
-                        dialogInstance.attachFormChanged(function(isValid) {
-                            dialog.updateOkButton(isValid);
-                        });
-                    }
-                }, function(err) {
-                    console.warn('[WorkItemGroup] Não foi possível obter instância do dialog:', err);
                 });
             }, function(err) {
                 console.error('[WorkItemGroup] Erro ao abrir dialog:', err);
@@ -424,34 +390,6 @@
                     console.error('[WorkItemGroup] Erro ao obter WorkItemFormService:', err);
                 });
             });
-        }
-
-        /**
-         * Mostra um toast nativo do Azure DevOps usando o GlobalMessagesService
-         */
-        function mostrarToastNativo(message, type) {
-            console.log('[WorkItemGroup] Mostrando toast nativo:', message, type);
-            
-            if (globalMessagesService && globalMessagesService.addToast) {
-                globalMessagesService.addToast({
-                    duration: 3000,
-                    message: message
-                });
-            } else {
-                // Tentar obter o serviço novamente se não estiver disponível
-                VSS.getService(VSS.ServiceIds.GlobalMessages).then(function(service) {
-                    if (service && service.addToast) {
-                        service.addToast({
-                            duration: 3000,
-                            message: message
-                        });
-                    } else {
-                        console.warn('[WorkItemGroup] GlobalMessages.addToast não disponível');
-                    }
-                }, function(err) {
-                    console.warn('[WorkItemGroup] Erro ao obter GlobalMessages:', err);
-                });
-            }
         }
 
         // Fallback para popup caso o dialog nativo não funcione
