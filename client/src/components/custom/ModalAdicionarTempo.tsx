@@ -555,8 +555,7 @@ export const ModalAdicionarTempo = ({
           </div>
         </div>
 
-        {/* Footer - oculto no modo Host Dialog */}
-        {!hostDialog && (
+        {/* Footer com botões de ação */}
         <div className="flex items-center justify-end gap-2 px-4 py-3 bg-[#FAF9F8] border-t border-[#EAEAEA]">
            <button 
              onClick={onClose}
@@ -585,7 +584,6 @@ export const ModalAdicionarTempo = ({
              )}
            </button>
         </div>
-        )}
       </div>
     </div>
   );
