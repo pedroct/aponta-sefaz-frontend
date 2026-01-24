@@ -71,7 +71,7 @@ jobs:
             ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/
 
           # Reiniciar apenas o container do frontend (não afeta o backend)
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/ubuntu/aponta-sefaz/staging && docker compose up -d --build --force-recreate --no-deps frontend"
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/ubuntu/aponta-sefaz/staging && docker compose down frontend && docker compose up -d --build --force-recreate --no-deps frontend"
 
       - name: Health Check
         run: |
