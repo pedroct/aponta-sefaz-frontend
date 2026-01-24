@@ -46,22 +46,6 @@
             width: 16px;
             height: 16px;
         }
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #0078d4;
-        }
-        .spinner {
-            display: inline-block;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
         .error {
             color: #d13438;
             font-size: 12px;
@@ -73,13 +57,7 @@
 </head>
 <body>
     <div id="root" class="container">
-        <div class="loading">
-            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" opacity="0.2"></circle>
-                <path d="M22 12a10 10 0 0 1-20 0"></path>
-            </svg>
-            <span>Carregando...</span>
-        </div>
+        <!-- Loading removido - o botão será renderizado rapidamente pelo JS -->
     </div>
 
     <script>
