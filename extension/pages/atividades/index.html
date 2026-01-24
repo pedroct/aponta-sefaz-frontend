@@ -103,7 +103,7 @@
                         const webContext = VSS.getWebContext();
                         console.log('[Atividades Wrapper] Web context:', webContext);
 
-                        VSS.getAccessToken().then(function(token) {
+                        Promise.resolve(VSS.getAccessToken()).then(function(token) {
                             console.log('[Atividades Wrapper] Token obtido');
                             
                             const params = new URLSearchParams({

@@ -107,7 +107,7 @@
                 }
 
                 // Obter token de autenticação
-                const token = await VSS.getAccessToken();
+                const token = await Promise.resolve(VSS.getAccessToken());
                 console.log('✅ Token obtido com sucesso');
 
                 // Injetar token no localStorage para a aplicação React usar
