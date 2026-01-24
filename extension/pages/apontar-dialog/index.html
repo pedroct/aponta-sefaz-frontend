@@ -65,9 +65,9 @@
 </head>
 <body>
     <div id="root" class="dialog-container">
-        <div class="loading">
+        <div id="loading-indicator" class="loading">
             <div class="spinner"></div>
-            <span>Carregando formulário...</span>
+            <span>Carregando...</span>
         </div>
     </div>
 
@@ -173,6 +173,12 @@
 
             function renderIframe() {
                 var root = document.getElementById('root');
+                
+                // Esconder o loading indicator (será mostrado pelo React se necessário)
+                var loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
 
                 // Construir URL do formulário React
                 var params = new URLSearchParams({
@@ -196,9 +202,14 @@
                 var iframeSrc = baseUrl + '/#/apontar?' + params.toString();
 
                 console.log('[ApontarDialog] Carregando iframe:', iframeSrc);
-
-                root.innerHTML = '<iframe id="apontar-iframe" class="dialog-iframe" src="' + iframeSrc + '"></iframe>';
-                iframeElement = document.getElementById('apontar-iframe');
+                
+                // Criar iframe e adicionar ao root (não substituir o HTML todo para evitar flash)
+                var iframe = document.createElement('iframe');
+                iframe.id = 'apontar-iframe';
+                iframe.className = 'dialog-iframe';
+                iframe.src = iframeSrc;
+                root.appendChild(iframe);
+                iframeElement = iframe;
 
                 // Listener para mensagens do iframe
                 window.addEventListener('message', handleIframeMessage);
