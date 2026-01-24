@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Folha de Horas</title>
-    <script src="https://www.vsassets.io/scripts/VSS.SDK.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -44,70 +43,75 @@
         <span>Inicializando Folha de Horas...</span>
     </div>
 
-    <script>
-        // Inicializar VSS SDK
-        VSS.init({
-            explicitNotifyLoaded: true,
-            usePlatformStyles: true,
-            usePlatformScripts: true
-        });
+    <script type="module">
+        // Usar Azure DevOps Extension SDK moderno
+        import * as SDK from 'https://cdn.jsdelivr.net/npm/azure-devops-extension-sdk@3/lib/SDK.min.js';
 
-        VSS.ready(function() {
-            console.log('[Timesheet Wrapper] Azure DevOps SDK inicializado');
+        async function initializeExtension() {
+            console.log('[Timesheet Wrapper] Inicializando Azure DevOps Extension SDK');
             
             try {
-                // Obter contexto do Azure DevOps
-                const webContext = VSS.getWebContext();
-                console.log('[Timesheet Wrapper] Contexto obtido:', webContext);
+                // Inicializar SDK moderno
+                await SDK.init();
+                console.log('[Timesheet Wrapper] SDK inicializado com sucesso');
+                
+                // Obter contexto
+                const projectService = await SDK.getService('ms.vss-tfs-web.project-data-service');
+                const project = await projectService.getProject();
+                
+                const userContext = SDK.getUser();
+                const hostContext = SDK.getHost();
+                
+                console.log('[Timesheet Wrapper] Contexto obtido:', {
+                    project: project.name,
+                    projectId: project.id,
+                    organization: hostContext.name,
+                    user: userContext.displayName
+                });
 
                 // Obter token de acesso
-                VSS.getAccessToken().then(function(token) {
-                    console.log('[Timesheet Wrapper] Token obtido:', token ? 'Sim' : 'Não');
-                    
-                    // Construir URL com parâmetros
-                    const params = new URLSearchParams({
-                        embedded: 'true',
-                        source: 'azdo-timesheet-hub',
-                        token: token.token,
-                        organization: webContext.account.name,
-                        project: webContext.project.name,
-                        projectId: webContext.project.id,
-                        userId: webContext.user.id,
-                        userName: webContext.user.name,
-                        userUniqueName: webContext.user.uniqueName,
-                        userEmail: webContext.user.email || webContext.user.uniqueName
-                    });
-
-                    // URL base da aplicação React
-                    const baseUrl = 'https://staging-aponta.treit.com.br';
-                    const targetUrl = `${baseUrl}/#/timesheet?${params.toString()}`;
-                    
-                    console.log('[Timesheet Wrapper] Redirecionando para:', targetUrl);
-                    
-                    // Criar iframe para carregar a aplicação
-                    const iframe = document.createElement('iframe');
-                    iframe.src = targetUrl;
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100vh';
-                    iframe.style.border = 'none';
-                    
-                    // Ocultar loading e mostrar iframe
-                    document.getElementById('loading').style.display = 'none';
-                    document.body.appendChild(iframe);
-                    
-                    // Notificar que a extensão foi carregada
-                    VSS.notifyLoadSucceeded();
-                    
-                }).catch(function(error) {
-                    console.error('[Timesheet Wrapper] Erro ao obter token:', error);
-                    showError('Erro ao obter token de acesso do Azure DevOps');
+                const accessToken = await SDK.getAccessToken();
+                console.log('[Timesheet Wrapper] Token obtido:', accessToken ? 'Sim' : 'Não');
+                
+                // Construir URL com parâmetros
+                const params = new URLSearchParams({
+                    embedded: 'true',
+                    source: 'azdo-timesheet-hub',
+                    token: accessToken,
+                    organization: hostContext.name,
+                    project: project.name,
+                    projectId: project.id,
+                    userId: userContext.id,
+                    userName: userContext.displayName,
+                    userUniqueName: userContext.uniqueName,
+                    userEmail: userContext.uniqueName
                 });
+
+                // URL base da aplicação React
+                const baseUrl = 'https://staging-aponta.treit.com.br';
+                const targetUrl = `${baseUrl}/#/timesheet?${params.toString()}`;
+                
+                console.log('[Timesheet Wrapper] Redirecionando para:', targetUrl);
+                
+                // Criar iframe para carregar a aplicação
+                const iframe = document.createElement('iframe');
+                iframe.src = targetUrl;
+                iframe.style.width = '100%';
+                iframe.style.height = '100vh';
+                iframe.style.border = 'none';
+                
+                // Ocultar loading e mostrar iframe
+                document.getElementById('loading').style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // Notificar que a extensão foi carregada
+                SDK.notifyLoadSucceeded();
                 
             } catch (error) {
                 console.error('[Timesheet Wrapper] Erro na inicialização:', error);
-                showError('Erro ao inicializar extensão');
+                showError(`Erro ao inicializar extensão: ${error.message}`);
             }
-        });
+        }
 
         function showError(message) {
             const loading = document.getElementById('loading');
@@ -119,6 +123,13 @@
                 </svg>
                 <span style="color: #dc2626;">${message}</span>
             `;
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeExtension);
+        } else {
+            initializeExtension();
         }
     </script>
 </body>
