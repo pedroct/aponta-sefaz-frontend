@@ -94,7 +94,12 @@
             organization: '',
             project: '',
             projectId: '',
-            token: ''
+            token: '',
+            // Dados do usuário autenticado
+            userId: '',
+            userName: '',
+            userUniqueName: '',
+            userEmail: ''
         };
 
         // Verificar se VSS está disponível ou carregá-lo
@@ -178,6 +183,19 @@
                                         workItemContext.organization = webContext.account.name;
                                         workItemContext.project = webContext.project.name;
                                         workItemContext.projectId = webContext.project.id;
+                                        
+                                        // Obter dados do usuário autenticado
+                                        if (webContext.user) {
+                                            workItemContext.userId = webContext.user.id || '';
+                                            workItemContext.userName = webContext.user.name || '';
+                                            workItemContext.userUniqueName = webContext.user.uniqueName || '';
+                                            workItemContext.userEmail = webContext.user.email || webContext.user.uniqueName || '';
+                                            console.log('[WorkItemGroup] Dados do usuário:', {
+                                                userId: workItemContext.userId,
+                                                userName: workItemContext.userName,
+                                                userUniqueName: workItemContext.userUniqueName
+                                            });
+                                        }
                                         
                                         // Obter token (Q promises usam .then(success, error) ao invés de .catch())
                                         VSS.getAccessToken().then(function(tokenObj) {
@@ -282,7 +300,12 @@
                     organization: workItemContext.organization || '',
                     project: workItemContext.project || '',
                     projectId: workItemContext.projectId || '',
-                    token: workItemContext.token || ''
+                    token: workItemContext.token || '',
+                    // Dados do usuário autenticado
+                    userId: workItemContext.userId || '',
+                    userName: encodeURIComponent(workItemContext.userName || ''),
+                    userUniqueName: encodeURIComponent(workItemContext.userUniqueName || ''),
+                    userEmail: encodeURIComponent(workItemContext.userEmail || '')
                 },
                 getDialogResult: function() {
                     // Retorna os dados quando o usuário clica em Salvar

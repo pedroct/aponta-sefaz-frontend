@@ -85,6 +85,11 @@
                 project: '',
                 projectId: '',
                 token: '',
+                // Dados do usuário
+                userId: '',
+                userName: '',
+                userUniqueName: '',
+                userEmail: '',
                 formData: null,
                 isValid: false
             };
@@ -119,6 +124,11 @@
                 dialogContext.project = urlParams.get('project') || '';
                 dialogContext.projectId = urlParams.get('projectId') || '';
                 dialogContext.token = urlParams.get('token') || '';
+                // Dados do usuário
+                dialogContext.userId = urlParams.get('userId') || '';
+                dialogContext.userName = decodeURIComponent(urlParams.get('userName') || '');
+                dialogContext.userUniqueName = decodeURIComponent(urlParams.get('userUniqueName') || '');
+                dialogContext.userEmail = decodeURIComponent(urlParams.get('userEmail') || '');
 
                 console.log('[ApontarDialog] Context from URL params:', {
                     workItemId: dialogContext.workItemId,
@@ -126,7 +136,10 @@
                     organization: dialogContext.organization,
                     project: dialogContext.project,
                     hasToken: !!dialogContext.token,
-                    tokenLength: dialogContext.token ? dialogContext.token.length : 0
+                    tokenLength: dialogContext.token ? dialogContext.token.length : 0,
+                    userId: dialogContext.userId,
+                    userName: dialogContext.userName,
+                    userUniqueName: dialogContext.userUniqueName
                 });
 
                 // Renderizar iframe com o formulário React
@@ -171,6 +184,11 @@
                     project: dialogContext.project,
                     projectId: dialogContext.projectId,
                     token: dialogContext.token,
+                    // Dados do usuário
+                    userId: dialogContext.userId,
+                    userName: dialogContext.userName,
+                    userUniqueName: dialogContext.userUniqueName,
+                    userEmail: dialogContext.userEmail,
                     mode: 'dialog'
                 });
 
