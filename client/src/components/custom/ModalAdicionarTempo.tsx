@@ -396,7 +396,10 @@ export const ModalAdicionarTempo = ({
         )}
 
         {/* Content */}
-        <div className="p-4 flex flex-col gap-4">
+        <div className={cn(
+          "p-4 flex flex-col gap-4",
+          hostDialog && "flex-grow overflow-auto"
+        )}>
           {/* User Display */}
           <div className="flex items-center gap-2 p-1.5 border border-[#C8C6C4] rounded-sm bg-[#FAF9F8]">
              <div className="w-5 h-5 rounded-full bg-[#0078D4] text-white flex items-center justify-center text-[10px] font-bold">

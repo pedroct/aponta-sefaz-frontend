@@ -253,6 +253,7 @@
             }
 
             console.log('[WorkItemGroup] Abrindo dialog nativo...');
+            console.log('[WorkItemGroup] Contexto:', workItemContext);
 
             // Verificar se o Dialog Service está disponível
             if (!dialogService) {
@@ -262,59 +263,55 @@
             }
 
             // Opções para o dialog nativo do Azure DevOps
+            var extensionContext = VSS.getExtensionContext();
+            var contributionId = extensionContext.publisherId + "." + extensionContext.extensionId + ".apontar-dialog-content";
+
             var dialogOptions = {
                 title: "Apontar Tempo",
-                width: 500,
-                height: 650,
+                width: 480,
+                height: 620,
                 modal: true,
                 draggable: true,
                 resizable: false,
-                buttons: {
-                    "Salvar": function() {
-                        // Enviar mensagem para o dialog salvar
-                        var dialog = this;
-                        dialog.getContributionInstance("apontar-dialog-content").then(function(instance) {
-                            if (instance && instance.save) {
-                                instance.save().then(function(result) {
-                                    if (result.success) {
-                                        dialog.close();
-                                    }
-                                }, function(err) {
-                                    console.error('[WorkItemGroup] Erro ao salvar:', err);
-                                });
-                            }
-                        });
-                    },
-                    "Cancelar": function() {
-                        this.close();
-                    }
-                },
+                okText: "Salvar",
+                cancelText: "Cancelar",
+                // Passa os valores para substituir os placeholders {{...}} na URI do manifesto
                 urlReplacementObject: {
-                    workItemId: workItemContext.id,
+                    workItemId: String(workItemContext.id || ''),
                     workItemTitle: encodeURIComponent(workItemContext.title || ''),
-                    organization: workItemContext.organization,
-                    project: workItemContext.project,
-                    projectId: workItemContext.projectId,
-                    token: workItemContext.token
+                    organization: workItemContext.organization || '',
+                    project: workItemContext.project || '',
+                    projectId: workItemContext.projectId || '',
+                    token: workItemContext.token || ''
+                },
+                getDialogResult: function() {
+                    // Retorna os dados quando o usuário clica em Salvar
+                    return true;
+                },
+                okCallback: function(result) {
+                    console.log('[WorkItemGroup] Dialog OK callback');
+                    // O salvamento é feito pelo iframe via postMessage
                 }
             };
-
-            // Abrir o dialog usando o contribution
-            var extensionContext = VSS.getExtensionContext();
-            var contributionId = extensionContext.publisherId + "." + extensionContext.extensionId + ".apontar-dialog-content";
             
             console.log('[WorkItemGroup] Abrindo dialog com contributionId:', contributionId);
+            console.log('[WorkItemGroup] urlReplacementObject:', dialogOptions.urlReplacementObject);
 
             dialogService.openDialog(contributionId, dialogOptions).then(function(dialog) {
                 console.log('[WorkItemGroup] Dialog aberto com sucesso');
                 
-                // Passar os dados do work item para o dialog
-                dialog.getContributionInstance("apontar-dialog-content").then(function(instance) {
-                    if (instance && instance.setContext) {
-                        instance.setContext(workItemContext);
+                // Obter instância do dialog para comunicação
+                dialog.getContributionInstance(contributionId).then(function(dialogInstance) {
+                    console.log('[WorkItemGroup] Instância do dialog obtida');
+                    
+                    // Escutar mudanças no formulário para habilitar/desabilitar botão OK
+                    if (dialogInstance && dialogInstance.attachFormChanged) {
+                        dialogInstance.attachFormChanged(function(isValid) {
+                            dialog.updateOkButton(isValid);
+                        });
                     }
                 }, function(err) {
-                    console.error('[WorkItemGroup] Erro ao obter instância do dialog:', err);
+                    console.warn('[WorkItemGroup] Não foi possível obter instância do dialog:', err);
                 });
             }, function(err) {
                 console.error('[WorkItemGroup] Erro ao abrir dialog:', err);

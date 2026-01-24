@@ -101,6 +101,8 @@
 
             VSS.ready(function() {
                 console.log('[ApontarDialog] VSS ready');
+                console.log('[ApontarDialog] window.location.href:', window.location.href);
+                console.log('[ApontarDialog] window.location.search:', window.location.search);
 
                 // Obter configuração passada pelo opener
                 var contribution = VSS.getContribution();
@@ -109,29 +111,22 @@
                 console.log('[ApontarDialog] Contribution:', contribution);
                 console.log('[ApontarDialog] Configuration:', config);
 
-                // Extrair parâmetros da configuração ou URL
-                if (config && config.dialog) {
-                    // Configuração passada via dialogOptions
-                    dialogContext.workItemId = config.workItemId || '';
-                    dialogContext.workItemTitle = config.workItemTitle || '';
-                    dialogContext.organization = config.organization || '';
-                    dialogContext.project = config.project || '';
-                    dialogContext.projectId = config.projectId || '';
-                    dialogContext.token = config.token || '';
-                } else {
-                    // Fallback: extrair da URL
-                    var urlParams = new URLSearchParams(window.location.search);
-                    dialogContext.workItemId = urlParams.get('workItemId') || '';
-                    dialogContext.workItemTitle = decodeURIComponent(urlParams.get('workItemTitle') || '');
-                    dialogContext.organization = urlParams.get('organization') || '';
-                    dialogContext.project = urlParams.get('project') || '';
-                    dialogContext.projectId = urlParams.get('projectId') || '';
-                    dialogContext.token = urlParams.get('token') || '';
-                }
+                // Extrair parâmetros da URL (passados via urlReplacementObject pelo opener)
+                var urlParams = new URLSearchParams(window.location.search);
+                dialogContext.workItemId = urlParams.get('workItemId') || '';
+                dialogContext.workItemTitle = decodeURIComponent(urlParams.get('workItemTitle') || '');
+                dialogContext.organization = urlParams.get('organization') || '';
+                dialogContext.project = urlParams.get('project') || '';
+                dialogContext.projectId = urlParams.get('projectId') || '';
+                dialogContext.token = urlParams.get('token') || '';
 
-                console.log('[ApontarDialog] Context:', {
+                console.log('[ApontarDialog] Context from URL params:', {
                     workItemId: dialogContext.workItemId,
-                    hasToken: !!dialogContext.token
+                    workItemTitle: dialogContext.workItemTitle,
+                    organization: dialogContext.organization,
+                    project: dialogContext.project,
+                    hasToken: !!dialogContext.token,
+                    tokenLength: dialogContext.token ? dialogContext.token.length : 0
                 });
 
                 // Renderizar iframe com o formulário React
