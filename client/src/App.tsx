@@ -7,6 +7,7 @@ import { AzureDevOpsProvider } from "@/contexts/AzureDevOpsContext";
 import { useHashLocation } from "@/lib/hashLocation";
 import FolhaDeHoras from "@/pages/FolhaDeHoras";
 import Atividades from "@/pages/Atividades";
+import ApontarPopup from "@/pages/ApontarPopup";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
@@ -17,6 +18,7 @@ function AppRouter() {
         <Route path="/index.html" component={FolhaDeHoras} />
         <Route path="/timesheet" component={FolhaDeHoras} />
         <Route path="/atividades" component={Atividades} />
+        <Route path="/apontar" component={ApontarPopup} />
         <Route component={NotFound} />
       </Switch>
     </Router>
