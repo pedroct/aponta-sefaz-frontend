@@ -21,18 +21,6 @@
             flex-direction: column;
             gap: 12px;
         }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e1e1e1;
-        }
-        .title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-        }
         .btn-apontar {
             display: inline-flex;
             align-items: center;
@@ -58,49 +46,6 @@
             width: 16px;
             height: 16px;
         }
-        .info-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .info-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: #666;
-        }
-        .info-label {
-            font-weight: 500;
-            color: #333;
-            min-width: 100px;
-        }
-        .info-value {
-            color: #0078d4;
-            font-weight: 500;
-        }
-        .apontamentos-list {
-            margin-top: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .apontamento-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 8px;
-            background: #f8f8f8;
-            border-radius: 4px;
-            margin-bottom: 4px;
-            font-size: 12px;
-        }
-        .apontamento-data {
-            color: #666;
-        }
-        .apontamento-duracao {
-            font-weight: 600;
-            color: #107c10;
-        }
         .loading {
             display: flex;
             align-items: center;
@@ -124,36 +69,6 @@
             background: #fde7e9;
             border-radius: 4px;
         }
-        .empty {
-            color: #666;
-            font-size: 12px;
-            font-style: italic;
-            padding: 12px;
-            text-align: center;
-        }
-        .iframe-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-        .iframe-container.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .iframe-container iframe {
-            width: 90%;
-            max-width: 600px;
-            height: 80%;
-            border: none;
-            border-radius: 8px;
-            background: white;
-        }
     </style>
 </head>
 <body>
@@ -165,10 +80,6 @@
             </svg>
             <span>Carregando...</span>
         </div>
-    </div>
-
-    <div id="modal-container" class="iframe-container">
-        <iframe id="modal-iframe"></iframe>
     </div>
 
     <script>
@@ -257,16 +168,16 @@
                                         workItemContext.project = webContext.project.name;
                                         workItemContext.projectId = webContext.project.id;
                                         
-                                        // Obter token
+                                        // Obter token (Q promises usam .then(success, error) ao invés de .catch())
                                         VSS.getAccessToken().then(function(tokenObj) {
                                             workItemContext.token = tokenObj.token;
                                             console.log('[WorkItemGroup] Token obtido');
                                             renderUI();
-                                        }).catch(function(err) {
+                                        }, function(err) {
                                             console.error('[WorkItemGroup] Erro ao obter token:', err);
                                             renderUI(); // Renderiza mesmo sem token
                                         });
-                                    }).catch(function(err) {
+                                    }, function(err) {
                                         console.error('[WorkItemGroup] Erro ao obter campos:', err);
                                         showError('Erro ao carregar dados do work item');
                                     });
@@ -306,37 +217,15 @@
 
         function renderUI() {
             var root = document.getElementById('root');
-            
+
             root.innerHTML = `
-                <div class="header">
-                    <span class="title">⏱️ Apontamentos</span>
-                    <button class="btn-apontar" id="btn-apontar" ${!workItemContext.id ? 'disabled' : ''}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Apontar Tempo
-                    </button>
-                </div>
-                
-                <div class="info-section">
-                    <div class="info-row">
-                        <span class="info-label">Work Item:</span>
-                        <span class="info-value">#${workItemContext.id || '-'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Tipo:</span>
-                        <span>${workItemContext.type || '-'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Status:</span>
-                        <span>${workItemContext.state || '-'}</span>
-                    </div>
-                </div>
-                
-                <div id="apontamentos-container">
-                    <div class="empty">Clique em "Apontar Tempo" para registrar horas neste item.</div>
-                </div>
+                <button class="btn-apontar" id="btn-apontar" ${!workItemContext.id ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Apontar Tempo
+                </button>
             `;
 
             // Adicionar event listener no botão
