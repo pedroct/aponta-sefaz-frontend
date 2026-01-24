@@ -43,73 +43,90 @@
         <span>Inicializando Gestão de Atividades...</span>
     </div>
 
-    <script type="module">
-        // Usar Azure DevOps Extension SDK moderno
-        import * as SDK from 'https://cdn.jsdelivr.net/npm/azure-devops-extension-sdk@3/lib/SDK.min.js';
+    <script>
+        console.log('[Atividades Wrapper] Iniciando...');
+        
+        // Verificar se VSS está disponível ou carregá-lo
+        function initializeExtension() {
+            if (typeof VSS !== 'undefined') {
+                console.log('[Atividades Wrapper] VSS já disponível');
+                setupVSS();
+            } else {
+                console.log('[Atividades Wrapper] Carregando VSS SDK...');
+                const script = document.createElement('script');
+                script.src = 'https://www.vsassets.io/scripts/VSS.SDK.min.js';
+                script.onload = () => {
+                    console.log('[Atividades Wrapper] VSS SDK carregado');
+                    setupVSS();
+                };
+                script.onerror = () => {
+                    console.error('[Atividades Wrapper] Erro ao carregar VSS SDK');
+                    showError('Erro ao carregar Azure DevOps SDK');
+                };
+                document.head.appendChild(script);
+            }
+        }
 
-        async function initializeExtension() {
-            console.log('[Atividades Wrapper] Inicializando Azure DevOps Extension SDK');
-            
+        function setupVSS() {
             try {
-                // Inicializar SDK moderno
-                await SDK.init();
-                console.log('[Atividades Wrapper] SDK inicializado com sucesso');
-                
-                // Obter contexto
-                const projectService = await SDK.getService('ms.vss-tfs-web.project-data-service');
-                const project = await projectService.getProject();
-                
-                const userContext = SDK.getUser();
-                const hostContext = SDK.getHost();
-                
-                console.log('[Atividades Wrapper] Contexto obtido:', {
-                    project: project.name,
-                    projectId: project.id,
-                    organization: hostContext.name,
-                    user: userContext.displayName
+                VSS.init({
+                    explicitNotifyLoaded: true,
+                    usePlatformStyles: true,
+                    usePlatformScripts: true
                 });
 
-                // Obter token de acesso
-                const accessToken = await SDK.getAccessToken();
-                console.log('[Atividades Wrapper] Token obtido:', accessToken ? 'Sim' : 'Não');
-                
-                // Construir URL com parâmetros
-                const params = new URLSearchParams({
-                    embedded: 'true',
-                    source: 'azdo-atividades-hub',
-                    token: accessToken,
-                    organization: hostContext.name,
-                    project: project.name,
-                    projectId: project.id,
-                    userId: userContext.id,
-                    userName: userContext.displayName,
-                    userUniqueName: userContext.uniqueName,
-                    userEmail: userContext.uniqueName
-                });
+                VSS.ready(function() {
+                    console.log('[Atividades Wrapper] VSS ready');
+                    
+                    try {
+                        const webContext = VSS.getWebContext();
+                        console.log('[Atividades Wrapper] Web context:', webContext);
 
-                // URL base da aplicação React
-                const baseUrl = 'https://staging-aponta.treit.com.br';
-                const targetUrl = `${baseUrl}/#/atividades?${params.toString()}`;
-                
-                console.log('[Atividades Wrapper] Redirecionando para:', targetUrl);
-                
-                // Criar iframe para carregar a aplicação
-                const iframe = document.createElement('iframe');
-                iframe.src = targetUrl;
-                iframe.style.width = '100%';
-                iframe.style.height = '100vh';
-                iframe.style.border = 'none';
-                
-                // Ocultar loading e mostrar iframe
-                document.getElementById('loading').style.display = 'none';
-                document.body.appendChild(iframe);
-                
-                // Notificar que a extensão foi carregada
-                SDK.notifyLoadSucceeded();
-                
+                        VSS.getAccessToken().then(function(token) {
+                            console.log('[Atividades Wrapper] Token obtido');
+                            
+                            const params = new URLSearchParams({
+                                embedded: 'true',
+                                source: 'azdo-atividades-hub',
+                                token: token.token,
+                                organization: webContext.account.name,
+                                project: webContext.project.name,
+                                projectId: webContext.project.id,
+                                userId: webContext.user.id,
+                                userName: webContext.user.name,
+                                userUniqueName: webContext.user.uniqueName,
+                                userEmail: webContext.user.email || webContext.user.uniqueName
+                            });
+
+                            const baseUrl = 'https://staging-aponta.treit.com.br';
+                            const targetUrl = `${baseUrl}/#/atividades?${params.toString()}`;
+                            
+                            console.log('[Atividades Wrapper] Redirecionando para:', targetUrl);
+                            
+                            const iframe = document.createElement('iframe');
+                            iframe.src = targetUrl;
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100vh';
+                            iframe.style.border = 'none';
+                            
+                            document.getElementById('loading').style.display = 'none';
+                            document.body.appendChild(iframe);
+                            
+                            VSS.notifyLoadSucceeded();
+                            
+                        }).catch(function(error) {
+                            console.error('[Atividades Wrapper] Erro ao obter token:', error);
+                            showError('Erro ao obter token de acesso');
+                        });
+                        
+                    } catch (error) {
+                        console.error('[Atividades Wrapper] Erro no VSS ready:', error);
+                        showError('Erro na inicialização do contexto');
+                    }
+                });
             } catch (error) {
-                console.error('[Atividades Wrapper] Erro na inicialização:', error);
-                showError(`Erro ao inicializar extensão: ${error.message}`);
+                console.error('[Atividades Wrapper] Erro no VSS.init:', error);
+                showError('Erro ao inicializar VSS SDK');
             }
         }
 
