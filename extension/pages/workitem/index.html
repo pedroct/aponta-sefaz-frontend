@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apontamentos - Work Item</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #ffffff;
+            overflow: auto;
+            padding: 8px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .btn-apontar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-apontar:hover {
+            background: #106ebe;
+        }
+        .btn-apontar:disabled {
+            background: #c8c8c8;
+            cursor: not-allowed;
+        }
+        .btn-apontar svg {
+            width: 16px;
+            height: 16px;
+        }
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .info-label {
+            font-weight: 500;
+            color: #333;
+            min-width: 100px;
+        }
+        .info-value {
+            color: #0078d4;
+            font-weight: 500;
+        }
+        .apontamentos-list {
+            margin-top: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .apontamento-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            background: #f8f8f8;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        .apontamento-data {
+            color: #666;
+        }
+        .apontamento-duracao {
+            font-weight: 600;
+            color: #107c10;
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #0078d4;
+        }
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            color: #d13438;
+            font-size: 12px;
+            padding: 8px;
+            background: #fde7e9;
+            border-radius: 4px;
+        }
+        .empty {
+            color: #666;
+            font-size: 12px;
+            font-style: italic;
+            padding: 12px;
+            text-align: center;
+        }
+        .iframe-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .iframe-container.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .iframe-container iframe {
+            width: 90%;
+            max-width: 600px;
+            height: 80%;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="container">
+        <div class="loading">
+            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" opacity="0.2"></circle>
+                <path d="M22 12a10 10 0 0 1-20 0"></path>
+            </svg>
+            <span>Carregando...</span>
+        </div>
+    </div>
+
+    <div id="modal-container" class="iframe-container">
+        <iframe id="modal-iframe"></iframe>
+    </div>
+
+    <script>
+        console.log('[WorkItemGroup] Iniciando...');
+
+        // Variáveis globais do contexto
+        var workItemContext = {
+            id: null,
+            title: '',
+            state: '',
+            type: '',
+            organization: '',
+            project: '',
+            projectId: '',
+            token: ''
+        };
+
+        // Verificar se VSS está disponível ou carregá-lo
+        function initializeExtension() {
+            if (typeof VSS !== 'undefined') {
+                console.log('[WorkItemGroup] VSS já disponível');
+                setupVSS();
+            } else {
+                console.log('[WorkItemGroup] Carregando VSS SDK...');
+                var script = document.createElement('script');
+                script.src = 'https://cdn.vsassets.io/bundles/vss-web-extension-sdk/lib/VSS.SDK.min.js';
+                script.onload = function() {
+                    console.log('[WorkItemGroup] VSS SDK carregado');
+                    setupVSS();
+                };
+                script.onerror = function() {
+                    // Fallback para outro CDN
+                    var fallbackScript = document.createElement('script');
+                    fallbackScript.src = 'https://cdn.jsdelivr.net/npm/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js';
+                    fallbackScript.onload = function() {
+                        console.log('[WorkItemGroup] VSS SDK carregado (fallback)');
+                        setupVSS();
+                    };
+                    fallbackScript.onerror = function() {
+                        showError('Erro ao carregar Azure DevOps SDK');
+                    };
+                    document.head.appendChild(fallbackScript);
+                };
+                document.head.appendChild(script);
+            }
+        }
+
+        function setupVSS() {
+            try {
+                VSS.init({
+                    explicitNotifyLoaded: true,
+                    usePlatformScripts: true,
+                    usePlatformStyles: true
+                });
+
+                VSS.require(["TFS/WorkItemTracking/Services"], function(_WorkItemServices) {
+                    console.log('[WorkItemGroup] WorkItemServices carregado');
+
+                    function getWorkItemFormService() {
+                        return _WorkItemServices.WorkItemFormService.getService();
+                    }
+
+                    // Registrar o contribution
+                    VSS.register(VSS.getContribution().id, function() {
+                        return {
+                            onLoaded: function(args) {
+                                console.log('[WorkItemGroup] Work item carregado');
+                                
+                                getWorkItemFormService().then(function(service) {
+                                    service.getFieldValues([
+                                        "System.Id", 
+                                        "System.Title", 
+                                        "System.State",
+                                        "System.WorkItemType"
+                                    ]).then(function(values) {
+                                        console.log('[WorkItemGroup] Campos obtidos:', values);
+                                        
+                                        workItemContext.id = values["System.Id"];
+                                        workItemContext.title = values["System.Title"];
+                                        workItemContext.state = values["System.State"];
+                                        workItemContext.type = values["System.WorkItemType"];
+                                        
+                                        // Obter contexto web
+                                        var webContext = VSS.getWebContext();
+                                        workItemContext.organization = webContext.account.name;
+                                        workItemContext.project = webContext.project.name;
+                                        workItemContext.projectId = webContext.project.id;
+                                        
+                                        // Obter token
+                                        VSS.getAccessToken().then(function(tokenObj) {
+                                            workItemContext.token = tokenObj.token;
+                                            console.log('[WorkItemGroup] Token obtido');
+                                            renderUI();
+                                        }).catch(function(err) {
+                                            console.error('[WorkItemGroup] Erro ao obter token:', err);
+                                            renderUI(); // Renderiza mesmo sem token
+                                        });
+                                    }).catch(function(err) {
+                                        console.error('[WorkItemGroup] Erro ao obter campos:', err);
+                                        showError('Erro ao carregar dados do work item');
+                                    });
+                                });
+                            },
+                            
+                            onFieldChanged: function(args) {
+                                console.log('[WorkItemGroup] Campo alterado:', args.changedFields);
+                            },
+                            
+                            onSaved: function(args) {
+                                console.log('[WorkItemGroup] Work item salvo');
+                            },
+                            
+                            onRefreshed: function(args) {
+                                console.log('[WorkItemGroup] Work item atualizado');
+                            },
+                            
+                            onReset: function(args) {
+                                console.log('[WorkItemGroup] Work item resetado');
+                            },
+                            
+                            onUnloaded: function(args) {
+                                console.log('[WorkItemGroup] Work item descarregado');
+                            }
+                        };
+                    });
+
+                    VSS.notifyLoadSucceeded();
+                });
+
+            } catch (error) {
+                console.error('[WorkItemGroup] Erro no VSS.init:', error);
+                showError('Erro ao inicializar extensão');
+            }
+        }
+
+        function renderUI() {
+            var root = document.getElementById('root');
+            
+            root.innerHTML = `
+                <div class="header">
+                    <span class="title">⏱️ Apontamentos</span>
+                    <button class="btn-apontar" id="btn-apontar" ${!workItemContext.id ? 'disabled' : ''}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Apontar Tempo
+                    </button>
+                </div>
+                
+                <div class="info-section">
+                    <div class="info-row">
+                        <span class="info-label">Work Item:</span>
+                        <span class="info-value">#${workItemContext.id || '-'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tipo:</span>
+                        <span>${workItemContext.type || '-'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status:</span>
+                        <span>${workItemContext.state || '-'}</span>
+                    </div>
+                </div>
+                
+                <div id="apontamentos-container">
+                    <div class="empty">Clique em "Apontar Tempo" para registrar horas neste item.</div>
+                </div>
+            `;
+
+            // Adicionar event listener no botão
+            var btnApontar = document.getElementById('btn-apontar');
+            if (btnApontar) {
+                btnApontar.addEventListener('click', abrirModalApontamento);
+            }
+        }
+
+        function abrirModalApontamento() {
+            if (!workItemContext.id) {
+                alert('Work Item ID não disponível');
+                return;
+            }
+
+            // Construir URL com parâmetros
+            var params = new URLSearchParams({
+                embedded: 'true',
+                source: 'azdo-workitem-form',
+                workItemId: workItemContext.id,
+                workItemTitle: workItemContext.title || '',
+                organization: workItemContext.organization,
+                project: workItemContext.project,
+                projectId: workItemContext.projectId,
+                token: workItemContext.token,
+                mode: 'modal'
+            });
+
+            var baseUrl = 'https://staging-aponta.treit.com.br';
+            var targetUrl = baseUrl + '/#/apontar?' + params.toString();
+
+            console.log('[WorkItemGroup] Abrindo modal:', targetUrl);
+
+            // Abrir em nova janela/popup
+            var width = 600;
+            var height = 700;
+            var left = (screen.width - width) / 2;
+            var top = (screen.height - height) / 2;
+            
+            window.open(
+                targetUrl,
+                'ApontarTempo',
+                'width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes'
+            );
+        }
+
+        function showError(message) {
+            var root = document.getElementById('root');
+            root.innerHTML = '<div class="error">' + message + '</div>';
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeExtension);
+        } else {
+            initializeExtension();
+        }
+    </script>
+</body>
+</html>
