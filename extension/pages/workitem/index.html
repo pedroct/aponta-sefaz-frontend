@@ -73,6 +73,7 @@
             project: '',
             projectId: '',
             token: '',
+            tokenError: false,
             // Dados do usuário autenticado
             userId: '',
             userName: '',
@@ -178,11 +179,14 @@
                                         // Obter token (Q promises usam .then(success, error) ao invés de .catch())
                                         VSS.getAccessToken().then(function(tokenObj) {
                                             workItemContext.token = tokenObj.token;
+                                            workItemContext.tokenError = false;
                                             console.log('[WorkItemGroup] Token obtido');
                                             renderUI();
                                         }, function(err) {
                                             console.error('[WorkItemGroup] Erro ao obter token:', err);
-                                            renderUI(); // Renderiza mesmo sem token
+                                            workItemContext.tokenError = true;
+                                            // Renderiza mesmo sem token - o apontar-dialog vai tentar obter o token diretamente
+                                            renderUI();
                                         });
                                     }, function(err) {
                                         console.error('[WorkItemGroup] Erro ao obter campos:', err);

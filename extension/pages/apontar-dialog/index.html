@@ -123,27 +123,43 @@
                 dialogContext.organization = urlParams.get('organization') || '';
                 dialogContext.project = urlParams.get('project') || '';
                 dialogContext.projectId = urlParams.get('projectId') || '';
-                dialogContext.token = urlParams.get('token') || '';
                 // Dados do usuário
                 dialogContext.userId = urlParams.get('userId') || '';
                 dialogContext.userName = decodeURIComponent(urlParams.get('userName') || '');
                 dialogContext.userUniqueName = decodeURIComponent(urlParams.get('userUniqueName') || '');
                 dialogContext.userEmail = decodeURIComponent(urlParams.get('userEmail') || '');
 
+                // Token da URL como fallback
+                var urlToken = urlParams.get('token') || '';
+
                 console.log('[ApontarDialog] Context from URL params:', {
                     workItemId: dialogContext.workItemId,
                     workItemTitle: dialogContext.workItemTitle,
                     organization: dialogContext.organization,
                     project: dialogContext.project,
-                    hasToken: !!dialogContext.token,
-                    tokenLength: dialogContext.token ? dialogContext.token.length : 0,
+                    hasUrlToken: !!urlToken,
+                    urlTokenLength: urlToken ? urlToken.length : 0,
                     userId: dialogContext.userId,
                     userName: dialogContext.userName,
                     userUniqueName: dialogContext.userUniqueName
                 });
 
-                // Renderizar iframe com o formulário React
-                renderIframe();
+                // Obter token diretamente via VSS.getAccessToken() (mesmo padrão da timesheet)
+                VSS.getAccessToken().then(function(tokenObj) {
+                    dialogContext.token = tokenObj.token;
+                    console.log('[ApontarDialog] Token obtido via VSS.getAccessToken():', dialogContext.token ? '(' + dialogContext.token.length + ' chars)' : 'vazio');
+                    renderIframe();
+                }, function(err) {
+                    console.warn('[ApontarDialog] Erro ao obter token via VSS.getAccessToken(), usando fallback da URL:', err);
+                    dialogContext.token = urlToken;
+                    if (!dialogContext.token) {
+                        console.error('[ApontarDialog] Token não disponível nem via VSS nem via URL');
+                        showError('Erro ao obter token de autenticação. Por favor, recarregue a página.');
+                        return;
+                    }
+                    console.log('[ApontarDialog] Usando token da URL como fallback:', dialogContext.token.length + ' chars');
+                    renderIframe();
+                });
 
                 // Registrar objeto para comunicação com o opener
                 VSS.register(VSS.getContribution().id, {
