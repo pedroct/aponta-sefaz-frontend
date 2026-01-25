@@ -296,18 +296,28 @@
 
             dialogService.openDialog(contributionId, dialogOptions).then(function(dialog) {
                 console.log('[WorkItemGroup] Dialog aberto com sucesso');
-                
+                console.log('[WorkItemGroup] Dialog object:', dialog);
+
                 // Escutar quando o dialog fechar para processar o resultado
                 // O resultado vem do apontar-dialog quando chama config.dialog.close(result)
                 dialog.getDialogResult().then(function(result) {
                     console.log('[WorkItemGroup] Dialog fechou com resultado:', result);
+                    console.log('[WorkItemGroup] Tipo do resultado:', typeof result);
+                    console.log('[WorkItemGroup] Resultado stringified:', JSON.stringify(result));
                     // Atualizar campos do Work Item se houver duração
                     if (result && result.success && result.duration && result.duration > 0) {
                         console.log('[WorkItemGroup] Atualizando campos do Work Item com duração:', result.duration);
                         atualizarCamposWorkItem(result.duration);
+                    } else {
+                        console.log('[WorkItemGroup] Condições não atendidas para atualizar WI:', {
+                            hasResult: !!result,
+                            success: result?.success,
+                            duration: result?.duration,
+                            durationGt0: result?.duration > 0
+                        });
                     }
                 }, function(err) {
-                    console.log('[WorkItemGroup] Dialog cancelado ou fechado sem salvar');
+                    console.log('[WorkItemGroup] Dialog cancelado ou fechado sem salvar:', err);
                 });
             }, function(err) {
                 console.error('[WorkItemGroup] Erro ao abrir dialog:', err);

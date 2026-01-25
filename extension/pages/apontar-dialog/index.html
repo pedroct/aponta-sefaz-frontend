@@ -288,13 +288,19 @@
             }
 
             function closeDialog(success, result) {
+                console.log('[ApontarDialog] closeDialog chamado:', { success: success, result: result });
                 var config = VSS.getConfiguration();
+                console.log('[ApontarDialog] config.dialog existe:', !!config, !!config?.dialog);
                 if (config && config.dialog) {
                     if (success) {
+                        console.log('[ApontarDialog] Chamando config.dialog.close com result:', JSON.stringify(result));
                         config.dialog.close(result);
                     } else {
+                        console.log('[ApontarDialog] Chamando config.dialog.close sem result');
                         config.dialog.close();
                     }
+                } else {
+                    console.error('[ApontarDialog] config.dialog não disponível!');
                 }
             }
 

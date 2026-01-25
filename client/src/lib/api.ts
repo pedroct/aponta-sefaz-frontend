@@ -82,6 +82,9 @@ export class ApiClient {
     const token = await this.getToken();
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
+    console.log('[ApiClient] Requisição:', options.method || 'GET', url);
+    console.log('[ApiClient] Token presente:', !!token, token ? `(${token.length} chars)` : '');
+
     const headers = new Headers(options.headers);
     if (!headers.has('Content-Type') && options.body) {
       headers.set('Content-Type', 'application/json');
@@ -94,6 +97,8 @@ export class ApiClient {
       ...options,
       headers,
     });
+
+    console.log('[ApiClient] Response status:', response.status, response.statusText);
 
     // Retry em 401 (token expirado)
     if (response.status === 401) {
