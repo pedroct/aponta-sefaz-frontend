@@ -1,8 +1,8 @@
 # Sistema de PATs por Organização
 
 **Data:** 26 de Janeiro de 2026  
-**Versão:** 1.1.0  
-**Status:** 🔄 Implementado - Aguardando Deploy  
+**Versão:** 1.2.0  
+**Status:** ✅ Implementado em Staging  
 **Autor:** Implementação assistida por IA
 
 ---
@@ -15,10 +15,11 @@
 4. [Arquitetura](#arquitetura)
 5. [Backend: Detalhes da Implementação](#backend-detalhes-da-implementação)
 6. [Frontend: Detalhes da Implementação](#frontend-detalhes-da-implementação)
-7. [Configuração e Deploy](#configuração-e-deploy)
-8. [Uso da Interface](#uso-da-interface)
-9. [API Reference](#api-reference)
-10. [Troubleshooting](#troubleshooting)
+7. [Extensão Azure DevOps](#extensão-azure-devops)
+8. [Configuração e Deploy](#configuração-e-deploy)
+9. [Uso da Interface](#uso-da-interface)
+10. [API Reference](#api-reference)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -273,6 +274,85 @@ https://aponta.treit.com.br/#/configuracao/pats
 
 ---
 
+## 🔌 Extensão Azure DevOps
+
+A configuração de PATs está integrada diretamente no **Organization Settings** do Azure DevOps através de um hub administrativo.
+
+### Contribution no Manifesto
+
+```json
+{
+  "id": "configuracao-pats-hub",
+  "type": "ms.vss-web.hub",
+  "description": "Hub de configuração de PATs por organização no Organization Settings",
+  "targets": [
+    "ms.vss-web.collection-admin-hub-group"
+  ],
+  "properties": {
+    "name": "Aponta - PATs",
+    "order": 100,
+    "uri": "pages/configuracao-pats/index.html",
+    "icon": {
+      "light": "images/icon-16.png",
+      "dark": "images/icon-16-dark.png"
+    }
+  }
+}
+```
+
+### Arquivos da Extensão
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `extension/pages/configuracao-pats/index.html` | Wrapper que carrega o frontend via iframe |
+| `extension/vss-extension.json` | Manifesto de produção |
+| `extension/vss-extension.staging.json` | Manifesto de staging |
+
+### Acesso via Azure DevOps
+
+1. **Navegação:** `Organization Settings` → `Extensions` → `Aponta - PATs`
+2. **URL Direta (Staging):** 
+   ```
+   https://dev.azure.com/{organization}/_settings/sefaz-ceara.aponta-projetos-staging.configuracao-pats-hub
+   ```
+3. **URL Direta (Produção):**
+   ```
+   https://dev.azure.com/{organization}/_settings/sefaz-ceara.aponta-projetos.configuracao-pats-hub
+   ```
+
+### Fluxo de Carregamento
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│               Azure DevOps Organization Settings                │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│           pages/configuracao-pats/index.html (wrapper)          │
+├─────────────────────────────────────────────────────────────────┤
+│  1. Carrega VSS SDK (fallback: CDN jsdelivr/unpkg)              │
+│  2. Inicializa VSS.init()                                       │
+│  3. Obtém webContext e appToken                                 │
+│  4. Cria iframe apontando para frontend externo                 │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│       https://staging-aponta.treit.com.br/#/configuracao/pats   │
+│               (Frontend React hospedado externamente)           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Versões do VSIX
+
+| Ambiente | Versão | Arquivo |
+|----------|--------|---------|
+| Staging | 1.1.97 | `sefaz-ceara.aponta-projetos-staging-1.1.97.vsix` |
+| Produção | 1.0.1 | `sefaz-ceara.aponta-projetos-1.0.1.vsix` |
+
+---
+
 ## ⚙️ Configuração e Deploy
 
 ### Variáveis de Ambiente (Backend)
@@ -522,6 +602,15 @@ WHERE organization_name = 'sefaz-ceara';
 
 ## 📝 Changelog
 
+### v1.2.0 (26/01/2026)
+
+- ✨ **Novo:** Hub administrativo no Organization Settings do Azure DevOps
+- ✨ **Novo:** Contribution `ms.vss-web.collection-admin-hub-group` para acesso direto
+- ✨ **Novo:** Wrapper HTML com fallback de VSS SDK (jsdelivr/unpkg)
+- 🔧 **Corrigido:** URL do iframe agora aponta para frontend externo (`staging-aponta.treit.com.br`)
+- 🔧 **Corrigido:** Caminho do VSS SDK local (`../../lib/VSS.SDK.min.js`)
+- 📦 **VSIX Staging:** v1.1.97
+
 ### v1.1.0 (26/01/2026)
 
 - ✨ **Novo:** Interface de gerenciamento de PATs
@@ -535,6 +624,8 @@ WHERE organization_name = 'sefaz-ceara';
 
 ## 🔗 Links Relacionados
 
+- [DEPLOY_STAGING_WORKFLOW.md](./DEPLOY_STAGING_WORKFLOW.md) - Workflow de deploy staging
 - [DEPLOY_PRODUCAO_V1.0.md](./DEPLOY_PRODUCAO_V1.0.md) - Deploy inicial de produção
 - [DIVERGENCIAS_GIT_AMBIENTES.md](./DIVERGENCIAS_GIT_AMBIENTES.md) - Sincronização Git
+- [Azure DevOps Extension Targets](https://learn.microsoft.com/en-us/azure/devops/extend/reference/targets/overview)
 - [Azure DevOps PAT Guide](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate)
