@@ -1,8 +1,8 @@
 # Sistema de PATs por Organização
 
 **Data:** 26 de Janeiro de 2026  
-**Versão:** 1.2.0  
-**Status:** ✅ Implementado em Staging  
+**Versão:** 1.2.1  
+**Status:** ✅ Implementado e Testado em Staging  
 **Autor:** Implementação assistida por IA
 
 ---
@@ -348,7 +348,7 @@ A configuração de PATs está integrada diretamente no **Organization Settings*
 
 | Ambiente | Versão | Arquivo |
 |----------|--------|---------|
-| Staging | 1.1.97 | `sefaz-ceara.aponta-projetos-staging-1.1.97.vsix` |
+| Staging | 1.1.98 | `sefaz-ceara.aponta-projetos-staging-1.1.98.vsix` |
 | Produção | 1.0.1 | `sefaz-ceara.aponta-projetos-1.0.1.vsix` |
 
 ---
@@ -587,7 +587,7 @@ DELETE /api/v1/organization-pats/{id}
 
 **Solução:** Verifique se `PAT_ENCRYPTION_KEY` ou `SECRET_KEY` estão corretos nas variáveis de ambiente.
 
-### PAT não está sendo usado
+### Erro: "PAT não está sendo usado"
 
 **Causa:** O PAT pode estar desativado ou a busca não encontra.
 
@@ -598,9 +598,43 @@ FROM aponta_sefaz.organization_pats
 WHERE organization_name = 'sefaz-ceara';
 ```
 
+### Erro: "422 Unprocessable Content" ao criar PAT
+
+**Causa 1:** Campo `expira_em` em formato incorreto (apenas data sem hora).
+
+**Solução:** Frontend deve converter para datetime ISO: `2027-01-24T23:59:59.000Z`
+
+**Causa 2:** Validators duplicados no schema Pydantic.
+
+**Solução:** Verificar se há apenas um `@field_validator` por campo com `mode="before"`.
+
+### Erro: "datetime_parsing - invalid datetime separator"
+
+**Causa:** O campo de data está sendo enviado como `YYYY-MM-DD` mas o backend espera datetime ISO.
+
+**Solução:** No frontend, converter a data antes de enviar:
+```typescript
+const expiraEmDatetime = formData.expira_em
+  ? new Date(formData.expira_em + "T23:59:59").toISOString()
+  : undefined;
+```
+
 ---
 
 ## 📝 Changelog
+
+### v1.2.1 (26/01/2026)
+
+- 🔧 **Corrigido (Backend):** Unificação de validators duplicados para `organization_url` no schema Pydantic
+  - Problema: Dois `@field_validator` com `mode="before"` causavam conflitos e erro 422
+  - Solução: Unificados em único validator que converte string vazia para None e gera URL automaticamente
+  - Commit: `e7b3490`
+- 🔧 **Corrigido (Frontend):** Conversão de `expira_em` para datetime ISO
+  - Problema: Input `type="date"` enviava `YYYY-MM-DD`, backend esperava datetime ISO
+  - Solução: Conversão para `YYYY-MM-DDTHH:mm:ss.sssZ` antes do envio
+  - Commit: `da7dcb8`
+- ✅ **Testado:** Criação e validação de PATs funcionando em staging
+- 📦 **VSIX Staging:** v1.1.98
 
 ### v1.2.0 (26/01/2026)
 

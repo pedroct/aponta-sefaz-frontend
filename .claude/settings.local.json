@@ -25,7 +25,20 @@
       "Bash(powershell -Command \"Add-Type -AssemblyName System.IO.Compression.FileSystem; $z = [System.IO.Compression.ZipFile]::OpenRead\\(''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix''\\); $z.Entries | Where-Object { $_FullName -match ''lib|SDK'' } | Select-Object -ExpandProperty FullName; $z.Dispose\\(\\)\")",
       "Bash(powershell \"Expand-Archive -Path ''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix'' -DestinationPath ''./vsix-check-temp'' -Force; Get-ChildItem -Recurse ./vsix-check-temp/extension/lib 2>$null | Select-Object -ExpandProperty Name; Remove-Item -Recurse -Force ./vsix-check-temp\")",
       "Bash(powershell \"Expand-Archive -Path ''sefaz-ceara.aponta-projetos-staging-1.1.64.vsix'' -DestinationPath ''./vsix-temp'' -Force; if \\(Test-Path ''./vsix-temp/extension/lib''\\) { Get-ChildItem ''./vsix-temp/extension/lib'' | Select-Object -ExpandProperty Name } else { Write-Host ''lib folder not found'' }; Remove-Item -Recurse -Force ''./vsix-temp''\")",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(cd:*)",
+      "Bash(source:*)",
+      "Bash(npm run test:*)",
+      "Bash(wsl -d Ubuntu-24.04 -- bash -c \"cd /home/pedroctdev/apps/api-aponta-vps && source .venv/bin/activate && python -m pytest -v 2>&1\")",
+      "Bash(wsl -d Ubuntu-24.04 -- bash -c \"cd /home/pedroctdev/apps/api-aponta-vps && ls -la\":*)",
+      "Bash(wsl -d Ubuntu-24.04 -- bash -c \"cd /home/pedroctdev/apps/api-aponta-vps && . .venv/bin/activate && python -m pytest -v 2>&1\":*)",
+      "Bash(wsl -d Ubuntu-24.04 -- bash -c \"ls -la /home/pedroctdev/apps/api-aponta-vps/.venv/\")",
+      "Bash(wsl -d Ubuntu-24.04 -- bash -c \"ls -la /home/pedroctdev/apps/api-aponta-vps/.venv_new/\")",
+      "Bash(wsl:*)",
+      "Bash(npm run build:extension:*)"
     ]
   }
 }
