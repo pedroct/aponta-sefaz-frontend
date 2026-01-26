@@ -46,10 +46,11 @@
     <script>
         console.log('[Configuracao PATs Wrapper] Iniciando...');
 
-        // Lista de CDNs para fallback do VSS SDK
+        // Lista de CDNs para fallback do VSS SDK (mesmas fontes do timesheet)
         var VSS_SDK_SOURCES = [
-            'https://cdn.vsassets.io/v/M211_20240109.9/_scripts/VSS/SDK/VSS.SDK.min.js',
-            '../lib/VSS.SDK.min.js'
+            '../../lib/VSS.SDK.min.js',
+            'https://cdn.jsdelivr.net/npm/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js',
+            'https://unpkg.com/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js'
         ];
 
         var currentSourceIndex = 0;
