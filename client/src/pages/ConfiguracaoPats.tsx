@@ -244,13 +244,18 @@ export function ConfiguracaoPats() {
 
   const handleFormSubmit = async () => {
     try {
+      // Converte data para datetime ISO (input date retorna YYYY-MM-DD, backend espera datetime)
+      const expiraEmDatetime = formData.expira_em
+        ? new Date(formData.expira_em + "T23:59:59").toISOString()
+        : undefined;
+
       if (formMode === "create") {
         await criarMutation.mutateAsync({
           organization_name: formData.organization_name,
           pat: formData.pat,
           organization_url: formData.organization_url || undefined,
           descricao: formData.descricao || undefined,
-          expira_em: formData.expira_em || undefined,
+          expira_em: expiraEmDatetime,
           validate_first: validateFirst,
         });
         toast({
@@ -264,7 +269,7 @@ export function ConfiguracaoPats() {
             organization_url: formData.organization_url || undefined,
             pat: formData.pat || undefined,
             descricao: formData.descricao || undefined,
-            expira_em: formData.expira_em || undefined,
+            expira_em: expiraEmDatetime,
           },
         });
         toast({
