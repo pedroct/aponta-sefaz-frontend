@@ -144,13 +144,13 @@
                     userUniqueName: dialogContext.userUniqueName
                 });
 
-                // Obter token diretamente via VSS.getAccessToken() (mesmo padrão da timesheet)
-                VSS.getAccessToken().then(function(tokenObj) {
+                // Obter token diretamente via VSS.getAppToken() (token JWT para autenticação com backend)
+                VSS.getAppToken().then(function(tokenObj) {
                     dialogContext.token = tokenObj.token;
-                    console.log('[ApontarDialog] Token obtido via VSS.getAccessToken():', dialogContext.token ? '(' + dialogContext.token.length + ' chars)' : 'vazio');
+                    console.log('[ApontarDialog] App Token obtido via VSS.getAppToken():', dialogContext.token ? '(' + dialogContext.token.length + ' chars)' : 'vazio');
                     renderIframe();
                 }, function(err) {
-                    console.warn('[ApontarDialog] Erro ao obter token via VSS.getAccessToken(), usando fallback da URL:', err);
+                    console.warn('[ApontarDialog] Erro ao obter token via VSS.getAppToken(), usando fallback da URL:', err);
                     dialogContext.token = urlToken;
                     if (!dialogContext.token) {
                         console.error('[ApontarDialog] Token não disponível nem via VSS nem via URL');

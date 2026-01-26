@@ -177,10 +177,10 @@
                                         }
                                         
                                         // Obter token (Q promises usam .then(success, error) ao invés de .catch())
-                                        VSS.getAccessToken().then(function(tokenObj) {
+                                        VSS.getAppToken().then(function(tokenObj) {
                                             workItemContext.token = tokenObj.token;
                                             workItemContext.tokenError = false;
-                                            console.log('[WorkItemGroup] Token obtido');
+                                            console.log('[WorkItemGroup] App Token obtido (' + tokenObj.token.length + ' chars)');
                                             renderUI();
                                         }, function(err) {
                                             console.error('[WorkItemGroup] Erro ao obter token:', err);

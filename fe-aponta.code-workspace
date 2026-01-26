@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "\\\\wsl.localhost\\Ubuntu-24.04\\home\\pedroctdev\\apps\\api-aponta-vps"
 		}
 	],
 	"settings": {}

@@ -106,9 +106,9 @@
                     throw new Error('Work Item ID não foi fornecido na URL');
                 }
 
-                // Obter token de autenticação
-                const token = await Promise.resolve(VSS.getAccessToken());
-                console.log('✅ Token obtido com sucesso');
+                // Obter token de autenticação (App Token JWT para autenticação com backend)
+                const token = await Promise.resolve(VSS.getAppToken());
+                console.log('✅ App Token obtido com sucesso (' + token.token.length + ' chars)');
 
                 // Injetar token no localStorage para a aplicação React usar
                 localStorage.setItem('vss_token', token.token);
