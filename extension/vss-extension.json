@@ -96,6 +96,23 @@
       "properties": {
         "uri": "pages/apontar-dialog/index.html?workItemId={{workItemId}}&workItemTitle={{workItemTitle}}&organization={{organization}}&project={{project}}&projectId={{projectId}}&token={{token}}&userId={{userId}}&userName={{userName}}&userUniqueName={{userUniqueName}}&userEmail={{userEmail}}"
       }
+    },
+    {
+      "id": "configuracao-pats-hub",
+      "type": "ms.vss-web.hub",
+      "description": "Hub de configuração de PATs por organização no Organization Settings",
+      "targets": [
+        "ms.vss-web.collection-admin-hub-group"
+      ],
+      "properties": {
+        "name": "Aponta - PATs",
+        "order": 100,
+        "uri": "pages/configuracao-pats/index.html",
+        "icon": {
+          "light": "images/icon-16.png",
+          "dark": "images/icon-16-dark.png"
+        }
+      }
     }
   ],
   "files": [

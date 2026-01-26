@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração de PATs por Organização</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #0078d4;
+            gap: 12px;
+        }
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <svg class="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" opacity="0.2"></circle>
+            <path d="M22 12a10 10 0 0 1-20 0"></path>
+        </svg>
+        <span>Carregando Configuração de PATs...</span>
+    </div>
+
+    <script>
+        console.log('[Configuracao PATs Wrapper] Iniciando...');
+
+        // Lista de CDNs para fallback do VSS SDK
+        var VSS_SDK_SOURCES = [
+            'https://cdn.vsassets.io/v/M211_20240109.9/_scripts/VSS/SDK/VSS.SDK.min.js',
+            '../lib/VSS.SDK.min.js'
+        ];
+
+        var currentSourceIndex = 0;
+
+        function loadScript(src, onload, onerror) {
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = onload;
+            script.onerror = onerror;
+            document.head.appendChild(script);
+        }
+
+        function tryLoadVSSSDK() {
+            if (currentSourceIndex >= VSS_SDK_SOURCES.length) {
+                console.error('[Configuracao PATs Wrapper] Todas as fontes do VSS SDK falharam');
+                document.getElementById('loading').innerHTML = '<span style="color: red;">Erro ao carregar VSS SDK</span>';
+                return;
+            }
+
+            var source = VSS_SDK_SOURCES[currentSourceIndex];
+            console.log('[Configuracao PATs Wrapper] Tentando carregar VSS SDK de:', source);
+
+            loadScript(source, function() {
+                console.log('[Configuracao PATs Wrapper] VSS SDK carregado com sucesso de:', source);
+                initializeExtension();
+            }, function() {
+                console.warn('[Configuracao PATs Wrapper] Falha ao carregar de:', source);
+                currentSourceIndex++;
+                tryLoadVSSSDK();
+            });
+        }
+
+        function initializeExtension() {
+            console.log('[Configuracao PATs Wrapper] Inicializando extensão...');
+
+            VSS.init({
+                explicitNotifyLoaded: true,
+                usePlatformStyles: true,
+                usePlatformScripts: true
+            });
+
+            VSS.ready(function() {
+                console.log('[Configuracao PATs Wrapper] VSS.ready chamado');
+
+                VSS.require(["VSS/Authentication/Services"], function(AuthServices) {
+                    console.log('[Configuracao PATs Wrapper] AuthServices carregado');
+
+                    var webContext = VSS.getWebContext();
+                    console.log('[Configuracao PATs Wrapper] WebContext:', webContext);
+
+                    // Obter token de autenticação
+                    AuthServices.getAuthTokenManager().getToken().then(function(token) {
+                        console.log('[Configuracao PATs Wrapper] Token obtido');
+
+                        // Construir URL do iframe com parâmetros
+                        var params = new URLSearchParams({
+                            organization: webContext.collection.name || webContext.host.name,
+                            project: webContext.project ? webContext.project.name : '',
+                            projectId: webContext.project ? webContext.project.id : '',
+                            token: token,
+                            userId: webContext.user.id,
+                            userName: webContext.user.name,
+                            userUniqueName: webContext.user.uniqueName || '',
+                            userEmail: webContext.user.email || ''
+                        });
+
+                        // URL base da aplicação React - rota de configuração de PATs
+                        var baseUrl = window.location.origin + window.location.pathname.replace('configuracao-pats/index.html', '');
+                        var iframeSrc = baseUrl + 'index.html#/configuracao/pats?' + params.toString();
+
+                        console.log('[Configuracao PATs Wrapper] iframe src:', iframeSrc);
+
+                        // Criar e inserir iframe
+                        var iframe = document.createElement('iframe');
+                        iframe.src = iframeSrc;
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100vh';
+                        iframe.style.border = 'none';
+
+                        // Remover loading e adicionar iframe
+                        var loadingEl = document.getElementById('loading');
+                        loadingEl.style.display = 'none';
+                        document.body.appendChild(iframe);
+
+                        // Notificar que a extensão foi carregada
+                        VSS.notifyLoadSucceeded();
+                        console.log('[Configuracao PATs Wrapper] Extensão carregada com sucesso');
+
+                    }).catch(function(error) {
+                        console.error('[Configuracao PATs Wrapper] Erro ao obter token:', error);
+                        document.getElementById('loading').innerHTML = '<span style="color: red;">Erro de autenticação</span>';
+                        VSS.notifyLoadFailed(error);
+                    });
+                });
+            });
+        }
+
+        // Iniciar carregamento do SDK
+        tryLoadVSSSDK();
+    </script>
+</body>
+</html>

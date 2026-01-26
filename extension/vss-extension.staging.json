@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos-staging",
-  "version": "1.1.94",
+  "version": "1.1.95",
   "name": "Aponta (Staging)",
   "description": "[STAGING] Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -97,6 +97,23 @@
       "targets": [],
       "properties": {
         "uri": "pages/apontar-dialog/index.html?workItemId={{workItemId}}&workItemTitle={{workItemTitle}}&organization={{organization}}&project={{project}}&projectId={{projectId}}&token={{token}}&userId={{userId}}&userName={{userName}}&userUniqueName={{userUniqueName}}&userEmail={{userEmail}}"
+      }
+    },
+    {
+      "id": "configuracao-pats-hub",
+      "type": "ms.vss-web.hub",
+      "description": "Hub de configuração de PATs por organização no Organization Settings",
+      "targets": [
+        "ms.vss-web.collection-admin-hub-group"
+      ],
+      "properties": {
+        "name": "Aponta - PATs (Staging)",
+        "order": 100,
+        "uri": "pages/configuracao-pats/index.html",
+        "icon": {
+          "light": "images/icon-16.png",
+          "dark": "images/icon-16-dark.png"
+        }
       }
     }
   ],
