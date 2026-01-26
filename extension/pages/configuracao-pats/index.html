@@ -53,103 +53,120 @@
             'https://unpkg.com/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js'
         ];
 
-        var currentSourceIndex = 0;
-
-        function loadScript(src, onload, onerror) {
-            var script = document.createElement('script');
-            script.src = src;
-            script.onload = onload;
-            script.onerror = onerror;
-            document.head.appendChild(script);
-        }
-
-        function tryLoadVSSSDK() {
-            if (currentSourceIndex >= VSS_SDK_SOURCES.length) {
-                console.error('[Configuracao PATs Wrapper] Todas as fontes do VSS SDK falharam');
-                document.getElementById('loading').innerHTML = '<span style="color: red;">Erro ao carregar VSS SDK</span>';
+        // Tenta carregar o VSS SDK de múltiplas fontes
+        function loadVSSSDK(sources, index) {
+            if (index >= sources.length) {
+                console.error('[Configuracao PATs Wrapper] Todas as fontes de VSS SDK falharam');
+                showError('Erro ao carregar Azure DevOps SDK - verifique sua conexão');
                 return;
             }
 
-            var source = VSS_SDK_SOURCES[currentSourceIndex];
-            console.log('[Configuracao PATs Wrapper] Tentando carregar VSS SDK de:', source);
+            var src = sources[index];
+            console.log('[Configuracao PATs Wrapper] Tentando carregar VSS SDK de:', src);
 
-            loadScript(source, function() {
-                console.log('[Configuracao PATs Wrapper] VSS SDK carregado com sucesso de:', source);
-                initializeExtension();
-            }, function() {
-                console.warn('[Configuracao PATs Wrapper] Falha ao carregar de:', source);
-                currentSourceIndex++;
-                tryLoadVSSSDK();
-            });
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = function() {
+                console.log('[Configuracao PATs Wrapper] VSS SDK carregado de:', src);
+                setupVSS();
+            };
+            script.onerror = function() {
+                console.warn('[Configuracao PATs Wrapper] Falha ao carregar de:', src);
+                loadVSSSDK(sources, index + 1);
+            };
+            document.head.appendChild(script);
         }
 
+        // Verificar se VSS está disponível ou carregá-lo
         function initializeExtension() {
-            console.log('[Configuracao PATs Wrapper] Inicializando extensão...');
-
-            VSS.init({
-                explicitNotifyLoaded: true,
-                usePlatformStyles: true,
-                usePlatformScripts: true
-            });
-
-            VSS.ready(function() {
-                console.log('[Configuracao PATs Wrapper] VSS.ready chamado');
-
-                VSS.require(["VSS/Authentication/Services"], function(AuthServices) {
-                    console.log('[Configuracao PATs Wrapper] AuthServices carregado');
-
-                    var webContext = VSS.getWebContext();
-                    console.log('[Configuracao PATs Wrapper] WebContext:', webContext);
-
-                    // Obter token de autenticação
-                    AuthServices.getAuthTokenManager().getToken().then(function(token) {
-                        console.log('[Configuracao PATs Wrapper] Token obtido');
-
-                        // Construir URL do iframe com parâmetros
-                        var params = new URLSearchParams({
-                            organization: webContext.collection.name || webContext.host.name,
-                            project: webContext.project ? webContext.project.name : '',
-                            projectId: webContext.project ? webContext.project.id : '',
-                            token: token,
-                            userId: webContext.user.id,
-                            userName: webContext.user.name,
-                            userUniqueName: webContext.user.uniqueName || '',
-                            userEmail: webContext.user.email || ''
-                        });
-
-                        // URL base da aplicação React - rota de configuração de PATs
-                        var baseUrl = window.location.origin + window.location.pathname.replace('configuracao-pats/index.html', '');
-                        var iframeSrc = baseUrl + 'index.html#/configuracao/pats?' + params.toString();
-
-                        console.log('[Configuracao PATs Wrapper] iframe src:', iframeSrc);
-
-                        // Criar e inserir iframe
-                        var iframe = document.createElement('iframe');
-                        iframe.src = iframeSrc;
-                        iframe.style.width = '100%';
-                        iframe.style.height = '100vh';
-                        iframe.style.border = 'none';
-
-                        // Remover loading e adicionar iframe
-                        var loadingEl = document.getElementById('loading');
-                        loadingEl.style.display = 'none';
-                        document.body.appendChild(iframe);
-
-                        // Notificar que a extensão foi carregada
-                        VSS.notifyLoadSucceeded();
-                        console.log('[Configuracao PATs Wrapper] Extensão carregada com sucesso');
-
-                    }).catch(function(error) {
-                        console.error('[Configuracao PATs Wrapper] Erro ao obter token:', error);
-                        document.getElementById('loading').innerHTML = '<span style="color: red;">Erro de autenticação</span>';
-                        VSS.notifyLoadFailed(error);
-                    });
-                });
-            });
+            if (typeof VSS !== 'undefined') {
+                console.log('[Configuracao PATs Wrapper] VSS já disponível');
+                setupVSS();
+            } else {
+                console.log('[Configuracao PATs Wrapper] Carregando VSS SDK com fallback...');
+                loadVSSSDK(VSS_SDK_SOURCES, 0);
+            }
         }
 
-        // Iniciar carregamento do SDK
-        tryLoadVSSSDK();
+        function setupVSS() {
+            try {
+                VSS.init({
+                    explicitNotifyLoaded: true,
+                    usePlatformStyles: true,
+                    usePlatformScripts: true
+                });
+
+                VSS.ready(function() {
+                    console.log('[Configuracao PATs Wrapper] VSS ready');
+                    
+                    try {
+                        var webContext = VSS.getWebContext();
+                        console.log('[Configuracao PATs Wrapper] Web context:', webContext);
+
+                        Promise.resolve(VSS.getAppToken()).then(function(token) {
+                            console.log('[Configuracao PATs Wrapper] App Token obtido (' + token.token.length + ' chars)');
+                            
+                            var params = new URLSearchParams({
+                                embedded: 'true',
+                                source: 'azdo-configuracao-pats-hub',
+                                token: token.token,
+                                organization: webContext.account.name,
+                                userId: webContext.user.id,
+                                userName: webContext.user.name,
+                                userUniqueName: webContext.user.uniqueName,
+                                userEmail: webContext.user.email || webContext.user.uniqueName
+                            });
+
+                            // URL base do frontend hospedado (staging)
+                            var baseUrl = 'https://staging-aponta.treit.com.br';
+                            var targetUrl = baseUrl + '/#/configuracao/pats?' + params.toString();
+                            
+                            console.log('[Configuracao PATs Wrapper] Redirecionando para:', targetUrl);
+                            
+                            var iframe = document.createElement('iframe');
+                            iframe.src = targetUrl;
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100vh';
+                            iframe.style.border = 'none';
+                            
+                            document.getElementById('loading').style.display = 'none';
+                            document.body.appendChild(iframe);
+                            
+                            VSS.notifyLoadSucceeded();
+                            
+                        }).catch(function(error) {
+                            console.error('[Configuracao PATs Wrapper] Erro ao obter token:', error);
+                            showError('Erro ao obter token de acesso');
+                        });
+                        
+                    } catch (error) {
+                        console.error('[Configuracao PATs Wrapper] Erro no VSS ready:', error);
+                        showError('Erro na inicialização do contexto');
+                    }
+                });
+            } catch (error) {
+                console.error('[Configuracao PATs Wrapper] Erro no VSS.init:', error);
+                showError('Erro ao inicializar VSS SDK');
+            }
+        }
+
+        function showError(message) {
+            var loading = document.getElementById('loading');
+            loading.innerHTML = 
+                '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">' +
+                    '<circle cx="12" cy="12" r="10"></circle>' +
+                    '<line x1="15" y1="9" x2="9" y2="15"></line>' +
+                    '<line x1="9" y1="9" x2="15" y2="15"></line>' +
+                '</svg>' +
+                '<span style="color: #dc2626;">' + message + '</span>';
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeExtension);
+        } else {
+            initializeExtension();
+        }
     </script>
 </body>
 </html>
