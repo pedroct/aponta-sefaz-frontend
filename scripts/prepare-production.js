@@ -17,7 +17,8 @@ const HTML_FILES = [
     'extension/pages/apontar-dialog/index.html',
     'extension/pages/workitem/index.html',
     'extension/pages/timesheet/index.html',
-    'extension/pages/atividades/index.html'
+    'extension/pages/atividades/index.html',
+    'extension/pages/configuracao-pats/index.html'
 ];
 
 function prepareForProduction() {
