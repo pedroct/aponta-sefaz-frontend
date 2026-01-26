@@ -4,9 +4,9 @@
 
 Este documento descreve a implementação de um filtro por **Iteration (Sprint)** na tela de Gestão de Apontamentos (Folha de Horas). O objetivo é permitir que o usuário filtre os Work Items exibidos com base na Sprint/Iteration selecionada.
 
-**Data:** 26/01/2026  
-**Versão:** 1.1.0  
-**Status:** Planejamento
+**Data:** 26/01/2026
+**Versão:** 1.2.0
+**Status:** ✅ Implementado
 
 ---
 
@@ -678,23 +678,23 @@ export default function FolhaDeHoras() {
 
 ### Backend
 
-- [ ] Criar `app/schemas/iteration.py`
-- [ ] Criar `app/services/iteration_service.py`
-- [ ] Criar `app/routers/iterations.py`
-- [ ] Registrar novo router em `app/main.py`
-- [ ] Modificar `app/services/timesheet_service.py` para aceitar `iteration_id`
-- [ ] Modificar `app/routers/timesheet.py` para aceitar `iteration_id`
-- [ ] Adicionar testes unitários
+- [x] Criar `app/schemas/iteration.py`
+- [x] Criar `app/services/iteration_service.py`
+- [x] Criar `app/routers/iterations.py`
+- [x] Registrar novo router em `app/main.py`
+- [x] Modificar `app/services/timesheet_service.py` para aceitar `iteration_id`
+- [x] Modificar `app/routers/timesheet.py` para aceitar `iteration_id`
+- [x] Testes unitários passando (18 testes)
 
 ### Frontend
 
-- [ ] Criar tipos em `client/src/lib/iteration-types.ts`
-- [ ] Criar `client/src/hooks/use-iterations.ts`
-- [ ] Criar `client/src/components/custom/IterationSelector.tsx`
-- [ ] Modificar `client/src/hooks/use-timesheet.ts`
-- [ ] Modificar `client/src/lib/timesheet-types.ts`
-- [ ] Modificar `client/src/pages/FolhaDeHoras.tsx`
-- [ ] Adicionar testes
+- [x] Criar tipos em `client/src/lib/iteration-types.ts`
+- [x] Criar `client/src/hooks/use-iterations.ts`
+- [x] Criar `client/src/components/custom/IterationSelector.tsx`
+- [x] Modificar `client/src/hooks/use-timesheet.ts`
+- [x] Modificar `client/src/lib/timesheet-types.ts`
+- [x] Modificar `client/src/pages/FolhaDeHoras.tsx`
+- [x] Testes passando (77 testes)
 
 ---
 
@@ -722,5 +722,48 @@ export default function FolhaDeHoras() {
 
 | Versão | Data | Descrição |
 |--------|------|-----------|
+| 1.2.0 | 26/01/2026 | **Implementação concluída**: Backend (schemas, service, router, filtro timesheet), Frontend (tipos, hook, componente, integração FolhaDeHoras). Deploy para staging realizado. |
 | 1.1.0 | 26/01/2026 | Refinamento: comportamento de seleção automática da Sprint atual, regras de negócio, casos de borda, mockup detalhado do dropdown |
 | 1.0.0 | 26/01/2026 | Documento inicial criado |
+
+---
+
+## 🚀 Deploy
+
+### Backend (api-aponta-vps)
+
+**Commit:** `6344529` - feat: add iterations (sprints) filter to timesheet
+**Branch:** `develop`
+**Deploy:** Automático via GitHub Actions (workflow: deploy-staging.yml)
+
+### Frontend (fe-aponta)
+
+**Commit:** `e5fc067` - feat: add iteration (sprint) selector to timesheet
+**Branch:** `develop`
+**VSIX:** `sefaz-ceara.aponta-projetos-staging-1.1.98.vsix`
+
+---
+
+## 📁 Arquivos Implementados
+
+### Backend
+
+| Arquivo | Tipo | Descrição |
+|---------|------|-----------|
+| `app/schemas/iteration.py` | Novo | Schemas Pydantic (IterationResponse, IterationsListResponse, etc.) |
+| `app/services/iteration_service.py` | Novo | Serviço para integração com API Azure DevOps |
+| `app/routers/iterations.py` | Novo | Router com endpoints GET /iterations e GET /iterations/{id}/work-items |
+| `app/main.py` | Modificado | Registro do novo router |
+| `app/services/timesheet_service.py` | Modificado | Adicionado filtro por iteration_id |
+| `app/routers/timesheet.py` | Modificado | Adicionado parâmetro iteration_id |
+
+### Frontend
+
+| Arquivo | Tipo | Descrição |
+|---------|------|-----------|
+| `client/src/lib/iteration-types.ts` | Novo | Tipos TypeScript (Iteration, TimeFrame, helpers) |
+| `client/src/hooks/use-iterations.ts` | Novo | Hook useIterations com TanStack Query |
+| `client/src/components/custom/IterationSelector.tsx` | Novo | Componente dropdown agrupado por timeFrame |
+| `client/src/lib/timesheet-types.ts` | Modificado | Adicionado iteration_id ao TimesheetParams |
+| `client/src/hooks/use-timesheet.ts` | Modificado | Passa iteration_id para API |
+| `client/src/pages/FolhaDeHoras.tsx` | Modificado | Integração do seletor de sprint |
