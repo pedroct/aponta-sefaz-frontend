@@ -5,17 +5,19 @@ import { ptBR } from "date-fns/locale";
 import { ModalAdicionarTempo, ModalMode } from "@/components/custom/ModalAdicionarTempo";
 import { CelulaApontamento } from "@/components/custom/CelulaApontamento";
 import { DialogConfirmarExclusao } from "@/components/custom/DialogConfirmarExclusao";
+import { IterationSelector } from "@/components/custom/IterationSelector";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkItemIcon } from "@/components/ui/work-item-icon";
 import { useTimesheet } from "@/hooks/use-timesheet";
+import { useIterations } from "@/hooks/use-iterations";
 import { useAzureContext } from "@/contexts/AzureDevOpsContext";
-import { 
-  WorkItemTimesheet, 
-  ApontamentoDia, 
-  getMondayOfWeek, 
-  formatDateForApi 
+import {
+  WorkItemTimesheet,
+  ApontamentoDia,
+  getMondayOfWeek,
+  formatDateForApi
 } from "@/lib/timesheet-types";
 
 // Chave para persistir estado de expansão no localStorage
@@ -47,21 +49,57 @@ export default function FolhaDeHoras() {
     }
   });
 
+  // Estado do filtro de Iteration (Sprint)
+  const [selectedIterationId, setSelectedIterationId] = useState<string | null>(null);
+  const [isIterationInitialized, setIsIterationInitialized] = useState(false);
+
   // Calcular week_start (segunda-feira da semana atual)
   const weekStart = getMondayOfWeek(currentDate);
   const weekStartFormatted = formatDateForApi(weekStart);
 
+  // Hook para buscar iterations (sprints)
+  const {
+    data: iterationsData,
+    isLoading: isLoadingIterations,
+  } = useIterations({
+    organization_name: organization,
+    project_id: project,
+  });
+
+  // Auto-selecionar Sprint atual na primeira carga
+  useEffect(() => {
+    if (!isIterationInitialized && iterationsData && iterationsData.iterations.length > 0) {
+      if (iterationsData.current_iteration_id) {
+        setSelectedIterationId(iterationsData.current_iteration_id);
+      }
+      setIsIterationInitialized(true);
+    }
+  }, [iterationsData, isIterationInitialized]);
+
   // Hook para buscar dados do timesheet
-  const { 
-    data: timesheet, 
-    isLoading, 
-    isError, 
-    error 
+  const {
+    data: timesheet,
+    isLoading,
+    isError,
+    error
   } = useTimesheet({
     organization_name: organization,
     project_id: project,
     week_start: weekStartFormatted,
+    iteration_id: selectedIterationId ?? undefined,
   });
+
+  // Handler para mudança de Sprint
+  const handleIterationChange = useCallback((iterationId: string | null) => {
+    setSelectedIterationId(iterationId);
+    // Opcional: navegar para a semana de início da Sprint
+    if (iterationId && iterationsData) {
+      const iteration = iterationsData.iterations.find(it => it.id === iterationId);
+      if (iteration?.attributes.start_date) {
+        setCurrentDate(new Date(iteration.attributes.start_date));
+      }
+    }
+  }, [iterationsData]);
 
   // Persistir estado de expansão no localStorage
   useEffect(() => {
@@ -315,14 +353,23 @@ export default function FolhaDeHoras() {
       {/* Toolbar / Filters Bar */}
       <div className="h-14 bg-white border-b border-[#EDEBE9] flex items-center px-6 justify-between shrink-0 shadow-sm z-10">
         <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => handleNovoApontamento()} 
-            variant="azure" 
-            size="azure" 
+          <Button
+            onClick={() => handleNovoApontamento()}
+            variant="azure"
+            size="azure"
             className="gap-1.5 font-semibold shadow-sm"
           >
             <Plus size={16} /> Novo Apontamento
           </Button>
+
+          {/* Seletor de Sprint */}
+          <IterationSelector
+            value={selectedIterationId}
+            onChange={handleIterationChange}
+            iterations={iterationsData?.iterations ?? []}
+            isLoading={isLoadingIterations}
+            className="w-[260px] h-8 text-xs"
+          />
         </div>
         
         <div className="flex items-center gap-3 text-[#605E5C]">
