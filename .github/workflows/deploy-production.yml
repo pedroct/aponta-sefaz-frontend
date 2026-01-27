@@ -70,6 +70,10 @@ jobs:
             --exclude='vsix-check' \
             ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/
 
+      - name: Garantir rede Docker
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker network inspect api-aponta-vps_default >/dev/null 2>&1 || docker network create api-aponta-vps_default"
+
       - name: Build e restart container
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "\
