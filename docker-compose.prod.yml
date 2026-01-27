@@ -1,12 +1,14 @@
 # docker-compose.prod.yml
 # Override para VPS produção
 # Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Portas: nao expoe portas no host. O nginx-aponta (reverse proxy)
+# acessa fe-aponta-prod:80 pela rede interna aponta-shared-network.
 
 services:
   frontend:
     container_name: fe-aponta-prod
-    ports:
-      - "3000:80"
+    ports: []
 
 networks:
   aponta-network:
