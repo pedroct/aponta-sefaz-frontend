@@ -10,4 +10,4 @@ services:
 networks:
   aponta-network:
     external: true
-    name: api-aponta-vps_default
+    name: aponta-shared-network
