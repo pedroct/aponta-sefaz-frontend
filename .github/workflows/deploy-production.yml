@@ -74,11 +74,15 @@ jobs:
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker network inspect aponta-shared-network >/dev/null 2>&1 || docker network create aponta-shared-network"
 
+      - name: Remover container antigo (se existir)
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker rm -f fe-aponta-prod 2>/dev/null || true"
+
       - name: Build e restart container
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "\
             cd ${{ env.DEPLOY_PATH }} && \
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --force-recreate --no-deps frontend"
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --no-deps frontend"
 
       - name: Health Check
         run: |
