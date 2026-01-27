@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "name": "Aponta",
   "description": "Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
@@ -47,8 +47,9 @@
     {
       "id": "atividades-hub",
       "type": "ms.vss-web.hub",
+      "description": "Hub de gestão de atividades no Project Settings (somente administradores)",
       "targets": [
-        ".aponta-hub-group"
+        "ms.vss-web.project-admin-hub-group"
       ],
       "properties": {
         "name": "Gestão de Atividades",

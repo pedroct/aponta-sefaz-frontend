@@ -117,8 +117,8 @@
                                 userEmail: webContext.user.email || webContext.user.uniqueName
                             });
 
-                            // URL base do frontend hospedado (staging)
-                            var baseUrl = 'https://staging-aponta.treit.com.br';
+                            // URL base do frontend hospedado (produção)
+                            var baseUrl = 'https://aponta.treit.com.br';
                             var targetUrl = baseUrl + '/#/configuracao/pats?' + params.toString();
                             
                             console.log('[Configuracao PATs Wrapper] Redirecionando para:', targetUrl);

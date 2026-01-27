@@ -28,6 +28,16 @@ export function useIterations(params: IterationsParams) {
   const { organization_name, project_id, team_id } = params;
   const { api, token, isLoading } = useAzureContext();
 
+  // Debug: verificar por que a query não está executando
+  const isEnabled = !!token && !isLoading && !!organization_name && !!project_id;
+  console.log("[useIterations] Estado:", {
+    hasToken: !!token,
+    isLoading,
+    organization_name,
+    project_id,
+    isEnabled
+  });
+
   return useQuery({
     queryKey: ["iterations", organization_name, project_id, team_id],
     queryFn: async (): Promise<IterationsListResponse> => {

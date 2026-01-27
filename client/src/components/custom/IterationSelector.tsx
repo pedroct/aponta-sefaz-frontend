@@ -44,8 +44,20 @@ export function IterationSelector({
   isLoading,
   className,
 }: IterationSelectorProps) {
+  // Debug: verificar iterations recebidas
+  console.log("[IterationSelector] iterations recebidas:", iterations.length, {
+    hasTimeFrame: iterations.filter(it => it.attributes?.time_frame).length,
+    sample: iterations.slice(0, 3).map(it => ({ name: it.name, time_frame: it.attributes?.time_frame }))
+  });
+
   // Agrupar iterations por timeFrame
   const { current, future, past } = groupIterationsByTimeFrame(iterations);
+  
+  console.log("[IterationSelector] Agrupadas:", { 
+    current: current?.name, 
+    future: future.length, 
+    past: past.length 
+  });
 
   // Encontrar a iteration selecionada para exibir no trigger
   const selectedIteration = iterations.find((it) => it.id === value);

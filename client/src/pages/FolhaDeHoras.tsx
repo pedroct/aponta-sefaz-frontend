@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Plus, ChevronDown, ChevronRight, ChevronLeft, Calendar as CalendarIcon, AlertCircle } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight, ChevronLeft, Calendar as CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
 import { format, addWeeks, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ModalAdicionarTempo, ModalMode } from "@/components/custom/ModalAdicionarTempo";
@@ -80,6 +80,7 @@ export default function FolhaDeHoras() {
   const {
     data: timesheet,
     isLoading,
+    isFetching,
     isError,
     error
   } = useTimesheet({
@@ -412,7 +413,16 @@ export default function FolhaDeHoras() {
       </div>
 
       <main className="flex-1 overflow-auto p-6 bg-[#F8F9FA]">
-        <div className="bg-white border border-[#EDEBE9] rounded-sm shadow-md overflow-hidden">
+        <div className="bg-white border border-[#EDEBE9] rounded-sm shadow-md overflow-hidden relative">
+          {/* Overlay de loading quando está buscando dados (refresh/mudança de sprint) */}
+          {isFetching && !isLoading && (
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] z-20 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3 bg-white p-6 rounded-lg shadow-lg border border-[#EDEBE9]">
+                <Loader2 size={32} className="animate-spin text-[#0078D4]" />
+                <span className="text-sm font-medium text-[#605E5C]">Carregando Work Items...</span>
+              </div>
+            </div>
+          )}
           <table className="w-full border-collapse text-xs text-left">
             <thead className="bg-[#FAF9F8] border-b-2 border-[#EDEBE9] sticky top-0 z-10">
               <tr>
