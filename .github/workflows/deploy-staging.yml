@@ -7,7 +7,7 @@ on:
     branches: [develop]
 
 env:
-  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH_STG }}
+  DEPLOY_PATH: /home/ubuntu/aponta-sefaz/staging/frontend
 
 jobs:
   test:
@@ -33,14 +33,6 @@ jobs:
       - name: Executar testes
         run: npm run test:run -- --passWithNoTests
 
-      - name: Upload relatório de cobertura
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 30
-
   deploy:
     name: Deploy Staging
     runs-on: ubuntu-latest
@@ -59,21 +51,36 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Criar .env no VPS
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > ${{ env.DEPLOY_PATH }}/.env << 'ENVEOF'
+          VITE_API_URL=/api/v1
+          VITE_AZURE_ORG=sefaz-ceara-lab
+          VITE_AZURE_PROJECT=DEV
+          ENVEOF"
+
       - name: Sincronizar código
         run: |
-          # Sincronizar código
           rsync -avz --delete \
             --exclude='.git' \
             --exclude='node_modules' \
             --exclude='.env' \
+            --exclude='.env.*' \
             --exclude='dist' \
             --exclude='.github' \
+            --exclude='docs' \
+            --exclude='*.vsix' \
+            --exclude='vsix-check' \
             ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/
 
-          # Reiniciar apenas o container do frontend (não afeta o backend)
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/ubuntu/aponta-sefaz/staging && docker stop fe-aponta-staging || true && docker rm fe-aponta-staging || true && docker compose up -d --build --force-recreate --no-deps frontend"
+      - name: Build e restart container
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "\
+            cd ${{ env.DEPLOY_PATH }} && \
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build --force-recreate --no-deps frontend"
 
       - name: Health Check
         run: |
           sleep 15
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker exec fe-aponta-staging curl -sf http://localhost/health || exit 1"
+          echo "Deploy staging verificado!"

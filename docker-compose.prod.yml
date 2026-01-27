@@ -1,8 +1,9 @@
 # docker-compose.prod.yml
-# Usar na VPS com: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Usar na VPS produção com: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 services:
   frontend:
+    container_name: fe-aponta-prod
     networks:
       - aponta-network
 

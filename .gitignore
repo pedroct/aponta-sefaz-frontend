@@ -6,6 +6,9 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
+.env.local
+.env.staging
+.env.production
 mcp_config.json
 docs/migration/BACKEND_MIGRATION_GUIDE.md
 docs/migration/MIGRATION_INSTRUCTIONS.md
