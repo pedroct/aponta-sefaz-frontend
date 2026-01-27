@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apontar Tempo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .dialog-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .dialog-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #0078d4;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e1e1e1;
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #d13438;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .error-icon {
+            font-size: 48px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="dialog-container">
+        <div id="loading-indicator" class="loading">
+            <div class="spinner"></div>
+            <span>Carregando...</span>
+        </div>
+    </div>
+
+    <script src="../../lib/VSS.SDK.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            console.log('[ApontarDialog] Iniciando...');
+
+            var dialogContext = {
+                workItemId: null,
+                workItemTitle: '',
+                organization: '',
+                project: '',
+                projectId: '',
+                token: '',
+                // Dados do usuário
+                userId: '',
+                userName: '',
+                userUniqueName: '',
+                userEmail: '',
+                formData: null,
+                isValid: false
+            };
+
+            var iframeElement = null;
+            var formCallbacks = [];
+
+            // Inicializar VSS SDK
+            VSS.init({
+                explicitNotifyLoaded: true,
+                usePlatformScripts: true,
+                usePlatformStyles: true
+            });
+
+            VSS.ready(function() {
+                console.log('[ApontarDialog] VSS ready');
+                console.log('[ApontarDialog] window.location.href:', window.location.href);
+                console.log('[ApontarDialog] window.location.search:', window.location.search);
+
+                // Obter configuração passada pelo opener
+                var contribution = VSS.getContribution();
+                var config = VSS.getConfiguration();
+
+                console.log('[ApontarDialog] Contribution:', contribution);
+                console.log('[ApontarDialog] Configuration:', config);
+
+                // Extrair parâmetros da URL (passados via urlReplacementObject pelo opener)
+                var urlParams = new URLSearchParams(window.location.search);
+                dialogContext.workItemId = urlParams.get('workItemId') || '';
+                dialogContext.workItemTitle = decodeURIComponent(urlParams.get('workItemTitle') || '');
+                dialogContext.organization = urlParams.get('organization') || '';
+                dialogContext.project = urlParams.get('project') || '';
+                dialogContext.projectId = urlParams.get('projectId') || '';
+                // Dados do usuário
+                dialogContext.userId = urlParams.get('userId') || '';
+                dialogContext.userName = decodeURIComponent(urlParams.get('userName') || '');
+                dialogContext.userUniqueName = decodeURIComponent(urlParams.get('userUniqueName') || '');
+                dialogContext.userEmail = decodeURIComponent(urlParams.get('userEmail') || '');
+
+                // Token da URL como fallback
+                var urlToken = urlParams.get('token') || '';
+
+                console.log('[ApontarDialog] Context from URL params:', {
+                    workItemId: dialogContext.workItemId,
+                    workItemTitle: dialogContext.workItemTitle,
+                    organization: dialogContext.organization,
+                    project: dialogContext.project,
+                    hasUrlToken: !!urlToken,
+                    urlTokenLength: urlToken ? urlToken.length : 0,
+                    userId: dialogContext.userId,
+                    userName: dialogContext.userName,
+                    userUniqueName: dialogContext.userUniqueName
+                });
+
+                // Obter token diretamente via VSS.getAppToken() (token JWT para autenticação com backend)
+                VSS.getAppToken().then(function(tokenObj) {
+                    dialogContext.token = tokenObj.token;
+                    console.log('[ApontarDialog] App Token obtido via VSS.getAppToken():', dialogContext.token ? '(' + dialogContext.token.length + ' chars)' : 'vazio');
+                    renderIframe();
+                }, function(err) {
+                    console.warn('[ApontarDialog] Erro ao obter token via VSS.getAppToken(), usando fallback da URL:', err);
+                    dialogContext.token = urlToken;
+                    if (!dialogContext.token) {
+                        console.error('[ApontarDialog] Token não disponível nem via VSS nem via URL');
+                        showError('Erro ao obter token de autenticação. Por favor, recarregue a página.');
+                        return;
+                    }
+                    console.log('[ApontarDialog] Usando token da URL como fallback:', dialogContext.token.length + ' chars');
+                    renderIframe();
+                });
+
+                // Registrar objeto para comunicação com o opener
+                VSS.register(VSS.getContribution().id, {
+                    // Chamado pelo opener para verificar se form é válido
+                    isFormValid: function() {
+                        return dialogContext.isValid;
+                    },
+                    // Chamado pelo opener para obter dados do formulário
+                    getFormData: function() {
+                        return dialogContext.formData;
+                    },
+                    // Permite registrar callbacks para mudanças no form
+                    attachFormChanged: function(callback) {
+                        formCallbacks.push(callback);
+                    },
+                    // Chamado quando o dialog deve salvar
+                    save: function() {
+                        if (iframeElement && iframeElement.contentWindow) {
+                            iframeElement.contentWindow.postMessage({ type: 'SAVE_FORM' }, '*');
+                        }
+                        return dialogContext.formData;
+                    }
+                });
+
+                VSS.notifyLoadSucceeded();
+            });
+
+            function renderIframe() {
+                var root = document.getElementById('root');
+                
+                // Esconder o loading indicator (será mostrado pelo React se necessário)
+                var loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+
+                // Construir URL do formulário React
+                var params = new URLSearchParams({
+                    embedded: 'true',
+                    source: 'azdo-host-dialog',
+                    workItemId: dialogContext.workItemId,
+                    workItemTitle: dialogContext.workItemTitle,
+                    organization: dialogContext.organization,
+                    project: dialogContext.project,
+                    projectId: dialogContext.projectId,
+                    token: dialogContext.token,
+                    // Dados do usuário
+                    userId: dialogContext.userId,
+                    userName: dialogContext.userName,
+                    userUniqueName: dialogContext.userUniqueName,
+                    userEmail: dialogContext.userEmail,
+                    mode: 'dialog'
+                });
+
+                var baseUrl = 'https://aponta.treit.com.br';
+                var iframeSrc = baseUrl + '/#/apontar?' + params.toString();
+
+                console.log('[ApontarDialog] Carregando iframe:', iframeSrc);
+                
+                // Criar iframe e adicionar ao root (não substituir o HTML todo para evitar flash)
+                var iframe = document.createElement('iframe');
+                iframe.id = 'apontar-iframe';
+                iframe.className = 'dialog-iframe';
+                iframe.src = iframeSrc;
+                root.appendChild(iframe);
+                iframeElement = iframe;
+
+                // Listener para mensagens do iframe
+                window.addEventListener('message', handleIframeMessage);
+            }
+
+            function handleIframeMessage(event) {
+                // Verificar origem
+                if (!event.origin.includes('aponta.treit.com.br')) {
+                    return;
+                }
+
+                var data = event.data;
+                console.log('[ApontarDialog] Mensagem do iframe:', data);
+
+                if (!data || !data.type) return;
+
+                switch (data.type) {
+                    case 'FORM_VALID_CHANGED':
+                        dialogContext.isValid = !!data.isValid;
+                        // Notificar callbacks registrados
+                        formCallbacks.forEach(function(cb) {
+                            try { cb(dialogContext.isValid); } catch(e) { console.error(e); }
+                        });
+                        // Atualizar botão OK do dialog host
+                        updateDialogOkButton(dialogContext.isValid);
+                        break;
+
+                    case 'FORM_DATA_CHANGED':
+                        dialogContext.formData = data.formData;
+                        break;
+
+                    case 'FORM_SAVED':
+                        console.log('[ApontarDialog] Formulário salvo com sucesso', data.result);
+                        // Passar os dados de duração para o parent poder atualizar os campos do WI
+                        // O toast nativo será mostrado pelo workitem/index.html via GlobalMessagesService
+                        var duration = data.result && data.result.duration ? data.result.duration : 0;
+                        closeDialog(true, {
+                            success: true,
+                            duration: duration,
+                            workItemId: dialogContext.workItemId
+                        });
+                        break;
+
+                    case 'FORM_ERROR':
+                        console.error('[ApontarDialog] Erro no formulário:', data.error);
+                        alert(data.error || 'Erro ao salvar apontamento');
+                        break;
+
+                    case 'CLOSE_FORM':
+                        closeDialog(false);
+                        break;
+                }
+            }
+
+            function updateDialogOkButton(enabled) {
+                var config = VSS.getConfiguration();
+                if (config && config.dialog) {
+                    config.dialog.updateOkButton(enabled);
+                }
+            }
+
+            function closeDialog(success, result) {
+                console.log('[ApontarDialog] closeDialog chamado:', { success: success, result: result });
+                var config = VSS.getConfiguration();
+                console.log('[ApontarDialog] config.dialog existe:', !!config, !!config?.dialog);
+                if (config && config.dialog) {
+                    if (success) {
+                        console.log('[ApontarDialog] Chamando config.dialog.close com result:', JSON.stringify(result));
+                        config.dialog.close(result);
+                    } else {
+                        console.log('[ApontarDialog] Chamando config.dialog.close sem result');
+                        config.dialog.close();
+                    }
+                } else {
+                    console.error('[ApontarDialog] config.dialog não disponível!');
+                }
+            }
+
+            function showError(message) {
+                var root = document.getElementById('root');
+                root.innerHTML = 
+                    '<div class="error">' +
+                        '<div class="error-icon">⚠️</div>' +
+                        '<div>' + message + '</div>' +
+                    '</div>';
+            }
+        })();
+    </script>
+</body>
+</html>

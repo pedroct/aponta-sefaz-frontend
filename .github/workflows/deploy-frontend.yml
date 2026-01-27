@@ -1,0 +1,55 @@
+name: Deploy Frontend Aponta
+
+on:
+  push:
+    branches: [ develop, main ]
+
+jobs:
+  build-and-push:
+    name: Build e Push para GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e Push da Imagem
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Injeta as variáveis que o seu Dockerfile já espera
+          build-args: |
+            VITE_API_URL=${{ github.ref == 'refs/heads/main' && 'https://aponta.treit.com.br/api' || 'https://staging-aponta.treit.com.br/api' }}
+            VITE_AZURE_ORG=sefaz-ceara-lab
+            VITE_AZURE_PROJECT=DEV
+          tags: |
+            ghcr.io/${{ github.repository }}/fe-aponta:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
+
+  deploy:
+    name: Deploy na VPS via SSH
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    steps:
+      - name: Executar Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            APP_DIR="/home/ubuntu/aponta-sefaz/${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}/frontend"
+            cd $APP_DIR
+            docker compose pull
+            docker compose up -d --remove-orphans

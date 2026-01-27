@@ -38,7 +38,8 @@
       "Bash(wsl -d Ubuntu-24.04 -- bash -c \"ls -la /home/pedroctdev/apps/api-aponta-vps/.venv/\")",
       "Bash(wsl -d Ubuntu-24.04 -- bash -c \"ls -la /home/pedroctdev/apps/api-aponta-vps/.venv_new/\")",
       "Bash(wsl:*)",
-      "Bash(npm run build:extension:*)"
+      "Bash(npm run build:extension:*)",
+      "Bash(gh pr create --base main --head develop --title \"ci: deploy automatizado + sync codigo local\" --body \"$\\(cat <<''EOF''\n## Summary\n- Corrigir workflows de deploy staging e produção \\(GitHub Actions\\)\n- Adicionar docker-compose overrides por ambiente \\(staging/prod\\)\n- Atualizar extension HTML, iteration selector e docs pós-produção\n- Criar docs/DEPLOY.md como fonte única de verdade\n\n## Mudanças de CI/CD\n- `deploy-staging.yml`: criar `.env` no VPS, compose override, remover docker stop/rm redundante\n- `deploy-production.yml`: mesmo fluxo com valores de produção\n- `docker-compose.staging.yml`: container `fe-aponta-staging` + rede externa\n- `docker-compose.prod.yml`: adicionar `container_name: fe-aponta-prod`\n- `.gitignore`: adicionar `.env.local`, `.env.staging`, `.env.production`\n\n## Mudanças de código\n- IterationSelector / use-iterations / FolhaDeHoras: ajustes no filtro de sprint\n- Extension HTML pages: corrigir URLs base para ambientes\n- vss-extension.json / staging.json: atualizar manifests\n- Docs pós-produção: CORS, iterations 404, VITE API URL, deploy context\n\n## Test plan\n- [ ] Verificar workflow de staging dispara ao fazer push em develop\n- [ ] Verificar health check em https://staging-aponta.treit.com.br\n- [ ] Após merge, verificar deploy de produção em https://aponta.treit.com.br\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\nEOF\n\\)\")"
     ]
   }
 }

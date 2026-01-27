@@ -1,0 +1,102 @@
+{
+    "manifestVersion": 1,
+    "scopes": [
+        "vso.profile",
+        "vso.work_write",
+        "vso.identity"
+    ],
+    "demands": [],
+    "contributions": [
+        {
+            "id": "aponta-hub-group",
+            "type": "ms.vss-web.hub-group",
+            "targets": [
+                "ms.vss-web.project-hub-groups-collection"
+            ],
+            "properties": {
+                "name": "Apontamentos",
+                "order": 100,
+                "icon": "images/icon-16.png"
+            }
+        },
+        {
+            "id": "atividades-hub",
+            "type": "ms.vss-web.hub",
+            "targets": [
+                ".aponta-hub-group"
+            ],
+            "properties": {
+                "name": "Gestão de Atividades",
+                "order": 100,
+                "uri": "pages/atividades/index.html",
+                "icon": {
+                    "light": "images/icon-16.png",
+                    "dark": "images/icon-16-dark.png"
+                }
+            }
+        },
+        {
+            "id": "timesheet-hub",
+            "type": "ms.vss-web.hub",
+            "targets": [
+                ".aponta-hub-group"
+            ],
+            "properties": {
+                "name": "Folha de Horas",
+                "order": 200,
+                "uri": "pages/timesheet/index.html",
+                "icon": {
+                    "light": "images/icon-16.png",
+                    "dark": "images/icon-16-dark.png"
+                }
+            }
+        },
+        {
+            "id": "aponta-tempo-modal-work-item-form-group",
+            "type": "ms.vss-work-web.work-item-form-group",
+            "targets": [
+                "ms.vss-work-web.work-item-form"
+            ],
+            "properties": {
+                "name": "Apontamentos",
+                "uri": "pages/workitem/index.html",
+                "height": 250
+            }
+        },
+        {
+            "id": "apontar-dialog-content",
+            "type": "ms.vss-web.control",
+            "description": "Conteúdo do dialog de apontamento de tempo no formulário de um Work Item",
+            "targets": [],
+            "properties": {
+                "uri": "pages/apontar-dialog/index.html?workItemId={{workItemId}}&workItemTitle={{workItemTitle}}&organization={{organization}}&project={{project}}&projectId={{projectId}}&token={{token}}&userId={{userId}}&userName={{userName}}&userUniqueName={{userUniqueName}}&userEmail={{userEmail}}"
+            }
+        },
+        {
+            "id": "configuracao-pats-hub",
+            "type": "ms.vss-web.hub",
+            "description": "Hub de configuração de PATs por organização no Organization Settings",
+            "targets": [
+                "ms.vss-web.collection-admin-hub-group"
+            ],
+            "properties": {
+                "name": "Aponta - PATs",
+                "order": 100,
+                "uri": "pages/configuracao-pats/index.html",
+                "icon": {
+                    "light": "images/icon-16.png",
+                    "dark": "images/icon-16-dark.png"
+                }
+            }
+        }
+    ],
+    "gallery": {
+        "color": "#FFA500",
+        "theme": "dark"
+    },
+    "repository": {
+        "type": "git",
+        "uri": "https://github.com/pedroct/aponta-sefaz-frontend"
+    },
+    "contributionTypes": []
+}

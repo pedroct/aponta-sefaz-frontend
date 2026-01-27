@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Atividades</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #0078d4;
+            gap: 12px;
+        }
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <svg class="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" opacity="0.2"></circle>
+            <path d="M22 12a10 10 0 0 1-20 0"></path>
+        </svg>
+        <span>Inicializando Gestão de Atividades...</span>
+    </div>
+
+    <script>
+        console.log('[Atividades Wrapper] Iniciando...');
+
+        // Lista de CDNs para fallback do VSS SDK
+        var VSS_SDK_SOURCES = [
+            '../../lib/VSS.SDK.min.js',
+            'https://cdn.jsdelivr.net/npm/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js',
+            'https://unpkg.com/vss-web-extension-sdk@5.141.0/lib/VSS.SDK.min.js'
+        ];
+
+        // Tenta carregar o VSS SDK de múltiplas fontes
+        function loadVSSSDK(sources, index) {
+            if (index >= sources.length) {
+                console.error('[Atividades Wrapper] Todas as fontes de VSS SDK falharam');
+                showError('Erro ao carregar Azure DevOps SDK - verifique sua conexão');
+                return;
+            }
+
+            var src = sources[index];
+            console.log('[Atividades Wrapper] Tentando carregar VSS SDK de:', src);
+
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = function() {
+                console.log('[Atividades Wrapper] VSS SDK carregado de:', src);
+                setupVSS();
+            };
+            script.onerror = function() {
+                console.warn('[Atividades Wrapper] Falha ao carregar de:', src);
+                loadVSSSDK(sources, index + 1);
+            };
+            document.head.appendChild(script);
+        }
+
+        // Verificar se VSS está disponível ou carregá-lo
+        function initializeExtension() {
+            if (typeof VSS !== 'undefined') {
+                console.log('[Atividades Wrapper] VSS já disponível');
+                setupVSS();
+            } else {
+                console.log('[Atividades Wrapper] Carregando VSS SDK com fallback...');
+                loadVSSSDK(VSS_SDK_SOURCES, 0);
+            }
+        }
+
+        function setupVSS() {
+            try {
+                VSS.init({
+                    explicitNotifyLoaded: true,
+                    usePlatformStyles: true,
+                    usePlatformScripts: true
+                });
+
+                VSS.ready(function() {
+                    console.log('[Atividades Wrapper] VSS ready');
+                    
+                    try {
+                        const webContext = VSS.getWebContext();
+                        console.log('[Atividades Wrapper] Web context:', webContext);
+
+                        Promise.resolve(VSS.getAppToken()).then(function(token) {
+                            console.log('[Atividades Wrapper] App Token obtido (' + token.token.length + ' chars)');
+                            
+                            const params = new URLSearchParams({
+                                embedded: 'true',
+                                source: 'azdo-atividades-hub',
+                                token: token.token,
+                                organization: webContext.account.name,
+                                project: webContext.project.name,
+                                projectId: webContext.project.id,
+                                userId: webContext.user.id,
+                                userName: webContext.user.name,
+                                userUniqueName: webContext.user.uniqueName,
+                                userEmail: webContext.user.email || webContext.user.uniqueName
+                            });
+
+                            const baseUrl = 'https://aponta.treit.com.br';
+                            const targetUrl = `${baseUrl}/#/atividades?${params.toString()}`;
+                            
+                            console.log('[Atividades Wrapper] Redirecionando para:', targetUrl);
+                            
+                            const iframe = document.createElement('iframe');
+                            iframe.src = targetUrl;
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100vh';
+                            iframe.style.border = 'none';
+                            
+                            document.getElementById('loading').style.display = 'none';
+                            document.body.appendChild(iframe);
+                            
+                            VSS.notifyLoadSucceeded();
+                            
+                        }).catch(function(error) {
+                            console.error('[Atividades Wrapper] Erro ao obter token:', error);
+                            showError('Erro ao obter token de acesso');
+                        });
+                        
+                    } catch (error) {
+                        console.error('[Atividades Wrapper] Erro no VSS ready:', error);
+                        showError('Erro na inicialização do contexto');
+                    }
+                });
+            } catch (error) {
+                console.error('[Atividades Wrapper] Erro no VSS.init:', error);
+                showError('Erro ao inicializar VSS SDK');
+            }
+        }
+
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            loading.innerHTML = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <span style="color: #dc2626;">${message}</span>
+            `;
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeExtension);
+        } else {
+            initializeExtension();
+        }
+    </script>
+</body>
+</html>

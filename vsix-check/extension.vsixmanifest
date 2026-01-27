@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Language="en-US" Id="aponta-projetos" Version="1.0.3" Publisher="sefaz-ceara"/>
+    <DisplayName>Aponta</DisplayName>
+    <Description xml:space="preserve">Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará</Description>
+    <Categories>Azure Boards</Categories>
+    <Tags>timetracker,time tracking,timesheet,apontamento,horas,gestão de projetos,sefaz</Tags>
+    <Properties>
+      <Property Id="Microsoft.VisualStudio.Services.Links.GitHub" Value="https://github.com/pedroct/aponta-sefaz-frontend"/>
+    </Properties>
+    <Icon>images/icon.png</Icon>
+  </Metadata>
+  <Dependencies/>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Services"/>
+  </Installation>
+  <Assets>
+    <Asset Type="images/favicon.png" d:Source="File" Path="images/favicon.png" Addressable="true"/>
+    <Asset Type="images/icon-128.png" d:Source="File" Path="images/icon-128.png" Addressable="true"/>
+    <Asset Type="images/icon-16-dark.png" d:Source="File" Path="images/icon-16-dark.png" Addressable="true"/>
+    <Asset Type="images/icon-16.png" d:Source="File" Path="images/icon-16.png" Addressable="true"/>
+    <Asset Type="images/icon.png" d:Source="File" Path="images/icon.png" Addressable="true"/>
+    <Asset Type="Microsoft.VisualStudio.Services.Icons.Default" d:Source="File" Path="images/icon.png" Addressable="true"/>
+    <Asset Type="lib/VSS.SDK.min.js" d:Source="File" Path="lib/VSS.SDK.min.js" Addressable="true"/>
+    <Asset Type="pages/actions/addTimeAction.html" d:Source="File" Path="pages/actions/addTimeAction.html" Addressable="true"/>
+    <Asset Type="pages/actions/addTimeMenu.html" d:Source="File" Path="pages/actions/addTimeMenu.html" Addressable="true"/>
+    <Asset Type="pages/addTimePopupDialog/index.html" d:Source="File" Path="pages/addTimePopupDialog/index.html" Addressable="true"/>
+    <Asset Type="pages/apontar-dialog/index.html" d:Source="File" Path="pages/apontar-dialog/index.html" Addressable="true"/>
+    <Asset Type="pages/atividades/index.html" d:Source="File" Path="pages/atividades/index.html" Addressable="true"/>
+    <Asset Type="pages/configuracao-pats/index.html" d:Source="File" Path="pages/configuracao-pats/index.html" Addressable="true"/>
+    <Asset Type="pages/timesheet/index.html" d:Source="File" Path="pages/timesheet/index.html" Addressable="true"/>
+    <Asset Type="pages/workitem/index.html" d:Source="File" Path="pages/workitem/index.html" Addressable="true"/>
+    <Asset Type="Microsoft.VisualStudio.Services.Content.Details" d:Source="File" Path="overview-prod.md" Addressable="true"/>
+    <Asset Type="Microsoft.VisualStudio.Services.Manifest" d:Source="File" Path="extension.vsomanifest" Addressable="true"/>
+  </Assets>
+</PackageManifest>
