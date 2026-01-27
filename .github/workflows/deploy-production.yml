@@ -6,30 +6,21 @@ on:
 
 env:
   DEPLOY_PATH: /home/ubuntu/aponta-sefaz/production/frontend
+  CONTAINER_NAME: fe-aponta-prod
 
 jobs:
   test:
-    name: Run Tests
+    name: Testes
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
-      - name: Instalar dependências
-        run: npm ci
-
-      - name: Type check
-        run: npm run type-check
-
-      - name: Executar testes
-        run: npm run test:run -- --passWithNoTests
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run test:run -- --passWithNoTests
 
   deploy:
     name: Deploy Production
@@ -38,8 +29,7 @@ jobs:
     environment: production
 
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Configurar SSH
         run: |
@@ -48,44 +38,53 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Criar .env no VPS
-        run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > ${{ env.DEPLOY_PATH }}/.env << 'ENVEOF'
-          VITE_API_URL=/api/v1
-          VITE_AZURE_ORG=sefaz-ceara
-          VITE_AZURE_PROJECT=
-          ENVEOF"
-
-      - name: Sincronizar código
+      - name: Sincronizar código para VPS
         run: |
           rsync -avz --delete \
             --exclude='.git' \
             --exclude='node_modules' \
+            --exclude='dist' \
             --exclude='.env' \
             --exclude='.env.*' \
-            --exclude='dist' \
             --exclude='.github' \
             --exclude='docs' \
             --exclude='*.vsix' \
             --exclude='vsix-check' \
+            --exclude='nul' \
             ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/
 
-      - name: Garantir rede Docker
+      - name: Criar .env e fazer deploy
         run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker network inspect aponta-shared-network >/dev/null 2>&1 || docker network create aponta-shared-network"
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'
+            set -e
 
-      - name: Remover container antigo (se existir)
-        run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker rm -f fe-aponta-prod 2>/dev/null || true"
+            cd /home/ubuntu/aponta-sefaz/production/frontend
 
-      - name: Build e restart container
-        run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "\
-            cd ${{ env.DEPLOY_PATH }} && \
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --no-deps frontend"
+            # 1. Criar .env com variáveis de build do Vite
+            cat > .env << 'EOF'
+          VITE_API_URL=/api/v1
+          VITE_AZURE_ORG=sefaz-ceara
+          VITE_AZURE_PROJECT=
+          EOF
 
-      - name: Health Check
-        run: |
-          sleep 15
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker exec fe-aponta-prod curl -sf http://localhost/health || exit 1"
-          echo "Deploy produção verificado!"
+            # 2. Parar e remover container existente
+            docker rm -f fe-aponta-prod 2>/dev/null || true
+
+            # 3. Build e subir container
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --no-deps frontend
+
+            # 4. Aguardar container ficar healthy
+            echo "Aguardando container ficar healthy..."
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' fe-aponta-prod 2>/dev/null || echo "starting")
+              if [ "$STATUS" = "healthy" ]; then
+                echo "Container healthy!"
+                exit 0
+              fi
+              sleep 2
+            done
+
+            echo "ERRO: Container não ficou healthy em 60s"
+            docker logs fe-aponta-prod --tail 20
+            exit 1
+          DEPLOY_SCRIPT

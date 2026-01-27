@@ -1,11 +1,12 @@
 # docker-compose.prod.yml
-# Usar na VPS produção com: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Override para VPS produção
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 services:
   frontend:
     container_name: fe-aponta-prod
-    networks:
-      - aponta-network
+    ports:
+      - "3000:80"
 
 networks:
   aponta-network:

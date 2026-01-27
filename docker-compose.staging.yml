@@ -1,11 +1,12 @@
 # docker-compose.staging.yml
-# Usar na VPS staging com: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+# Override para VPS staging
+# Uso: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
 
 services:
   frontend:
     container_name: fe-aponta-staging
-    networks:
-      - aponta-network
+    ports:
+      - "3001:80"
 
 networks:
   aponta-network:
