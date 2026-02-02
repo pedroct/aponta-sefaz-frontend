@@ -20,7 +20,7 @@ function getDefaultApiUrl(): string {
   }
   
   // Produção: usar domínio da API
-  return 'https://api-aponta.pedroct.com.br/api/v1';
+  return 'http://aponta.treit.com.br/api/v1';
 }
 
 const API_URL = getDefaultApiUrl();

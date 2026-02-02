@@ -30,7 +30,7 @@ O sistema Aponta é uma extensão para Azure DevOps que permite o gerenciamento 
 | Componente | Tecnologia | URL/Local |
 |------------|------------|-----------|
 | Frontend (Extensão) | React + Vite + TypeScript | Marketplace Azure DevOps |
-| Backend API | FastAPI + Python 3.12 | https://aponta.treit.com.br/api |
+| Backend API | FastAPI + Python 3.12 | http://aponta.treit.com.br/api |
 | Banco de Dados | PostgreSQL 15 | Container `postgres-aponta` |
 | Reverse Proxy | Nginx Alpine | Container `nginx-aponta` |
 | Frontend Web | Nginx Alpine | Container `fe-aponta-prod` |
@@ -72,7 +72,7 @@ O sistema Aponta é uma extensão para Azure DevOps que permite o gerenciamento 
 ```env
 DATABASE_URL=postgresql://aponta_user:***@postgres-aponta:5432/gestao_projetos
 DATABASE_SCHEMA=aponta_sefaz
-CORS_ORIGINS=https://aponta.treit.com.br,https://dev.azure.com,https://*.visualstudio.com,https://*.vsassets.io
+CORS_ORIGINS=http://aponta.treit.com.br,https://dev.azure.com,https://*.visualstudio.com,https://*.vsassets.io
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/sefaz-ceara
 AZURE_DEVOPS_PAT=<PAT_SEFAZ_CEARA>
 AZURE_DEVOPS_ORG_PATS=sefaz-ce-diligencia=<PAT_DILIGENCIA>,sefaz-ce-siscoex2=<PAT_SISCOEX2>
@@ -368,7 +368,7 @@ npm run create:vsix:prod
 - [ ] Requisições à API retornam 200
 
 ### Nginx
-- [ ] SSL/TLS funcionando (https://aponta.treit.com.br)
+- [ ] SSL/TLS funcionando (http://aponta.treit.com.br)
 - [ ] Requisições de vsassets.io são permitidas
 - [ ] CSP frame-ancestors inclui vsassets.io
 

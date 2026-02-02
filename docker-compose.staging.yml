@@ -1,16 +1,15 @@
-# docker-compose.staging.yml
-# Override para VPS staging
-# Uso: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
-#
-# Portas: nao expoe portas no host. O nginx-aponta (reverse proxy)
-# acessa fe-aponta-staging:80 pela rede interna aponta-shared-network.
+name: aponta-staging-frontend
 
 services:
   frontend:
+    image: ghcr.io/pedroct/aponta-sefaz-frontend/fe-aponta:staging
+    build: null
     container_name: fe-aponta-staging
     ports: []
+    networks:
+      - aponta-shared-network
 
 networks:
-  aponta-network:
+  aponta-shared-network:
     external: true
     name: aponta-shared-network

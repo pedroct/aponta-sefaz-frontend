@@ -223,7 +223,7 @@ https://learn.microsoft.com/en-us/azure/devops/boards/work-items/workflow-and-st
 
 ## 📎 Referências
 
-- **Backend API de PRODUÇÃO Base URL**: `https://api-aponta.pedroct.com.br/api/v1`
+- **Backend API de PRODUÇÃO Base URL**: `http://aponta.treit.com.br/api/v1`
 - **Backend API DESENVOLVIMENTO LOCAL Base URL**: `http://localhost:8000/api/v1`
 - **Endpoints relevantes**:
   - `POST /apontamentos` - Criar apontamento
