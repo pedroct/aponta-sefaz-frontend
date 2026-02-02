@@ -73,7 +73,7 @@ GitHub Repository
 - **Fluxo:** build e push de imagem no GHCR → `docker compose pull/up` na VPS
 - **Build args:** `VITE_API_URL=/api/v1`, `VITE_AZURE_ORG=sefaz-ceara-lab`, `VITE_AZURE_PROJECT=DEV`
 
-### Docker Compose (base + overrides)
+### Docker Compose (por ambiente)
 
 - `docker-compose.yml` (local): build local + rede `aponta-shared-network`
 - `docker-compose.staging.yml`: imagem GHCR `:staging`, container `fe-aponta-staging`
@@ -82,10 +82,10 @@ GitHub Repository
 ### Comandos usados no deploy (VPS)
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.staging.yml pull
-docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans
+docker compose -f docker-compose.staging.yml pull
+docker compose -f docker-compose.staging.yml up -d --remove-orphans
 
-docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d --remove-orphans
 ```
 

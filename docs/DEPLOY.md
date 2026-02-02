@@ -39,11 +39,11 @@ Containers na rede:
 
 ## Docker Compose
 
-Base + override por ambiente:
+Arquivos por ambiente:
 
-- `docker-compose.yml` - base local (build, healthcheck, restart, rede aponta-shared-network)
-- `docker-compose.staging.yml` - imagem GHCR `:staging`, container fe-aponta-staging
-- `docker-compose.prod.yml` - imagem GHCR `:latest`, container fe-aponta-prod
+- `docker-compose.yml` - local (build, healthcheck, restart, rede aponta-shared-network)
+- `docker-compose.staging.yml` - staging (imagem GHCR `:staging`, container fe-aponta-staging)
+- `docker-compose.prod.yml` - produção (imagem GHCR `:latest`, container fe-aponta-prod)
 
 ## Variaveis de Build (VITE_*)
 

@@ -51,5 +51,5 @@ jobs:
           script: |
             APP_DIR="/home/ubuntu/aponta-sefaz/${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}/frontend"
             cd $APP_DIR
-            docker compose -f docker-compose.yml -f docker-compose.${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}.yml up -d --remove-orphans
+            docker compose -f docker-compose.${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}.yml pull
+            docker compose -f docker-compose.${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}.yml up -d --remove-orphans
