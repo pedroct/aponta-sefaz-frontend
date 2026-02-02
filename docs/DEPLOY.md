@@ -77,3 +77,19 @@ ssh ubuntu@<VPS> "docker ps --filter name=fe-aponta"
 # Health check manual
 ssh ubuntu@<VPS> "docker exec fe-aponta-staging wget -qO- http://localhost/health"
 ```
+
+## Nota sobre /health (evitar download no browser)
+
+Se o endpoint `/health` estiver baixando um arquivo no navegador, o problema
+geralmente e `Content-Type: application/octet-stream`. A correcao e garantir
+`text/plain` no Nginx do frontend:
+
+```nginx
+location /health {
+    access_log off;
+    default_type text/plain;
+    return 200 "OK";
+}
+```
+
+Esse ajuste deve ficar em `nginx.conf` (copiado para a imagem via Dockerfile).

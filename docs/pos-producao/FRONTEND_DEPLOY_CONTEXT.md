@@ -89,3 +89,15 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d --remove-orphans
 ```
 
+### Observacao: /health nao deve baixar arquivo
+
+Se o `/health` estiver baixando arquivo no browser, ajuste o Nginx do frontend
+para forcar `Content-Type: text/plain`:
+
+```nginx
+location /health {
+    access_log off;
+    default_type text/plain;
+    return 200 "OK";
+}
+```
