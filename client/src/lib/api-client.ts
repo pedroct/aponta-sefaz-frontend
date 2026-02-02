@@ -3,7 +3,7 @@
  * Espelhando os tipos da API FastAPI
  */
 
-const RAW_API_URL = import.meta.env.VITE_API_URL || "https://api-aponta.pedroct.com.br";
+const RAW_API_URL = import.meta.env.VITE_API_URL || "http://aponta.treit.com.br";
 const NORMALIZED_API_URL = RAW_API_URL.replace(/\/+$/, "");
 
 export const API_BASE_URL = NORMALIZED_API_URL.endsWith("/api/v1")

@@ -11,7 +11,7 @@ RUN npm ci
 COPY . .
 
 # Build com variáveis de ambiente
-ARG VITE_API_URL=https://api-aponta.pedroct.com.br/api/v1
+ARG VITE_API_URL=http://localhost:8000/api/v1
 ARG VITE_AZURE_ORG=sefaz-ceara-lab
 ARG VITE_AZURE_PROJECT=DEV
 ARG VITE_AZURE_PAT

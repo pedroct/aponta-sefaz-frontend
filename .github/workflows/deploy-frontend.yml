@@ -30,7 +30,7 @@ jobs:
           push: true
           # Injeta as variáveis que o seu Dockerfile já espera
           build-args: |
-            VITE_API_URL=${{ github.ref == 'refs/heads/main' && 'https://aponta.treit.com.br/api' || 'https://staging-aponta.treit.com.br/api' }}
+            VITE_API_URL=/api/v1
             VITE_AZURE_ORG=sefaz-ceara-lab
             VITE_AZURE_PROJECT=DEV
           tags: |
@@ -51,5 +51,5 @@ jobs:
           script: |
             APP_DIR="/home/ubuntu/aponta-sefaz/${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}/frontend"
             cd $APP_DIR
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker compose -f docker-compose.${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}.yml pull
+            docker compose -f docker-compose.${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}.yml up -d --remove-orphans

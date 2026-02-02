@@ -186,7 +186,7 @@ No arquivo `pages/addTimePopupDialog/index.html`, linha ~189:
 
 **Depois (Produção):**
 ```javascript
-'https://aponta.treit.com.br/api/v1/apontamentos'
+'http://aponta.treit.com.br/api/v1/apontamentos'
 ```
 
 ### 2️⃣ Tipos de Atividade

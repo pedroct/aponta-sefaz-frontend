@@ -11,7 +11,7 @@ Após deploy da extensão, o console mostrava erro:
 Failed to fetch - GET http://localhost:8000/api/v1/...
 ```
 
-O frontend estava chamando `localhost:8000` ao invés da URL de produção `https://aponta.treit.com.br`.
+O frontend estava chamando `localhost:8000` ao invés da URL de produção `http://aponta.treit.com.br`.
 
 ## Causa Raiz
 
@@ -36,7 +36,7 @@ Como o `vite.config.ts` define `root: 'client'`, o Vite procura arquivos `.env*`
 Criado arquivo `client/.env.production` com a URL correta:
 
 ```env
-VITE_API_URL=https://aponta.treit.com.br/api/v1
+VITE_API_URL=http://aponta.treit.com.br/api/v1
 ```
 
 ## Build e Deploy
@@ -59,7 +59,7 @@ docker cp /root/fe-aponta-deploy/extension/. fe-aponta-prod:/usr/share/nginx/htm
 
 Após reload da extensão no Azure DevOps, as chamadas de API foram para a URL correta:
 ```
-GET https://aponta.treit.com.br/api/v1/...
+GET http://aponta.treit.com.br/api/v1/...
 ```
 
 ## Lições Aprendidas

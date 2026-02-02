@@ -8,7 +8,7 @@
 
 Após deploy do frontend com suporte a Sprint/Iteration, o dropdown não carregava e mostrava erro no console:
 ```
-GET https://aponta.treit.com.br/api/v1/iterations?organization=... 404 (Not Found)
+GET http://aponta.treit.com.br/api/v1/iterations?organization=... 404 (Not Found)
 ```
 
 ## Causa Raiz

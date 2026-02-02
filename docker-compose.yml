@@ -1,10 +1,12 @@
+name: aponta-local-frontend
+
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-https://api-aponta.pedroct.com.br/api/v1}
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api/v1}
         - VITE_AZURE_ORG=${VITE_AZURE_ORG:-sefaz-ceara-lab}
         - VITE_AZURE_PROJECT=${VITE_AZURE_PROJECT:-DEV}
         - VITE_AZURE_PAT=${VITE_AZURE_PAT}
@@ -23,15 +25,9 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - aponta-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.aponta-frontend.rule=Host(`aponta.pedroct.com.br`)"
-      - "traefik.http.routers.aponta-frontend.entrypoints=websecure"
-      - "traefik.http.routers.aponta-frontend.tls.certresolver=cloudflare"
+      - aponta-shared-network
 
 networks:
-  aponta-network:
-    # Em desenvolvimento: cria rede local
-    # Em produção: usar docker-compose.prod.yml com rede externa
-    driver: bridge
+  aponta-shared-network:
+    external: true
+    name: aponta-shared-network

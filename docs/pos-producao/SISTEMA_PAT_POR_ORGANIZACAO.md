@@ -269,7 +269,7 @@ export function useValidarPatArmazenado() {
 ### URL de Acesso
 
 ```
-https://aponta.treit.com.br/#/configuracao/pats
+http://aponta.treit.com.br/#/configuracao/pats
 ```
 
 ---
@@ -419,7 +419,7 @@ docker restart fe-aponta-prod
 
 ### Acessando a Página
 
-1. Acesse `https://aponta.treit.com.br/#/configuracao/pats`
+1. Acesse `http://aponta.treit.com.br/#/configuracao/pats`
 2. A página lista todos os PATs cadastrados
 
 ### Cadastrando um Novo PAT

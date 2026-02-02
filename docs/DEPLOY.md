@@ -7,7 +7,7 @@
 | Ambiente  | Branch    | URL                                 | Container         |
 |-----------|-----------|-------------------------------------|-------------------|
 | Staging   | `develop` | https://staging-aponta.treit.com.br | fe-aponta-staging |
-| Producao  | `main`    | https://aponta.treit.com.br         | fe-aponta-prod    |
+| Producao  | `main`    | http://aponta.treit.com.br          | fe-aponta-prod    |
 
 ## Fluxo
 
@@ -19,10 +19,9 @@ feature branch → PR para develop → merge → deploy staging automatico
 ## Como funciona o deploy
 
 1. Push na branch dispara GitHub Actions
-2. Actions roda testes (type-check + vitest)
-3. rsync sincroniza codigo para VPS
-4. Na VPS: cria .env, remove container antigo, docker compose build + up
-5. Aguarda container ficar healthy (healthcheck via /health)
+2. Actions builda e publica imagem no GHCR
+3. Na VPS: `docker compose` faz pull da imagem e reinicia o container
+4. Aguarda container ficar healthy (healthcheck via /health)
 
 ## Infraestrutura VPS
 
@@ -40,22 +39,22 @@ Containers na rede:
 
 ## Docker Compose
 
-Base + override por ambiente:
+Arquivos por ambiente:
 
-- `docker-compose.yml` - config base (build, healthcheck, restart)
-- `docker-compose.staging.yml` - container fe-aponta-staging, rede aponta-shared-network
-- `docker-compose.prod.yml` - container fe-aponta-prod, rede aponta-shared-network
+- `docker-compose.yml` - local (build, healthcheck, restart, rede aponta-shared-network)
+- `docker-compose.staging.yml` - staging (imagem GHCR `:staging`, container fe-aponta-staging)
+- `docker-compose.prod.yml` - produção (imagem GHCR `:latest`, container fe-aponta-prod)
 
 ## Variaveis de Build (VITE_*)
 
 Injetadas via .env no VPS antes do docker build.
 Vite embute no bundle JS (nao sao runtime).
 
-| Variavel             | Staging           | Producao      |
-|----------------------|-------------------|---------------|
-| `VITE_API_URL`       | `/api/v1`         | `/api/v1`     |
-| `VITE_AZURE_ORG`     | `sefaz-ceara-lab` | `sefaz-ceara` |
-| `VITE_AZURE_PROJECT` | `DEV`             | (vazio)       |
+| Variavel             | Staging           | Producao          |
+|----------------------|-------------------|-------------------|
+| `VITE_API_URL`       | `/api/v1`         | `/api/v1`         |
+| `VITE_AZURE_ORG`     | `sefaz-ceara-lab` | `sefaz-ceara-lab` |
+| `VITE_AZURE_PROJECT` | `DEV`             | `DEV`             |
 
 ## GitHub Secrets
 
@@ -78,3 +77,19 @@ ssh ubuntu@<VPS> "docker ps --filter name=fe-aponta"
 # Health check manual
 ssh ubuntu@<VPS> "docker exec fe-aponta-staging wget -qO- http://localhost/health"
 ```
+
+## Nota sobre /health (evitar download no browser)
+
+Se o endpoint `/health` estiver baixando um arquivo no navegador, o problema
+geralmente e `Content-Type: application/octet-stream`. A correcao e garantir
+`text/plain` no Nginx do frontend:
+
+```nginx
+location /health {
+    access_log off;
+    default_type text/plain;
+    return 200 "OK";
+}
+```
+
+Esse ajuste deve ficar em `nginx.conf` (copiado para a imagem via Dockerfile).

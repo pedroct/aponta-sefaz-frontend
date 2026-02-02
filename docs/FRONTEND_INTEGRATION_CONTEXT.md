@@ -8,9 +8,9 @@ Este documento prepara o contexto para iniciar a integração do frontend com o 
 ---
 
 ## 2) Base URL e Documentação
-- **Base URL (produção):** https://api-aponta.pedroct.com.br
-- **Swagger:** https://api-aponta.pedroct.com.br/docs
-- **ReDoc:** https://api-aponta.pedroct.com.br/redoc
+- **Base URL (produção):** http://aponta.treit.com.br
+- **Swagger:** http://aponta.treit.com.br/docs
+- **ReDoc:** http://aponta.treit.com.br/redoc
 
 ---
 
@@ -155,7 +155,7 @@ Listas usam:
 
 ## 8) CORS (produção)
 Origens liberadas:
-- https://api-aponta.pedroct.com.br
+- http://aponta.treit.com.br
 - https://dev.azure.com
 - https://vsassets.io
 - https://sefaz-ceara.gallerycdn.vsassets.io
