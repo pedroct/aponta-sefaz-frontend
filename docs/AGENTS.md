@@ -1,34 +1,25 @@
-# AGENTS.md
+# AGENTS.md - Frontend Aponta
+
+## Regras para Codex
+
+- Documento: `docs/CODEX_RULES.md`
 
 ## Dev environment tips
-- Install dependencies with `npm install` before running scaffolds.
-- Use `npm run dev` for the interactive TypeScript session that powers local experimentation.
-- Run `npm run build` to refresh the CommonJS bundle in `dist/` before shipping changes.
-- Store generated artefacts in `.context/` so reruns stay deterministic.
+- Instale dependências com `npm install`.
+- Use `npm run dev` para ambiente local (porta 5000).
+- Use `npm run build` antes de abrir PR.
 
 ## Testing instructions
-- Execute `npm run test` to run the Jest suite.
-- Append `-- --watch` while iterating on a failing spec.
-- Trigger `npm run build && npm run test` before opening a PR to mimic CI.
-- Add or update tests alongside any generator or CLI changes.
+- Execute `npm run test` para modo interativo.
+- Use `npm run test:run` para simular o CI.
+- Adicione ou atualize testes ao mudar lógica crítica.
 
 ## PR instructions
-- Follow Conventional Commits (for example, `feat(scaffolding): add doc links`).
-- Cross-link new scaffolds in `docs/README.md` and `agents/README.md` so future agents can find them.
-- Attach sample CLI output or generated markdown when behaviour shifts.
-- Confirm the built artefacts in `dist/` match the new source changes.
+- Siga Conventional Commits (ex.: `feat(ui): ajusta layout`).
+- Mantenha docs relevantes atualizadas quando alterar fluxo de deploy.
 
 ## Repository map
-- `attached_assets/` — explain what lives here and when agents should edit it.
-- `client/` — explain what lives here and when agents should edit it.
-- `components.json/` — explain what lives here and when agents should edit it.
-- `drizzle.config.ts/` — explain what lives here and when agents should edit it.
-- `fe-aponta.code-workspace/` — explain what lives here and when agents should edit it.
-- `package-lock.json/` — explain what lives here and when agents should edit it.
-- `package.json/` — explain what lives here and when agents should edit it.
-- `postcss.config.js/` — explain what lives here and when agents should edit it.
-
-## AI Context References
-- Documentation index: `.context/docs/README.md`
-- Agent playbooks: `.context/agents/README.md`
-- Contributor guide: `CONTRIBUTING.md`
+- `client/` — aplicação React (UI e integrações)
+- `docs/` — documentação operacional e técnica
+- `nginx.conf` — Nginx do container (inclui `/health`)
+- `docker-compose*.yml` — compose local/staging/prod
