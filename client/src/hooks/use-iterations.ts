@@ -3,6 +3,7 @@ import { useAzureContext } from "@/contexts/AzureDevOpsContext";
 import {
   IterationsListResponse,
   IterationsParams,
+  normalizeIterationAttributes,
 } from "@/lib/iteration-types";
 
 /**
@@ -52,7 +53,14 @@ export function useIterations(params: IterationsParams) {
         queryParams.team_id = team_id;
       }
 
-      return api.get<IterationsListResponse>("/iterations", queryParams);
+      const response = await api.get<IterationsListResponse>("/iterations", queryParams);
+      return {
+        ...response,
+        iterations: response.iterations.map((it) => ({
+          ...it,
+          attributes: normalizeIterationAttributes(it.attributes),
+        })),
+      };
     },
     // Só executar quando tiver token, não estiver carregando E tiver os params obrigatórios
     enabled: !!token && !isLoading && !!organization_name && !!project_id,
