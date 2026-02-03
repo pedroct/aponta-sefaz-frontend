@@ -19,7 +19,11 @@ npm run preview      # Preview da build de produção
 npm run test         # Executar testes (watch mode)
 npm run test:run     # Executar testes uma vez
 npm run test:coverage # Gerar relatório de cobertura
+npm run test:e2e     # Executar testes E2E (Playwright)
+npm run test:all     # Vitest + Playwright
 ```
+
+> Primeira execução do Playwright: `npx playwright install`
 
 ---
 

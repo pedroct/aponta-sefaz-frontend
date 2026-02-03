@@ -4,6 +4,11 @@
 
 Este é o repositório **frontend** da aplicação **fe-aponta** (Sistema de Apontamentos de Tempo).
 
+## 📌 Documentação Operacional
+
+- [CODEX_RULES.md](docs/CODEX_RULES.md) - Regras operacionais para Codex
+- [AGENTS.md](docs/AGENTS.md) - Instruções para agentes IA
+
 ## 📚 Documentação de Migração
 
 Toda a documentação referente à **migração de full-stack para frontend-only** foi organizada em:

@@ -28,6 +28,12 @@ jobs:
       - name: Rodar testes (Vitest)
         run: npx vitest run
 
+      - name: Instalar browsers (Playwright)
+        run: npx playwright install --with-deps
+
+      - name: Rodar testes (Playwright E2E)
+        run: npm run test:e2e
+
       - name: Login no GitHub Container Registry (GHCR)
         uses: docker/login-action@v3
         with:
