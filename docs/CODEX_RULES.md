@@ -43,7 +43,7 @@
 1) **Fluxo:** Build (GitHub) → Push (GHCR) → SSH (VPS) → `docker compose pull/up`
 2) **Ordem:** sempre deploy em **staging** primeiro; produção só após PR aprovado e merge na `main`
 3) **Sem deploy manual:** não executar build local na VPS, rsync, ou `docker build` manual
-4) **Testes obrigatórios:** Vitest roda antes do build/push no workflow
+4) **Testes obrigatórios:** Vitest + Playwright rodam antes do build/push no workflow
 
 ---
 
@@ -72,6 +72,6 @@
 
 - Vite + React + TypeScript
 - Vitest
+- Playwright (E2E)
 - Tailwind CSS
 - Nginx (container)
-

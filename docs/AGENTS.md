@@ -12,6 +12,8 @@
 ## Testing instructions
 - Execute `npm run test` para modo interativo.
 - Use `npm run test:run` para simular o CI.
+- Use `npm run test:e2e` para testes E2E (Playwright).
+- Use `npm run test:all` para rodar Vitest + Playwright.
 - Adicione ou atualize testes ao mudar lógica crítica.
 
 ## PR instructions
