@@ -91,13 +91,39 @@ Após a instalação:
 - Verifique se o Work Item é do tipo Task ou Bug
 - Confirme que o JavaScript está carregando corretamente (DevTools → Console)
 
-## Atualização da Extensão
+## Atualização da Extensão (staging)
 
-Para publicar uma nova versão:
+Para publicar uma nova versão em **staging**:
 
 1. Atualize a versão em `extension/vss-extension.staging.json`
-2. Gere novo pacote: `npx tfx extension create --manifest-globs vss-extension.staging.json --output-path ../dist/extension`
-3. Publique via Marketplace ou CLI
+2. Gere o pacote VSIX (staging):
+   ```bash
+   npx tfx-cli extension create \
+     --root extension \
+     --manifests vss-extension.staging.json \
+     --output-path ./
+   ```
+3. Mova o VSIX para a pasta padrão:
+   ```bash
+   node scripts/move-vsix.js
+   ```
+4. Publique via Marketplace ou CLI.
+
+> **Nota (WSL/Linux):** use `tfx-cli` (não `tfx`). Os scripts de validação que usam PowerShell
+> rodam apenas no Windows.
+
+## Scripts de Extensão
+
+Os scripts relacionados à extensão ficam em `scripts/`:
+
+```text
+scripts/
+├── validate-build.js     # Valida dist/public após o build
+├── move-vsix.js          # Move VSIX para extension/vsix/{staging,production}
+├── validate-vsix.js      # Valida conteúdo do VSIX (PowerShell)
+├── validate-vsix.ps1     # Validação do VSIX (Windows)
+├── prepare-production.js # Alterna staging/produção antes do build
+```
 
 ## Arquivos da Extensão
 

@@ -214,7 +214,7 @@
                     mode: 'dialog'
                 });
 
-                var baseUrl = 'https://aponta.treit.com.br';
+                var baseUrl = 'https://staging-aponta.treit.com.br';
                 var iframeSrc = baseUrl + '/#/apontar?' + params.toString();
 
                 console.log('[ApontarDialog] Carregando iframe:', iframeSrc);
@@ -233,7 +233,7 @@
 
             function handleIframeMessage(event) {
                 // Verificar origem
-                if (!event.origin.includes('aponta.treit.com.br')) {
+                if (!event.origin.includes('staging-aponta.treit.com.br')) {
                     return;
                 }
 
