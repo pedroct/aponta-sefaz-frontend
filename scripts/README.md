@@ -38,6 +38,36 @@ Valida o conteúdo do arquivo VSIX gerado:
 - `npm run validate:build` - Valida arquivos do build
 - `npm run validate:vsix` - Valida conteúdo do VSIX
 
+## Atualização de Versão (Staging)
+
+Antes de gerar uma nova extensão de **staging**, sempre **incremente** a versão:
+
+- Arquivo: `extension/vss-extension.staging.json`
+- Campo: `"version"`
+
+Exemplo:
+```json
+{
+  "version": "1.2.2"
+}
+```
+
+## Geração Manual de VSIX (WSL/Linux)
+
+Em ambientes sem PowerShell, use o `tfx-cli`:
+
+```bash
+npx tfx-cli extension create \
+  --root extension \
+  --manifests vss-extension.staging.json \
+  --output-path ./
+
+node scripts/move-vsix.js
+```
+
+Saída esperada:
+- `extension/vsix/staging/*.vsix`
+
 ## Exemplo de Saída
 
 ### Build Validation:

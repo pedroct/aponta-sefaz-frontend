@@ -177,3 +177,14 @@ Origens liberadas:
 - [README.md](../../README.md)
 - [API_DOCUMENTATION.md](../api/API_DOCUMENTATION.md)
 - [ARCHITECTURE.md](../architecture/ARCHITECTURE.md)
+
+## 2026-02-03 - Coverage local (frontend)
+
+- Executado: `npm run test:coverage`
+- Resultado:
+  - Statements: 49.24%
+  - Branches: 36.64%
+  - Functions: 31.97%
+  - Lines: 50.56%
+- Comparativo: acima do backend (39%) na mesma data.
+

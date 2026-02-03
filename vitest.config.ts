@@ -10,6 +10,9 @@ export default defineConfig({
     globals: true,
     include: ["client/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["tests/e2e/**", "node_modules/**", "dist/**"],
+    coverage: {
+      exclude: ["tests/msw/**"],
+    },
   },
   resolve: {
     alias: {

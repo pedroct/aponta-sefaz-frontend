@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "aponta-projetos-staging",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "name": "Aponta (Staging)",
   "description": "[STAGING] Extensão para gerenciamento de apontamentos de horas em atividades dos projetos de engenharia de software da Sefaz Ceará",
   "publisher": "sefaz-ceara",
