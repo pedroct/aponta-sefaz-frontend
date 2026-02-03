@@ -13,11 +13,17 @@ export type TimeFrame = "past" | "current" | "future";
  */
 export interface IterationAttributes {
   /** Data de início da iteration (ISO 8601) */
-  start_date: string | null;
+  start_date?: string | null;
+  /** Data de início da iteration (ISO 8601) - camelCase vindo da API */
+  startDate?: string | null;
   /** Data de fim da iteration (ISO 8601) */
-  finish_date: string | null;
+  finish_date?: string | null;
+  /** Data de fim da iteration (ISO 8601) - camelCase vindo da API */
+  finishDate?: string | null;
   /** Período: past, current, future */
-  time_frame: TimeFrame | null;
+  time_frame?: TimeFrame | null;
+  /** Período: past, current, future - camelCase vindo da API */
+  timeFrame?: TimeFrame | null;
 }
 
 /**
@@ -93,6 +99,29 @@ export function formatIterationDateRange(
       .padStart(2, "0")}`;
 
   return `(${formatDate(start)} - ${formatDate(end)})`;
+}
+
+/**
+ * Normaliza atributos de iteration para snake_case usado no frontend.
+ * Aceita tanto camelCase (API) quanto snake_case (frontend).
+ */
+export function normalizeIterationAttributes(
+  attributes?: IterationAttributes | null
+): IterationAttributes {
+  if (!attributes) {
+    return { start_date: null, finish_date: null, time_frame: null };
+  }
+
+  const start_date = attributes.start_date ?? attributes.startDate ?? null;
+  const finish_date = attributes.finish_date ?? attributes.finishDate ?? null;
+  const time_frame = attributes.time_frame ?? attributes.timeFrame ?? null;
+
+  return {
+    ...attributes,
+    start_date,
+    finish_date,
+    time_frame,
+  };
 }
 
 /**
