@@ -25,7 +25,8 @@ const EXPANDED_STORAGE_KEY = "folha-horas-expanded";
 
 export default function FolhaDeHoras() {
   // Contexto do Azure DevOps - organização e projeto dinâmicos
-  const { organization, project, isLoading: isContextLoading, isInAzureDevOps } = useAzureContext();
+  const { organization, project, projectId, isLoading: isContextLoading, isInAzureDevOps } = useAzureContext();
+  const effectiveProjectId = projectId || project;
 
   // Estado do modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,7 +64,7 @@ export default function FolhaDeHoras() {
     isLoading: isLoadingIterations,
   } = useIterations({
     organization_name: organization,
-    project_id: project,
+    project_id: effectiveProjectId,
   });
 
   // Auto-selecionar Sprint atual na primeira carga
@@ -85,7 +86,7 @@ export default function FolhaDeHoras() {
     error
   } = useTimesheet({
     organization_name: organization,
-    project_id: project,
+    project_id: effectiveProjectId,
     week_start: weekStartFormatted,
     iteration_id: selectedIterationId ?? undefined,
   });
@@ -515,7 +516,7 @@ export default function FolhaDeHoras() {
         taskId={selectedWorkItem?.id.toString()}
         taskTitle={selectedWorkItem?.title}
         organizationName={organization}
-        projectId={project}
+        projectId={effectiveProjectId}
         mode={modalMode}
         apontamentoParaEditar={apontamentoParaEditar}
         dataApontamento={selectedDate}
