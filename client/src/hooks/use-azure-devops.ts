@@ -20,6 +20,8 @@ export interface AzureContext {
   workItemId?: string;
   workItemTitle?: string;
   workItemType?: string;
+  /** OAuth Access Token para chamadas Azure DevOps API (diferente do App Token JWT usado para auth) */
+  accessToken?: string;
 }
 
 interface UseAzureDevOpsReturn {
@@ -132,7 +134,8 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
    */
   const initializeFromUrlParams = useCallback((params: URLSearchParams) => {
     try {
-      const accessToken = params.get('token') || '';
+      const appToken = params.get('token') || '';
+      const oauthAccessToken = params.get('accessToken') || '';
       const organization = params.get('organization') || '';
       const project = params.get('project') || '';
       const projectId = params.get('projectId') || '';
@@ -144,12 +147,12 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
       const workItemTitle = params.get('workItemTitle') || undefined;
       const workItemType = params.get('workItemType') || undefined;
 
-      if (!accessToken) {
+      if (!appToken) {
         throw new Error('Token não encontrado nos parâmetros da URL');
       }
 
       setIsInAzureDevOps(true);
-      setToken(accessToken);
+      setToken(appToken);
       setContext({
         organization,
         project,
@@ -161,12 +164,15 @@ export function useAzureDevOps(): UseAzureDevOpsReturn {
         workItemId,
         workItemTitle,
         workItemType,
+        accessToken: oauthAccessToken || undefined,
       });
       setIsLoading(false);
 
       console.log('[useAzureDevOps] Inicializado via URL params', {
-        hasToken: !!accessToken,
-        tokenLength: accessToken.length,
+        hasToken: !!appToken,
+        tokenLength: appToken.length,
+        hasAccessToken: !!oauthAccessToken,
+        accessTokenLength: oauthAccessToken.length,
         organization,
         project,
         userId,
