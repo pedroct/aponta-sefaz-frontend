@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
-import { useIterations } from "./use-iterations";
+import { useTeams } from "./use-teams";
 
 const mockApiGet = vi.fn();
 let mockContext = {
@@ -23,7 +23,7 @@ const createWrapper = () => {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
 
-describe("useIterations", () => {
+describe("useTeams", () => {
   beforeEach(() => {
     mockApiGet.mockReset();
     mockContext = {
@@ -35,17 +35,21 @@ describe("useIterations", () => {
 
   it("chama a API com os parâmetros corretos", async () => {
     mockApiGet.mockResolvedValueOnce({
-      count: 0,
-      iterations: [],
-      current_iteration_id: null,
+      count: 2,
+      teams: [
+        { id: "team-1", name: "Team 1", project_id: "proj", project_name: "Project" },
+        { id: "team-2", name: "Team 2", project_id: "proj", project_name: "Project" },
+      ],
+      mine_only: true,
+      is_admin: false,
+      default_team_id: "team-1",
     });
 
     const { result } = renderHook(
       () =>
-        useIterations({
+        useTeams({
           organization_name: "org",
           project_id: "proj",
-          team_id: "team-1",
         }),
       { wrapper: createWrapper() }
     );
@@ -54,10 +58,9 @@ describe("useIterations", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockApiGet).toHaveBeenCalledWith("/iterations", {
+    expect(mockApiGet).toHaveBeenCalledWith("/teams", {
       organization_name: "org",
       project_id: "proj",
-      team_id: "team-1",
     });
   });
 
@@ -69,7 +72,7 @@ describe("useIterations", () => {
     };
 
     const { result } = renderHook(
-      () => useIterations({ organization_name: "org", project_id: "proj" }),
+      () => useTeams({ organization_name: "org", project_id: "proj" }),
       { wrapper: createWrapper() }
     );
 
@@ -78,37 +81,16 @@ describe("useIterations", () => {
     });
 
     expect(mockApiGet).not.toHaveBeenCalled();
-  });
-
-  it("omite team_id quando não informado", async () => {
-    mockApiGet.mockResolvedValueOnce({
-      count: 0,
-      iterations: [],
-      current_iteration_id: null,
-    });
-
-    const { result } = renderHook(
-      () => useIterations({ organization_name: "org", project_id: "proj" }),
-      { wrapper: createWrapper() }
-    );
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(mockApiGet).toHaveBeenCalledWith("/iterations", {
-      organization_name: "org",
-      project_id: "proj",
-    });
   });
 
   it("não executa quando enabled=false", async () => {
     const { result } = renderHook(
       () =>
-        useIterations(
-          { organization_name: "org", project_id: "proj" },
-          { enabled: false }
-        ),
+        useTeams({
+          organization_name: "org",
+          project_id: "proj",
+          enabled: false,
+        }),
       { wrapper: createWrapper() }
     );
 
@@ -119,19 +101,23 @@ describe("useIterations", () => {
     expect(mockApiGet).not.toHaveBeenCalled();
   });
 
-  it("executa quando enabled=true explicitamente", async () => {
+  it("retorna is_admin e mine_only corretamente", async () => {
     mockApiGet.mockResolvedValueOnce({
-      count: 0,
-      iterations: [],
-      current_iteration_id: null,
+      count: 5,
+      teams: [
+        { id: "team-1", name: "Team 1", project_id: "proj", project_name: "Project" },
+      ],
+      mine_only: false,
+      is_admin: true,
+      default_team_id: "team-1",
     });
 
     const { result } = renderHook(
       () =>
-        useIterations(
-          { organization_name: "org", project_id: "proj", team_id: "team-1" },
-          { enabled: true }
-        ),
+        useTeams({
+          organization_name: "org",
+          project_id: "proj",
+        }),
       { wrapper: createWrapper() }
     );
 
@@ -139,10 +125,25 @@ describe("useIterations", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockApiGet).toHaveBeenCalledWith("/iterations", {
-      organization_name: "org",
-      project_id: "proj",
-      team_id: "team-1",
+    expect(result.current.data?.is_admin).toBe(true);
+    expect(result.current.data?.mine_only).toBe(false);
+    expect(result.current.data?.default_team_id).toBe("team-1");
+  });
+
+  it("não executa quando organization_name ou project_id estão ausentes", async () => {
+    const { result } = renderHook(
+      () =>
+        useTeams({
+          organization_name: "",
+          project_id: "proj",
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isFetching).toBe(false);
     });
+
+    expect(mockApiGet).not.toHaveBeenCalled();
   });
 });

@@ -25,17 +25,28 @@ import { useAzureContext } from "@/contexts/AzureDevOpsContext";
  * });
  * ```
  */
-export function useTimesheet(params: TimesheetParams) {
-  const { organization_name, project_id, week_start, iteration_id } = params;
+interface UseTimesheetOptions {
+  enabled?: boolean;
+}
+
+export function useTimesheet(params: TimesheetParams, options?: UseTimesheetOptions) {
+  const { organization_name, project_id, week_start, iteration_id, team_id } = params;
   const { api, token, isLoading } = useAzureContext();
 
   // Calcula week_start padrão se não fornecido
   const effectiveWeekStart = week_start || formatDateForApi(getMondayOfWeek(new Date()));
 
   return useQuery({
-    queryKey: ["timesheet", organization_name, project_id, effectiveWeekStart, iteration_id],
+    queryKey: [
+      "timesheet",
+      organization_name,
+      project_id,
+      effectiveWeekStart,
+      iteration_id,
+      team_id,
+    ],
     queryFn: async (): Promise<TimesheetResponse> => {
-      console.log('[useTimesheet] Executando queryFn, token disponível:', !!token, 'iteration_id:', iteration_id);
+      console.log('[useTimesheet] Executando queryFn, token disponível:', !!token, 'iteration_id:', iteration_id, 'team_id:', team_id);
 
       const queryParams: Record<string, string> = {
         organization_name,
@@ -48,10 +59,19 @@ export function useTimesheet(params: TimesheetParams) {
         queryParams.iteration_id = iteration_id;
       }
 
+      if (team_id) {
+        queryParams.team_id = team_id;
+      }
+
       return api.get<TimesheetResponse>("/timesheet", queryParams);
     },
     // Só executar quando tiver token, não estiver carregando E tiver os params obrigatórios
-    enabled: !!token && !isLoading && !!organization_name && !!project_id,
+    enabled:
+      (options?.enabled ?? true) &&
+      !!token &&
+      !isLoading &&
+      !!organization_name &&
+      !!project_id,
     staleTime: 2 * 60 * 1000, // Cache de 2 minutos
     refetchOnWindowFocus: false,
   });

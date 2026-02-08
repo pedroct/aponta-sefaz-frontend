@@ -6,12 +6,14 @@ import { ModalAdicionarTempo, ModalMode } from "@/components/custom/ModalAdicion
 import { CelulaApontamento } from "@/components/custom/CelulaApontamento";
 import { DialogConfirmarExclusao } from "@/components/custom/DialogConfirmarExclusao";
 import { IterationSelector } from "@/components/custom/IterationSelector";
+import { TeamSelector } from "@/components/custom/TeamSelector";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkItemIcon } from "@/components/ui/work-item-icon";
 import { useTimesheet } from "@/hooks/use-timesheet";
 import { useIterations } from "@/hooks/use-iterations";
+import { useTeams } from "@/hooks/use-teams";
 import { useAzureContext } from "@/contexts/AzureDevOpsContext";
 import {
   WorkItemTimesheet,
@@ -27,6 +29,15 @@ export default function FolhaDeHoras() {
   // Contexto do Azure DevOps - organização e projeto dinâmicos
   const { organization, project, projectId, isLoading: isContextLoading, isInAzureDevOps } = useAzureContext();
   const effectiveProjectId = projectId || project;
+
+  const {
+    data: teamsData,
+    isLoading: isLoadingTeams,
+  } = useTeams({
+    organization_name: organization,
+    project_id: effectiveProjectId,
+    enabled: !!organization && !!effectiveProjectId,
+  });
 
   // Estado do modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,19 +64,81 @@ export default function FolhaDeHoras() {
   // Estado do filtro de Iteration (Sprint)
   const [selectedIterationId, setSelectedIterationId] = useState<string | null>(null);
   const [isIterationInitialized, setIsIterationInitialized] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
   // Calcular week_start (segunda-feira da semana atual)
   const weekStart = getMondayOfWeek(currentDate);
   const weekStartFormatted = formatDateForApi(weekStart);
 
+  // Definir equipe padrão quando dados carregarem
+  useEffect(() => {
+    if (isLoadingTeams) {
+      return;
+    }
+
+    const availableTeams = teamsData?.teams ?? [];
+
+    if (!teamsData || availableTeams.length === 0) {
+      if (selectedTeamId !== null) {
+        setSelectedTeamId(null);
+      }
+      return;
+    }
+
+    const alreadySelected =
+      selectedTeamId && availableTeams.some((team) => team.id === selectedTeamId);
+
+    if (alreadySelected) {
+      return;
+    }
+
+    const fallbackId =
+      (teamsData.default_team_id &&
+        availableTeams.some((team) => team.id === teamsData.default_team_id)
+        ? teamsData.default_team_id
+        : availableTeams[0]?.id) ?? null;
+
+    if (fallbackId) {
+      setSelectedTeamId(fallbackId);
+    }
+  }, [teamsData, selectedTeamId, isLoadingTeams]);
+
+  const teams = teamsData?.teams ?? [];
+  const selectedTeam =
+    selectedTeamId && teams.length > 0
+      ? teams.find((team) => team.id === selectedTeamId) ?? null
+      : null;
+  const isAdminUser = teamsData?.is_admin ?? false;
+  const shouldRequireTeamSelection = teams.length > 0;
+  const showTeamSelector = isAdminUser || teams.length > 1;
+  const isWaitingForTeamSelection =
+    !isLoadingTeams && shouldRequireTeamSelection && !selectedTeamId;
+  const iterationsEnabled =
+    !isLoadingTeams && (shouldRequireTeamSelection ? !!selectedTeamId : true);
+  const timesheetEnabled = iterationsEnabled;
+
   // Hook para buscar iterations (sprints)
   const {
     data: iterationsData,
     isLoading: isLoadingIterations,
-  } = useIterations({
-    organization_name: organization,
-    project_id: effectiveProjectId,
-  });
+  } = useIterations(
+    {
+      organization_name: organization,
+      project_id: effectiveProjectId,
+      team_id: selectedTeamId ?? undefined,
+    },
+    { enabled: iterationsEnabled }
+  );
+
+  // Sempre que a equipe mudar, resetar seleção de sprint
+  useEffect(() => {
+    if (!selectedTeamId) {
+      return;
+    }
+
+    setIsIterationInitialized(false);
+    setSelectedIterationId(null);
+  }, [selectedTeamId]);
 
   // Auto-selecionar Sprint atual na primeira carga
   useEffect(() => {
@@ -84,12 +157,27 @@ export default function FolhaDeHoras() {
     isFetching,
     isError,
     error
-  } = useTimesheet({
-    organization_name: organization,
-    project_id: effectiveProjectId,
-    week_start: weekStartFormatted,
-    iteration_id: selectedIterationId ?? undefined,
-  });
+  } = useTimesheet(
+    {
+      organization_name: organization,
+      project_id: effectiveProjectId,
+      week_start: weekStartFormatted,
+      iteration_id: selectedIterationId ?? undefined,
+      team_id: selectedTeamId ?? undefined,
+    },
+    { enabled: timesheetEnabled }
+  );
+
+  const isTableLoading =
+    isLoadingTeams ||
+    (iterationsEnabled && isLoadingIterations) ||
+    (timesheetEnabled && isLoading) ||
+    isWaitingForTeamSelection;
+  const hasTimesheetData = (timesheet?.work_items?.length ?? 0) > 0;
+
+  const handleTeamChange = useCallback((teamId: string) => {
+    setSelectedTeamId(teamId);
+  }, []);
 
   // Handler para mudança de Sprint
   const handleIterationChange = useCallback((iterationId: string | null) => {
@@ -364,6 +452,29 @@ export default function FolhaDeHoras() {
             <Plus size={16} /> Novo Apontamento
           </Button>
 
+          {(showTeamSelector || isLoadingTeams || selectedTeam) && (
+            <div className="flex items-center gap-2">
+              {showTeamSelector ? (
+                <TeamSelector
+                  value={selectedTeamId}
+                  onChange={handleTeamChange}
+                  teams={teams}
+                  isLoading={isLoadingTeams}
+                  className="w-[260px] h-8 text-xs"
+                />
+              ) : isLoadingTeams ? (
+                <div className="w-[260px] h-8 rounded-sm border border-dashed border-[#C8C6C4] bg-[#F8F8F8] animate-pulse" />
+              ) : (
+                <div className="flex flex-col justify-center h-10 px-3 py-1 border border-[#EDEBE9] rounded-sm bg-[#FAF9F8]">
+                  <span className="text-[10px] uppercase text-[#605E5C] tracking-[0.08em]">Equipe</span>
+                  <span className="text-sm font-semibold text-[#201F1E] leading-tight">
+                    {selectedTeam?.name}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Seletor de Sprint */}
           <IterationSelector
             value={selectedIterationId}
@@ -472,10 +583,10 @@ export default function FolhaDeHoras() {
               </tr>
             </thead>
             <tbody>
-              {isLoading && renderSkeleton()}
-              {isError && renderError()}
-              {!isLoading && !isError && timesheet?.work_items.length === 0 && renderEmpty()}
-              {!isLoading && !isError && timesheet?.work_items.map(item => renderWorkItemRow(item))}
+              {isTableLoading && renderSkeleton()}
+              {!isTableLoading && isError && renderError()}
+              {!isTableLoading && !isError && !hasTimesheetData && renderEmpty()}
+              {!isTableLoading && !isError && hasTimesheetData && timesheet?.work_items.map(item => renderWorkItemRow(item))}
             </tbody>
             <tfoot className="bg-[#FAF9F8] font-black border-t-4 border-[#EDEBE9] text-[12px]">
               <tr>
