@@ -107,6 +107,64 @@ describe("useTimesheet", () => {
       })
     );
   });
+
+  it("deve enviar team_id quando informado", async () => {
+    mockApiGet.mockResolvedValueOnce({
+      semana_inicio: "2026-02-02",
+      semana_fim: "2026-02-08",
+      semana_label: "02/02 - 08/02",
+      work_items: [],
+      total_geral_horas: 0,
+      total_geral_formatado: "00:00",
+      totais_por_dia: [],
+      total_work_items: 0,
+      total_esforco: 0,
+      total_historico: 0,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useTimesheet({
+          organization_name: "org",
+          project_id: "proj",
+          week_start: "2026-02-02",
+          team_id: "team-123",
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(mockApiGet).toHaveBeenCalledWith(
+      "/timesheet",
+      expect.objectContaining({
+        team_id: "team-123",
+      })
+    );
+  });
+
+  it("não executa quando enabled=false", async () => {
+    const { result } = renderHook(
+      () =>
+        useTimesheet(
+          {
+            organization_name: "org",
+            project_id: "proj",
+            week_start: "2026-02-02",
+          },
+          { enabled: false }
+        ),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isFetching).toBe(false);
+    });
+
+    expect(mockApiGet).not.toHaveBeenCalled();
+  });
 });
 
 describe("useWorkItemStateCategory", () => {

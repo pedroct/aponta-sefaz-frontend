@@ -25,12 +25,17 @@ import {
  * const currentIterationId = data?.current_iteration_id;
  * ```
  */
-export function useIterations(params: IterationsParams) {
+interface UseIterationsOptions {
+  enabled?: boolean;
+}
+
+export function useIterations(params: IterationsParams, options?: UseIterationsOptions) {
   const { organization_name, project_id, team_id } = params;
   const { api, token, isLoading } = useAzureContext();
 
   // Debug: verificar por que a query não está executando
-  const isEnabled = !!token && !isLoading && !!organization_name && !!project_id;
+  const baseEnabled = !!token && !isLoading && !!organization_name && !!project_id;
+  const isEnabled = (options?.enabled ?? true) && baseEnabled;
   console.log("[useIterations] Estado:", {
     hasToken: !!token,
     isLoading,
@@ -62,8 +67,8 @@ export function useIterations(params: IterationsParams) {
         })),
       };
     },
-    // Só executar quando tiver token, não estiver carregando E tiver os params obrigatórios
-    enabled: !!token && !isLoading && !!organization_name && !!project_id,
+    // Só executar quando tiver token, não estiver carregando, tiver params obrigatórios e a flag enabled estiver true
+    enabled: isEnabled,
     // Iterations mudam raramente, usar cache longo
     staleTime: 10 * 60 * 1000, // 10 minutos
     refetchOnWindowFocus: false,

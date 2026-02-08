@@ -128,6 +128,7 @@ export interface TimesheetParams {
   project_id: string;
   week_start?: string;             // YYYY-MM-DD (segunda-feira)
   iteration_id?: string;           // UUID da Iteration (Sprint) para filtrar
+  team_id?: string;                // ID do time selecionado (Azure DevOps Team)
 }
 
 // ============================================================================
