@@ -82,12 +82,45 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
     return newToken;
   }, [refreshToken]);
 
+  const getCustomHeaders = useCallback((): HeadersInit => {
+    if (!context) {
+      return {};
+    }
+
+    const payload: Record<string, string> = {};
+
+    if (context.userName) {
+      payload['User-Name'] = context.userName;
+    }
+
+    if (context.userEmail) {
+      payload['User-Email'] = context.userEmail;
+    }
+
+    if (context.userId) {
+      payload['User-Id'] = context.userId;
+    }
+
+    if (context.userUniqueName) {
+      payload['User-UniqueName'] = context.userUniqueName;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      return {};
+    }
+
+    const json = JSON.stringify(payload);
+    const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(json)));
+
+    return { 'x-custom-header': encoded };
+  }, [context]);
+
   // Criar instância única do ApiClient
   // Agora usa callbacks estáveis, então só é criado uma vez
   const api = useMemo(() => {
     console.log('[AzureDevOpsContext] Criando ApiClient');
-    return new ApiClient(getToken, refreshTokenCallback);
-  }, [getToken, refreshTokenCallback]);
+    return new ApiClient(getToken, refreshTokenCallback, undefined, getCustomHeaders);
+  }, [getToken, refreshTokenCallback, getCustomHeaders]);
 
   // Valores do contexto
   const contextValue = useMemo<AzureDevOpsContextType>(() => ({

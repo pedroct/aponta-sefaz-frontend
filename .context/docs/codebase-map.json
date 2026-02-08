@@ -1,0 +1,1626 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-02-08T10:34:59.022Z",
+  "stack": {
+    "primaryLanguage": "typescript",
+    "languages": [
+      "javascript",
+      "typescript",
+      "python"
+    ],
+    "frameworks": [],
+    "buildTools": [
+      "vite",
+      "docker",
+      "docker-compose"
+    ],
+    "testFrameworks": [
+      "vitest",
+      "playwright"
+    ],
+    "packageManager": "npm",
+    "isMonorepo": false,
+    "hasDocker": true,
+    "hasCI": true
+  },
+  "structure": {
+    "totalFiles": 479,
+    "topDirectories": [
+      {
+        "name": "7pace-reference",
+        "fileCount": 70
+      },
+      {
+        "name": "client",
+        "fileCount": 138
+      },
+      {
+        "name": "components.json",
+        "fileCount": 1
+      },
+      {
+        "name": "docker-compose.prod.yml",
+        "fileCount": 1
+      },
+      {
+        "name": "docker-compose.staging.yml",
+        "fileCount": 1
+      },
+      {
+        "name": "docker-compose.yml",
+        "fileCount": 1
+      },
+      {
+        "name": "Dockerfile",
+        "fileCount": 1
+      },
+      {
+        "name": "docs",
+        "fileCount": 68
+      },
+      {
+        "name": "extension",
+        "fileCount": 130
+      },
+      {
+        "name": "extension.vsomanifest",
+        "fileCount": 1
+      },
+      {
+        "name": "fe-aponta-v1.1.40.tar.gz",
+        "fileCount": 1
+      },
+      {
+        "name": "fe-aponta.code-workspace",
+        "fileCount": 1
+      },
+      {
+        "name": "mcp_config.json",
+        "fileCount": 1
+      },
+      {
+        "name": "nginx-vps.conf",
+        "fileCount": 1
+      },
+      {
+        "name": "nginx.conf",
+        "fileCount": 1
+      },
+      {
+        "name": "package-lock.json",
+        "fileCount": 1
+      },
+      {
+        "name": "package.json",
+        "fileCount": 1
+      },
+      {
+        "name": "playwright.config.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "postcss.config.js",
+        "fileCount": 1
+      },
+      {
+        "name": "production-frontend.tar",
+        "fileCount": 1
+      },
+      {
+        "name": "scripts",
+        "fileCount": 7
+      },
+      {
+        "name": "sefaz-ceara.aponta-projetos-1.0.3.zip",
+        "fileCount": 1
+      },
+      {
+        "name": "sefaz-ceara.aponta-projetos-staging-1.2.4.vsix",
+        "fileCount": 1
+      },
+      {
+        "name": "shared",
+        "fileCount": 1
+      },
+      {
+        "name": "temp_hook.txt",
+        "fileCount": 1
+      },
+      {
+        "name": "tests",
+        "fileCount": 3
+      },
+      {
+        "name": "testsprite_tests",
+        "fileCount": 21
+      },
+      {
+        "name": "tsconfig.json",
+        "fileCount": 1
+      },
+      {
+        "name": "vite.config.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "vitest.config.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "vitest.setup.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "vsix-check",
+        "fileCount": 18
+      }
+    ],
+    "languageDistribution": [
+      {
+        "extension": ".tsx",
+        "count": 95
+      },
+      {
+        "extension": ".vsix",
+        "count": 91
+      },
+      {
+        "extension": ".md",
+        "count": 79
+      },
+      {
+        "extension": ".png",
+        "count": 57
+      },
+      {
+        "extension": ".ts",
+        "count": 44
+      },
+      {
+        "extension": ".html",
+        "count": 27
+      },
+      {
+        "extension": ".js",
+        "count": 26
+      },
+      {
+        "extension": ".py",
+        "count": 14
+      },
+      {
+        "extension": ".json",
+        "count": 12
+      },
+      {
+        "extension": ".css",
+        "count": 9
+      }
+    ]
+  },
+  "architecture": {
+    "layers": [
+      {
+        "name": "Models",
+        "description": "Data structures and domain objects",
+        "directories": [
+          "shared"
+        ],
+        "symbolCount": 2,
+        "dependsOn": []
+      },
+      {
+        "name": "Controllers",
+        "description": "Request handling and routing",
+        "directories": [
+          "tests\\msw",
+          "client\\src\\lib",
+          "client\\src\\hooks",
+          "testsprite_tests"
+        ],
+        "symbolCount": 23,
+        "dependsOn": []
+      },
+      {
+        "name": "Utils",
+        "description": "Shared utilities and helpers",
+        "directories": [
+          "client\\src\\lib",
+          "client\\src\\test",
+          "vsix-check\\lib",
+          "extension\\lib",
+          "7pace-reference\\pages\\panel\\scripts"
+        ],
+        "symbolCount": 129,
+        "dependsOn": []
+      },
+      {
+        "name": "Components",
+        "description": "UI components and views",
+        "directories": [
+          "client\\src\\components\\layouts",
+          "client\\src\\components\\ado",
+          "client\\src\\pages",
+          "client\\src\\components\\extension",
+          "client\\src\\components\\ui",
+          "client\\src\\components\\custom",
+          "7pace-reference\\pages\\panel\\scripts",
+          "7pace-reference\\pages\\contextMenu\\scripts"
+        ],
+        "symbolCount": 142,
+        "dependsOn": []
+      },
+      {
+        "name": "Repositories",
+        "description": "Data access and persistence",
+        "directories": [
+          "testsprite_tests"
+        ],
+        "symbolCount": 2,
+        "dependsOn": []
+      }
+    ],
+    "patterns": [],
+    "entryPoints": [
+      "tests\\msw\\server.ts",
+      "client\\src\\components\\layouts\\index.ts",
+      "client\\src\\components\\ado\\index.ts",
+      "client\\src\\main.tsx"
+    ]
+  },
+  "symbols": {
+    "classes": [
+      {
+        "name": "ApiClient",
+        "kind": "class",
+        "file": "client\\src\\lib\\api.ts",
+        "line": 60,
+        "exported": true
+      },
+      {
+        "name": "ApiClientError",
+        "kind": "class",
+        "file": "client\\src\\lib\\api.ts",
+        "line": 45,
+        "exported": true
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "ADOMultiSelectOption",
+        "kind": "interface",
+        "file": "client\\src\\components\\ado\\ADOMultiSelect.tsx",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "ADOTableColumn",
+        "kind": "interface",
+        "file": "client\\src\\components\\ado\\ADOTable.tsx",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "ApiError",
+        "kind": "interface",
+        "file": "client\\src\\lib\\api.ts",
+        "line": 39,
+        "exported": true
+      },
+      {
+        "name": "Apontamento",
+        "kind": "interface",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 38,
+        "exported": true
+      },
+      {
+        "name": "ApontamentoCreate",
+        "kind": "interface",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 59,
+        "exported": true
+      },
+      {
+        "name": "ApontamentoDia",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 88,
+        "exported": true
+      },
+      {
+        "name": "ApontamentoResumo",
+        "kind": "interface",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 79,
+        "exported": true
+      },
+      {
+        "name": "ApontamentoUpdate",
+        "kind": "interface",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 72,
+        "exported": true
+      },
+      {
+        "name": "Atividade",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 13,
+        "exported": true
+      },
+      {
+        "name": "AtividadeCreate",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 24,
+        "exported": true
+      },
+      {
+        "name": "AtividadeUpdate",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 31,
+        "exported": true
+      },
+      {
+        "name": "AzureContext",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-azure-devops.ts",
+        "line": 12,
+        "exported": true
+      },
+      {
+        "name": "AzureDevOpsContextType",
+        "kind": "interface",
+        "file": "client\\src\\contexts\\AzureDevOpsContext.tsx",
+        "line": 15,
+        "exported": true
+      },
+      {
+        "name": "AzureWorkItemInfo",
+        "kind": "interface",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 86,
+        "exported": true
+      },
+      {
+        "name": "BadgeProps",
+        "kind": "interface",
+        "file": "client\\src\\components\\ui\\badge.tsx",
+        "line": 33,
+        "exported": true
+      },
+      {
+        "name": "ButtonProps",
+        "kind": "interface",
+        "file": "client\\src\\components\\ui\\button.tsx",
+        "line": 47,
+        "exported": true
+      },
+      {
+        "name": "CelulaDia",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 73,
+        "exported": true
+      },
+      {
+        "name": "CurrentUser",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-current-user.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "Iteration",
+        "kind": "interface",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 32,
+        "exported": true
+      },
+      {
+        "name": "IterationAttributes",
+        "kind": "interface",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 14,
+        "exported": true
+      },
+      {
+        "name": "IterationsListResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 48,
+        "exported": true
+      },
+      {
+        "name": "IterationsParams",
+        "kind": "interface",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 74,
+        "exported": true
+      },
+      {
+        "name": "IterationWorkItemsResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 60,
+        "exported": true
+      },
+      {
+        "name": "OrganizationPat",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 9,
+        "exported": true
+      },
+      {
+        "name": "OrganizationPatCreate",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 23,
+        "exported": true
+      },
+      {
+        "name": "OrganizationPatList",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 40,
+        "exported": true
+      },
+      {
+        "name": "OrganizationPatUpdate",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 32,
+        "exported": true
+      },
+      {
+        "name": "OrganizationPatValidateRequest",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 45,
+        "exported": true
+      },
+      {
+        "name": "OrganizationPatValidateResponse",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 50,
+        "exported": true
+      },
+      {
+        "name": "ProcessStateMappingResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 193,
+        "exported": true
+      },
+      {
+        "name": "Projeto",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-projetos.ts",
+        "line": 12,
+        "exported": true
+      },
+      {
+        "name": "ProjetoListResponse",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-projetos.ts",
+        "line": 20,
+        "exported": true
+      },
+      {
+        "name": "ProjetoSimples",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 8,
+        "exported": true
+      },
+      {
+        "name": "SincronizacaoResponse",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-projetos.ts",
+        "line": 25,
+        "exported": true
+      },
+      {
+        "name": "StateCategoryResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 114,
+        "exported": true
+      },
+      {
+        "name": "Team",
+        "kind": "interface",
+        "file": "client\\src\\lib\\team-types.ts",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "TeamsParams",
+        "kind": "interface",
+        "file": "client\\src\\lib\\team-types.ts",
+        "line": 23,
+        "exported": true
+      },
+      {
+        "name": "TeamsResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\team-types.ts",
+        "line": 15,
+        "exported": true
+      },
+      {
+        "name": "TimesheetParams",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 126,
+        "exported": true
+      },
+      {
+        "name": "TimesheetResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "TotalDia",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 101,
+        "exported": true
+      },
+      {
+        "name": "WorkItemRevision",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 177,
+        "exported": true
+      },
+      {
+        "name": "WorkItemRevisionFields",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 168,
+        "exported": true
+      },
+      {
+        "name": "WorkItemRevisionsResponse",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 182,
+        "exported": true
+      },
+      {
+        "name": "WorkItemSearchResult",
+        "kind": "interface",
+        "file": "client\\src\\hooks\\use-search-work-items.ts",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "WorkItemTimesheet",
+        "kind": "interface",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 34,
+        "exported": true
+      },
+      {
+        "name": "ADOButtonProps",
+        "kind": "interface",
+        "file": "client\\src\\components\\ado\\ADOButton.tsx",
+        "line": 4,
+        "exported": false
+      },
+      {
+        "name": "ADOCardProps",
+        "kind": "interface",
+        "file": "client\\src\\components\\ado\\ADOCard.tsx",
+        "line": 4,
+        "exported": false
+      },
+      {
+        "name": "ADOHeaderProps",
+        "kind": "interface",
+        "file": "client\\src\\components\\ado\\ADOHeader.tsx",
+        "line": 3,
+        "exported": false
+      },
+      {
+        "name": "ADOInputProps",
+        "kind": "interface",
+        "file": "client\\src\\components\\ado\\ADOInput.tsx",
+        "line": 4,
+        "exported": false
+      }
+    ],
+    "functions": [
+      {
+        "name": "ADOButton",
+        "kind": "function",
+        "file": "client\\src\\components\\ado\\ADOButton.tsx",
+        "line": 16,
+        "exported": true
+      },
+      {
+        "name": "ADOCard",
+        "kind": "function",
+        "file": "client\\src\\components\\ado\\ADOCard.tsx",
+        "line": 15,
+        "exported": true
+      },
+      {
+        "name": "ADOHeader",
+        "kind": "function",
+        "file": "client\\src\\components\\ado\\ADOHeader.tsx",
+        "line": 14,
+        "exported": true
+      },
+      {
+        "name": "ADOInput",
+        "kind": "function",
+        "file": "client\\src\\components\\ado\\ADOInput.tsx",
+        "line": 14,
+        "exported": true
+      },
+      {
+        "name": "ADOMultiSelect",
+        "kind": "function",
+        "file": "client\\src\\components\\ado\\ADOMultiSelect.tsx",
+        "line": 34,
+        "exported": true
+      },
+      {
+        "name": "apiRequest",
+        "kind": "function",
+        "file": "client\\src\\lib\\queryClient.ts",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "ApontarPopup",
+        "kind": "function",
+        "file": "client\\src\\pages\\ApontarPopup.tsx",
+        "line": 36,
+        "exported": true
+      },
+      {
+        "name": "AzureDevOpsProvider",
+        "kind": "function",
+        "file": "client\\src\\contexts\\AzureDevOpsContext.tsx",
+        "line": 46,
+        "exported": true
+      },
+      {
+        "name": "buildApiHeaders",
+        "kind": "function",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 20,
+        "exported": true
+      },
+      {
+        "name": "canEditByStateCategory",
+        "kind": "function",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 160,
+        "exported": true
+      },
+      {
+        "name": "CelulaApontamento",
+        "kind": "function",
+        "file": "client\\src\\components\\custom\\CelulaApontamento.tsx",
+        "line": 31,
+        "exported": true
+      },
+      {
+        "name": "cn",
+        "kind": "function",
+        "file": "client\\src\\lib\\utils.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "createTestQueryClient",
+        "kind": "function",
+        "file": "client\\src\\test\\test-utils.tsx",
+        "line": 36,
+        "exported": true
+      },
+      {
+        "name": "formatDateForApi",
+        "kind": "function",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 153,
+        "exported": true
+      },
+      {
+        "name": "formatIterationDateRange",
+        "kind": "function",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 87,
+        "exported": true
+      },
+      {
+        "name": "getApiUrl",
+        "kind": "function",
+        "file": "client\\src\\lib\\api-client.ts",
+        "line": 15,
+        "exported": true
+      },
+      {
+        "name": "getBlueCellsForWeek",
+        "kind": "function",
+        "file": "client\\src\\lib\\blue-cells-logic.ts",
+        "line": 78,
+        "exported": true
+      },
+      {
+        "name": "getMondayOfWeek",
+        "kind": "function",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 141,
+        "exported": true
+      },
+      {
+        "name": "groupIterationsByTimeFrame",
+        "kind": "function",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 130,
+        "exported": true
+      },
+      {
+        "name": "isBlueCell",
+        "kind": "function",
+        "file": "client\\src\\lib\\blue-cells-logic.ts",
+        "line": 21,
+        "exported": true
+      },
+      {
+        "name": "normalizeIterationAttributes",
+        "kind": "function",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 108,
+        "exported": true
+      },
+      {
+        "name": "NotFound",
+        "kind": "function",
+        "file": "client\\src\\pages\\not-found.tsx",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "PageLayout",
+        "kind": "function",
+        "file": "client\\src\\components\\layouts\\PageLayout.tsx",
+        "line": 21,
+        "exported": true
+      },
+      {
+        "name": "QueryOnlyProvider",
+        "kind": "function",
+        "file": "client\\src\\test\\test-utils.tsx",
+        "line": 58,
+        "exported": true
+      },
+      {
+        "name": "renderWithQuery",
+        "kind": "function",
+        "file": "client\\src\\test\\test-utils.tsx",
+        "line": 71,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC014_UI_responsiveness_and_fast_interactions.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC013_Local_data_caching_and_offline_support.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC012_Data_validation_prevents_RemainingWork_from_becoming_negative.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC011_Average_time_to_record_a_time_entry_is_under_30_seconds.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC010_Authentication_with_Azure_DevOps_Personal_Access_Token_PAT.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC009_Weekly_Hours_Grid_displays_correct_totals_and_overload_indicators.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC008_Only_Task_and_Bug_work_items_updated_in_Azure_DevOps.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC007_Azure_DevOps_synchronization_resilient_to_API_outages.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC006_Task_Search_autocomplete_with_debounce_and_pagination.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC005_Hierarchical_Work_Items_tree_expand_and_collapse.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC004_Validation_rejects_total_daily_hours_exceeding_24.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC003_Validation_rejects_future_dates.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC002_Validation_rejects_negative_duration.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "run_test",
+        "kind": "function",
+        "file": "testsprite_tests\\TC001_Successful_time_entry_creation.py",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "TeamSelector",
+        "kind": "function",
+        "file": "client\\src\\components\\custom\\TeamSelector.tsx",
+        "line": 20,
+        "exported": true
+      },
+      {
+        "name": "useAtividade",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 139,
+        "exported": true
+      },
+      {
+        "name": "useAtividades",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 82,
+        "exported": true
+      },
+      {
+        "name": "useAtividadesGestao",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 111,
+        "exported": true
+      },
+      {
+        "name": "useAtualizarApontamento",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-api.ts",
+        "line": 46,
+        "exported": true
+      },
+      {
+        "name": "useAtualizarAtividade",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-atividades.ts",
+        "line": 181,
+        "exported": true
+      },
+      {
+        "name": "useAtualizarOrganizationPat",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-organization-pats.ts",
+        "line": 107,
+        "exported": true
+      },
+      {
+        "name": "useAzureContext",
+        "kind": "function",
+        "file": "client\\src\\contexts\\AzureDevOpsContext.tsx",
+        "line": 119,
+        "exported": true
+      },
+      {
+        "name": "useAzureContextOptional",
+        "kind": "function",
+        "file": "client\\src\\contexts\\AzureDevOpsContext.tsx",
+        "line": 136,
+        "exported": true
+      },
+      {
+        "name": "useAzureDevOps",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-azure-devops.ts",
+        "line": 97,
+        "exported": true
+      },
+      {
+        "name": "useAzureInfo",
+        "kind": "function",
+        "file": "client\\src\\hooks\\use-api.ts",
+        "line": 119,
+        "exported": true
+      }
+    ],
+    "types": [
+      {
+        "name": "ChartConfig",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\chart.tsx",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "InsertUser",
+        "kind": "type",
+        "file": "shared\\schema.ts",
+        "line": 16,
+        "exported": true
+      },
+      {
+        "name": "ModalMode",
+        "kind": "type",
+        "file": "client\\src\\components\\custom\\ModalAdicionarTempo.tsx",
+        "line": 32,
+        "exported": true
+      },
+      {
+        "name": "ProcessStateMap",
+        "kind": "type",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 191,
+        "exported": true
+      },
+      {
+        "name": "StateCategory",
+        "kind": "type",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 67,
+        "exported": true
+      },
+      {
+        "name": "TimeFrame",
+        "kind": "type",
+        "file": "client\\src\\lib\\iteration-types.ts",
+        "line": 9,
+        "exported": true
+      },
+      {
+        "name": "User",
+        "kind": "type",
+        "file": "shared\\schema.ts",
+        "line": 17,
+        "exported": true
+      },
+      {
+        "name": "WorkItemType",
+        "kind": "type",
+        "file": "client\\src\\lib\\timesheet-types.ts",
+        "line": 66,
+        "exported": true
+      },
+      {
+        "name": "Action",
+        "kind": "type",
+        "file": "client\\src\\hooks\\use-toast.ts",
+        "line": 34,
+        "exported": false
+      },
+      {
+        "name": "ActionType",
+        "kind": "type",
+        "file": "client\\src\\hooks\\use-toast.ts",
+        "line": 32,
+        "exported": false
+      },
+      {
+        "name": "CarouselApi",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\carousel.tsx",
+        "line": 10,
+        "exported": false
+      },
+      {
+        "name": "CarouselContextProps",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\carousel.tsx",
+        "line": 22,
+        "exported": false
+      },
+      {
+        "name": "CarouselOptions",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\carousel.tsx",
+        "line": 12,
+        "exported": false
+      },
+      {
+        "name": "CarouselPlugin",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\carousel.tsx",
+        "line": 13,
+        "exported": false
+      },
+      {
+        "name": "CarouselProps",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\carousel.tsx",
+        "line": 15,
+        "exported": false
+      },
+      {
+        "name": "ChartContextProps",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\chart.tsx",
+        "line": 20,
+        "exported": false
+      },
+      {
+        "name": "FormFieldContextValue",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\form.tsx",
+        "line": 18,
+        "exported": false
+      },
+      {
+        "name": "FormItemContextValue",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\form.tsx",
+        "line": 67,
+        "exported": false
+      },
+      {
+        "name": "GetTokenFn",
+        "kind": "type",
+        "file": "client\\src\\lib\\api.ts",
+        "line": 57,
+        "exported": false
+      },
+      {
+        "name": "PaginationLinkProps",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\pagination.tsx",
+        "line": 37,
+        "exported": false
+      },
+      {
+        "name": "RefreshTokenFn",
+        "kind": "type",
+        "file": "client\\src\\lib\\api.ts",
+        "line": 58,
+        "exported": false
+      },
+      {
+        "name": "SidebarContextProps",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\sidebar.tsx",
+        "line": 35,
+        "exported": false
+      },
+      {
+        "name": "Toast",
+        "kind": "type",
+        "file": "client\\src\\hooks\\use-toast.ts",
+        "line": 140,
+        "exported": false
+      },
+      {
+        "name": "ToasterProps",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\sonner.tsx",
+        "line": 6,
+        "exported": false
+      },
+      {
+        "name": "ToasterToast",
+        "kind": "type",
+        "file": "client\\src\\hooks\\use-toast.ts",
+        "line": 11,
+        "exported": false
+      },
+      {
+        "name": "UnauthorizedBehavior",
+        "kind": "type",
+        "file": "client\\src\\lib\\queryClient.ts",
+        "line": 26,
+        "exported": false
+      },
+      {
+        "name": "UseCarouselParameters",
+        "kind": "type",
+        "file": "client\\src\\components\\ui\\carousel.tsx",
+        "line": 11,
+        "exported": false
+      }
+    ],
+    "enums": []
+  },
+  "publicAPI": [
+    {
+      "name": "ADOButton",
+      "kind": "function",
+      "file": "client\\src\\components\\ado\\ADOButton.tsx",
+      "line": 16,
+      "exported": true
+    },
+    {
+      "name": "ADOCard",
+      "kind": "function",
+      "file": "client\\src\\components\\ado\\ADOCard.tsx",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "ADOHeader",
+      "kind": "function",
+      "file": "client\\src\\components\\ado\\ADOHeader.tsx",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "ADOInput",
+      "kind": "function",
+      "file": "client\\src\\components\\ado\\ADOInput.tsx",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "ADOMultiSelect",
+      "kind": "function",
+      "file": "client\\src\\components\\ado\\ADOMultiSelect.tsx",
+      "line": 34,
+      "exported": true
+    },
+    {
+      "name": "ADOMultiSelectOption",
+      "kind": "interface",
+      "file": "client\\src\\components\\ado\\ADOMultiSelect.tsx",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "ADOTableColumn",
+      "kind": "interface",
+      "file": "client\\src\\components\\ado\\ADOTable.tsx",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "ApiClient",
+      "kind": "class",
+      "file": "client\\src\\lib\\api.ts",
+      "line": 60,
+      "exported": true
+    },
+    {
+      "name": "ApiClientError",
+      "kind": "class",
+      "file": "client\\src\\lib\\api.ts",
+      "line": 45,
+      "exported": true
+    },
+    {
+      "name": "ApiError",
+      "kind": "interface",
+      "file": "client\\src\\lib\\api.ts",
+      "line": 39,
+      "exported": true
+    },
+    {
+      "name": "apiRequest",
+      "kind": "function",
+      "file": "client\\src\\lib\\queryClient.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "Apontamento",
+      "kind": "interface",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 38,
+      "exported": true
+    },
+    {
+      "name": "ApontamentoCreate",
+      "kind": "interface",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 59,
+      "exported": true
+    },
+    {
+      "name": "ApontamentoDia",
+      "kind": "interface",
+      "file": "client\\src\\lib\\timesheet-types.ts",
+      "line": 88,
+      "exported": true
+    },
+    {
+      "name": "ApontamentoResumo",
+      "kind": "interface",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 79,
+      "exported": true
+    },
+    {
+      "name": "ApontamentoUpdate",
+      "kind": "interface",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 72,
+      "exported": true
+    },
+    {
+      "name": "ApontarPopup",
+      "kind": "function",
+      "file": "client\\src\\pages\\ApontarPopup.tsx",
+      "line": 36,
+      "exported": true
+    },
+    {
+      "name": "Atividade",
+      "kind": "interface",
+      "file": "client\\src\\hooks\\use-atividades.ts",
+      "line": 13,
+      "exported": true
+    },
+    {
+      "name": "AtividadeCreate",
+      "kind": "interface",
+      "file": "client\\src\\hooks\\use-atividades.ts",
+      "line": 24,
+      "exported": true
+    },
+    {
+      "name": "AtividadeUpdate",
+      "kind": "interface",
+      "file": "client\\src\\hooks\\use-atividades.ts",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "AzureContext",
+      "kind": "interface",
+      "file": "client\\src\\hooks\\use-azure-devops.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "AzureDevOpsContextType",
+      "kind": "interface",
+      "file": "client\\src\\contexts\\AzureDevOpsContext.tsx",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "AzureDevOpsProvider",
+      "kind": "function",
+      "file": "client\\src\\contexts\\AzureDevOpsContext.tsx",
+      "line": 46,
+      "exported": true
+    },
+    {
+      "name": "AzureWorkItemInfo",
+      "kind": "interface",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 86,
+      "exported": true
+    },
+    {
+      "name": "BadgeProps",
+      "kind": "interface",
+      "file": "client\\src\\components\\ui\\badge.tsx",
+      "line": 33,
+      "exported": true
+    },
+    {
+      "name": "buildApiHeaders",
+      "kind": "function",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "ButtonProps",
+      "kind": "interface",
+      "file": "client\\src\\components\\ui\\button.tsx",
+      "line": 47,
+      "exported": true
+    },
+    {
+      "name": "canEditByStateCategory",
+      "kind": "function",
+      "file": "client\\src\\lib\\timesheet-types.ts",
+      "line": 160,
+      "exported": true
+    },
+    {
+      "name": "CelulaApontamento",
+      "kind": "function",
+      "file": "client\\src\\components\\custom\\CelulaApontamento.tsx",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "CelulaDia",
+      "kind": "interface",
+      "file": "client\\src\\lib\\timesheet-types.ts",
+      "line": 73,
+      "exported": true
+    },
+    {
+      "name": "ChartConfig",
+      "kind": "type",
+      "file": "client\\src\\components\\ui\\chart.tsx",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "cn",
+      "kind": "function",
+      "file": "client\\src\\lib\\utils.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "createTestQueryClient",
+      "kind": "function",
+      "file": "client\\src\\test\\test-utils.tsx",
+      "line": 36,
+      "exported": true
+    },
+    {
+      "name": "CurrentUser",
+      "kind": "interface",
+      "file": "client\\src\\hooks\\use-current-user.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "formatDateForApi",
+      "kind": "function",
+      "file": "client\\src\\lib\\timesheet-types.ts",
+      "line": 153,
+      "exported": true
+    },
+    {
+      "name": "formatIterationDateRange",
+      "kind": "function",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 87,
+      "exported": true
+    },
+    {
+      "name": "getApiUrl",
+      "kind": "function",
+      "file": "client\\src\\lib\\api-client.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "getBlueCellsForWeek",
+      "kind": "function",
+      "file": "client\\src\\lib\\blue-cells-logic.ts",
+      "line": 78,
+      "exported": true
+    },
+    {
+      "name": "getMondayOfWeek",
+      "kind": "function",
+      "file": "client\\src\\lib\\timesheet-types.ts",
+      "line": 141,
+      "exported": true
+    },
+    {
+      "name": "groupIterationsByTimeFrame",
+      "kind": "function",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 130,
+      "exported": true
+    },
+    {
+      "name": "InsertUser",
+      "kind": "type",
+      "file": "shared\\schema.ts",
+      "line": 16,
+      "exported": true
+    },
+    {
+      "name": "isBlueCell",
+      "kind": "function",
+      "file": "client\\src\\lib\\blue-cells-logic.ts",
+      "line": 21,
+      "exported": true
+    },
+    {
+      "name": "Iteration",
+      "kind": "interface",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 32,
+      "exported": true
+    },
+    {
+      "name": "IterationAttributes",
+      "kind": "interface",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "IterationsListResponse",
+      "kind": "interface",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 48,
+      "exported": true
+    },
+    {
+      "name": "IterationsParams",
+      "kind": "interface",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 74,
+      "exported": true
+    },
+    {
+      "name": "IterationWorkItemsResponse",
+      "kind": "interface",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 60,
+      "exported": true
+    },
+    {
+      "name": "ModalMode",
+      "kind": "type",
+      "file": "client\\src\\components\\custom\\ModalAdicionarTempo.tsx",
+      "line": 32,
+      "exported": true
+    },
+    {
+      "name": "normalizeIterationAttributes",
+      "kind": "function",
+      "file": "client\\src\\lib\\iteration-types.ts",
+      "line": 108,
+      "exported": true
+    },
+    {
+      "name": "NotFound",
+      "kind": "function",
+      "file": "client\\src\\pages\\not-found.tsx",
+      "line": 4,
+      "exported": true
+    }
+  ],
+  "dependencies": {
+    "mostImported": [
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\lib\\queryClient.ts",
+        "importedBy": 2
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\App.tsx",
+        "importedBy": 2
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\tests\\msw\\server.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\tests\\msw\\handlers.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\lib\\iteration-types.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\lib\\timesheet-types.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-timesheet.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-teams.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-search-work-items.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-projetos.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-organization-pats.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-iterations.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-current-user.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-azure-devops.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\hooks\\use-atividades.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\index.css",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\pages\\not-found.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\pages\\FolhaDeHoras.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\pages\\ConfiguracaoPats.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Projetos\\Azure\\fe-aponta\\client\\src\\pages\\Atividades.tsx",
+        "importedBy": 1
+      }
+    ]
+  },
+  "stats": {
+    "totalSymbols": 428,
+    "exportedSymbols": 134,
+    "analysisTimeMs": 1691
+  }
+}
