@@ -27,6 +27,7 @@
   ],
   "scopes": [
     "vso.profile",
+    "vso.project",
     "vso.work_write",
     "vso.identity"
   ],
