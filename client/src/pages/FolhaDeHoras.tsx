@@ -227,11 +227,13 @@ export default function FolhaDeHoras() {
     allIds.forEach(id => {
       newExpandedState[id] = true;
     });
+    console.log('[expandAll] Expandindo', allIds.length, 'work items');
     setExpandedItems(newExpandedState);
   }, [timesheet]);
 
   // Recolher todos os work items
   const collapseAll = useCallback(() => {
+    console.log('[collapseAll] Recolhendo todos os work items');
     setExpandedItems({});
   }, []);
 
