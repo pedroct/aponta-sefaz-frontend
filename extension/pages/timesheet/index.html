@@ -141,8 +141,29 @@
                             document.body.appendChild(iframe);
 
                             // Listener para mensagens do iframe (ex: abrir work item)
+                            console.log('[Timesheet Wrapper] Listener de postMessage adicionado');
                             window.addEventListener('message', function(event) {
-                                console.log('[Timesheet Wrapper] Mensagem recebida do iframe:', event.data);
+                                console.log('[Timesheet Wrapper] Mensagem recebida:', {
+                                    origin: event.origin,
+                                    type: event.data?.type,
+                                    data: event.data
+                                });
+
+                                // Aceitar mensagens apenas do domínio do iframe (staging ou produção)
+                                var allowedOrigins = [
+                                    'https://staging-aponta.treit.com.br',
+                                    'https://aponta.treit.com.br',
+                                    'http://localhost:5173' // desenvolvimento
+                                ];
+
+                                var isAllowedOrigin = allowedOrigins.some(function(origin) {
+                                    return event.origin === origin;
+                                });
+
+                                if (!isAllowedOrigin) {
+                                    console.log('[Timesheet Wrapper] Mensagem de origem não permitida:', event.origin);
+                                    return;
+                                }
 
                                 if (event.data && event.data.type === 'OPEN_WORK_ITEM') {
                                     var workItemId = event.data.workItemId;
@@ -158,6 +179,8 @@
                                             }).catch(function(err) {
                                                 console.error('[Timesheet Wrapper] Erro ao abrir work item:', err);
                                             });
+                                        }).catch(function(err) {
+                                            console.error('[Timesheet Wrapper] Erro ao obter WorkItemFormNavigationService:', err);
                                         });
                                     });
                                 }
