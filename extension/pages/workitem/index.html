@@ -176,14 +176,19 @@
                                             });
                                         }
                                         
-                                        // Obter token (Q promises usam .then(success, error) ao invés de .catch())
-                                        VSS.getAppToken().then(function(tokenObj) {
-                                            workItemContext.token = tokenObj.token;
+                                        // Obter ambos os tokens: App Token (auth) e Access Token (API calls)
+                                        Promise.all([
+                                            VSS.getAppToken(),
+                                            VSS.getAccessToken("499b84ac-1321-427f-aa17-267ca6975798")
+                                        ]).then(function(results) {
+                                            workItemContext.token = results[0].token;
+                                            workItemContext.accessToken = results[1].token;
                                             workItemContext.tokenError = false;
-                                            console.log('[WorkItemGroup] App Token obtido (' + tokenObj.token.length + ' chars)');
+                                            console.log('[WorkItemGroup] App Token obtido (' + results[0].token.length + ' chars)');
+                                            console.log('[WorkItemGroup] Access Token obtido (' + results[1].token.length + ' chars)');
                                             renderUI();
                                         }, function(err) {
-                                            console.error('[WorkItemGroup] Erro ao obter token:', err);
+                                            console.error('[WorkItemGroup] Erro ao obter tokens:', err);
                                             workItemContext.tokenError = true;
                                             // Renderiza mesmo sem token - o apontar-dialog vai tentar obter o token diretamente
                                             renderUI();
@@ -283,6 +288,7 @@
                     project: workItemContext.project || '',
                     projectId: workItemContext.projectId || '',
                     token: workItemContext.token || '',
+                    accessToken: workItemContext.accessToken || '',
                     // Dados do usuário autenticado
                     userId: workItemContext.userId || '',
                     userName: encodeURIComponent(workItemContext.userName || ''),

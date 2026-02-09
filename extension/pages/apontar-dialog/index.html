@@ -144,14 +144,20 @@
                     userUniqueName: dialogContext.userUniqueName
                 });
 
-                // Obter token diretamente via VSS.getAppToken() (token JWT para autenticação com backend)
-                VSS.getAppToken().then(function(tokenObj) {
-                    dialogContext.token = tokenObj.token;
+                // Obter ambos os tokens: App Token (autenticação) e Access Token (API calls)
+                Promise.all([
+                    VSS.getAppToken(),
+                    VSS.getAccessToken("499b84ac-1321-427f-aa17-267ca6975798")
+                ]).then(function(results) {
+                    dialogContext.token = results[0].token;
+                    dialogContext.accessToken = results[1].token;
                     console.log('[ApontarDialog] App Token obtido via VSS.getAppToken():', dialogContext.token ? '(' + dialogContext.token.length + ' chars)' : 'vazio');
+                    console.log('[ApontarDialog] Access Token obtido via VSS.getAccessToken():', dialogContext.accessToken ? '(' + dialogContext.accessToken.length + ' chars)' : 'vazio');
                     renderIframe();
                 }, function(err) {
-                    console.warn('[ApontarDialog] Erro ao obter token via VSS.getAppToken(), usando fallback da URL:', err);
+                    console.warn('[ApontarDialog] Erro ao obter tokens, usando fallback da URL:', err);
                     dialogContext.token = urlToken;
+                    dialogContext.accessToken = '';
                     if (!dialogContext.token) {
                         console.error('[ApontarDialog] Token não disponível nem via VSS nem via URL');
                         showError('Erro ao obter token de autenticação. Por favor, recarregue a página.');
@@ -206,6 +212,7 @@
                     project: dialogContext.project,
                     projectId: dialogContext.projectId,
                     token: dialogContext.token,
+                    accessToken: dialogContext.accessToken || '',
                     // Dados do usuário
                     userId: dialogContext.userId,
                     userName: dialogContext.userName,

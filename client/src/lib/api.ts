@@ -56,20 +56,24 @@ export class ApiClientError extends Error {
 
 type GetTokenFn = () => Promise<string>;
 type RefreshTokenFn = () => Promise<string>;
+type GetCustomHeadersFn = () => HeadersInit;
 
 export class ApiClient {
   private getToken: GetTokenFn;
   private refreshToken: RefreshTokenFn;
   private baseUrl: string;
+  private getCustomHeaders?: GetCustomHeadersFn;
 
   constructor(
     getToken: GetTokenFn,
     refreshToken: RefreshTokenFn,
-    baseUrl: string = API_BASE_URL
+    baseUrl: string = API_BASE_URL,
+    getCustomHeaders?: GetCustomHeadersFn
   ) {
     this.getToken = getToken;
     this.refreshToken = refreshToken;
     this.baseUrl = baseUrl;
+    this.getCustomHeaders = getCustomHeaders;
   }
 
   /**
@@ -88,6 +92,14 @@ export class ApiClient {
     const headers = new Headers(options.headers);
     if (!headers.has('Content-Type') && options.body) {
       headers.set('Content-Type', 'application/json');
+    }
+    if (this.getCustomHeaders) {
+      const customHeaders = new Headers(this.getCustomHeaders());
+      customHeaders.forEach((value, key) => {
+        if (value && !headers.has(key)) {
+          headers.set(key, value);
+        }
+      });
     }
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
@@ -108,6 +120,14 @@ export class ApiClient {
       const retryHeaders = new Headers(options.headers);
       if (!retryHeaders.has('Content-Type') && options.body) {
         retryHeaders.set('Content-Type', 'application/json');
+      }
+      if (this.getCustomHeaders) {
+        const customHeaders = new Headers(this.getCustomHeaders());
+        customHeaders.forEach((value, key) => {
+          if (value && !retryHeaders.has(key)) {
+            retryHeaders.set(key, value);
+          }
+        });
       }
       retryHeaders.set('Authorization', `Bearer ${newToken}`);
 

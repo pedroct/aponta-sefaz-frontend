@@ -103,13 +103,20 @@
                         const webContext = VSS.getWebContext();
                         console.log('[Atividades Wrapper] Web context:', webContext);
 
-                        Promise.resolve(VSS.getAppToken()).then(function(token) {
-                            console.log('[Atividades Wrapper] App Token obtido (' + token.token.length + ' chars)');
+                        Promise.all([
+                            Promise.resolve(VSS.getAppToken()),
+                            Promise.resolve(VSS.getAccessToken("499b84ac-1321-427f-aa17-267ca6975798"))
+                        ]).then(function(results) {
+                            const appToken = results[0];
+                            const accessToken = results[1];
+                            console.log('[Atividades Wrapper] App Token obtido (' + appToken.token.length + ' chars)');
+                            console.log('[Atividades Wrapper] Access Token obtido (' + accessToken.token.length + ' chars)');
                             
                             const params = new URLSearchParams({
                                 embedded: 'true',
                                 source: 'azdo-atividades-hub',
-                                token: token.token,
+                                token: appToken.token,
+                                accessToken: accessToken.token,
                                 organization: webContext.account.name,
                                 project: webContext.project.name,
                                 projectId: webContext.project.id,

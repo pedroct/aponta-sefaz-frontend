@@ -103,13 +103,20 @@
                         const webContext = VSS.getWebContext();
                         console.log('[Timesheet Wrapper] Web context:', webContext);
 
-                        Promise.resolve(VSS.getAppToken()).then(function(token) {
-                            console.log('[Timesheet Wrapper] App Token obtido (' + token.token.length + ' chars)');
+                        Promise.all([
+                            Promise.resolve(VSS.getAppToken()),
+                            Promise.resolve(VSS.getAccessToken("499b84ac-1321-427f-aa17-267ca6975798"))
+                        ]).then(function(results) {
+                            const appToken = results[0];
+                            const accessToken = results[1];
+                            console.log('[Timesheet Wrapper] App Token obtido (' + appToken.token.length + ' chars)');
+                            console.log('[Timesheet Wrapper] Access Token obtido (' + accessToken.token.length + ' chars)');
                             
                             const params = new URLSearchParams({
                                 embedded: 'true',
                                 source: 'azdo-timesheet-hub',
-                                token: token.token,
+                                token: appToken.token,
+                                accessToken: accessToken.token,
                                 organization: webContext.account.name,
                                 project: webContext.project.name,
                                 projectId: webContext.project.id,
@@ -129,10 +136,59 @@
                             iframe.style.width = '100%';
                             iframe.style.height = '100vh';
                             iframe.style.border = 'none';
-                            
+
                             document.getElementById('loading').style.display = 'none';
                             document.body.appendChild(iframe);
-                            
+
+                            // Listener para mensagens do iframe (ex: abrir work item)
+                            console.log('[Timesheet Wrapper] Listener de postMessage adicionado');
+                            window.addEventListener('message', function(event) {
+                                console.log('[Timesheet Wrapper] Mensagem recebida:', {
+                                    origin: event.origin,
+                                    type: event.data?.type,
+                                    data: event.data
+                                });
+
+                                // Aceitar mensagens apenas do domínio do iframe (staging ou produção)
+                                var allowedOrigins = [
+                                    'https://staging-aponta.treit.com.br',
+                                    'https://aponta.treit.com.br',
+                                    'http://localhost:5173' // desenvolvimento
+                                ];
+
+                                var isAllowedOrigin = allowedOrigins.some(function(origin) {
+                                    return event.origin === origin;
+                                });
+
+                                if (!isAllowedOrigin) {
+                                    console.log('[Timesheet Wrapper] Mensagem de origem não permitida:', event.origin);
+                                    return;
+                                }
+
+                                if (event.data && event.data.type === 'OPEN_WORK_ITEM') {
+                                    var workItemId = event.data.workItemId;
+                                    console.log('[Timesheet Wrapper] Abrindo work item:', workItemId);
+
+                                    // Usar VSS SDK para abrir work item em modal
+                                    VSS.require(["TFS/WorkItemTracking/Services"], function(WorkItemServices) {
+                                        WorkItemServices.WorkItemFormNavigationService.getService().then(function(service) {
+                                            // openWorkItem(id, openInNewTab)
+                                            // false = abre em modal dentro do Azure DevOps
+                                            service.openWorkItem(workItemId, false).then(
+                                                function() {
+                                                    console.log('[Timesheet Wrapper] Work item aberto em modal');
+                                                },
+                                                function(err) {
+                                                    console.error('[Timesheet Wrapper] Erro ao abrir work item:', err);
+                                                }
+                                            );
+                                        }, function(err) {
+                                            console.error('[Timesheet Wrapper] Erro ao obter WorkItemFormNavigationService:', err);
+                                        });
+                                    });
+                                }
+                            });
+
                             VSS.notifyLoadSucceeded();
                             
                         }).catch(function(error) {

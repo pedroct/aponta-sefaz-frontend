@@ -82,12 +82,53 @@ export function AzureDevOpsProvider({ children }: AzureDevOpsProviderProps) {
     return newToken;
   }, [refreshToken]);
 
+  const getCustomHeaders = useCallback((): HeadersInit => {
+    if (!context) {
+      return {};
+    }
+
+    const headers: Record<string, string> = {};
+
+    // Enviar Access Token OAuth para que o backend possa chamar APIs do Azure DevOps
+    // (o App Token JWT usado no Authorization header não pode chamar APIs do Azure DevOps)
+    if (context.accessToken) {
+      headers['x-azure-access-token'] = context.accessToken;
+    }
+
+    // Enviar dados do usuário codificados em base64
+    const payload: Record<string, string> = {};
+
+    if (context.userName) {
+      payload['User-Name'] = context.userName;
+    }
+
+    if (context.userEmail) {
+      payload['User-Email'] = context.userEmail;
+    }
+
+    if (context.userId) {
+      payload['User-Id'] = context.userId;
+    }
+
+    if (context.userUniqueName) {
+      payload['User-UniqueName'] = context.userUniqueName;
+    }
+
+    if (Object.keys(payload).length > 0) {
+      const json = JSON.stringify(payload);
+      const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(json)));
+      headers['x-custom-header'] = encoded;
+    }
+
+    return headers;
+  }, [context]);
+
   // Criar instância única do ApiClient
   // Agora usa callbacks estáveis, então só é criado uma vez
   const api = useMemo(() => {
     console.log('[AzureDevOpsContext] Criando ApiClient');
-    return new ApiClient(getToken, refreshTokenCallback);
-  }, [getToken, refreshTokenCallback]);
+    return new ApiClient(getToken, refreshTokenCallback, undefined, getCustomHeaders);
+  }, [getToken, refreshTokenCallback, getCustomHeaders]);
 
   // Valores do contexto
   const contextValue = useMemo<AzureDevOpsContextType>(() => ({
