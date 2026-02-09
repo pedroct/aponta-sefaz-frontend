@@ -174,12 +174,15 @@
                                         WorkItemServices.WorkItemFormNavigationService.getService().then(function(service) {
                                             // openWorkItem(id, openInNewTab)
                                             // false = abre em modal dentro do Azure DevOps
-                                            service.openWorkItem(workItemId, false).then(function() {
-                                                console.log('[Timesheet Wrapper] Work item aberto em modal');
-                                            }).catch(function(err) {
-                                                console.error('[Timesheet Wrapper] Erro ao abrir work item:', err);
-                                            });
-                                        }).catch(function(err) {
+                                            service.openWorkItem(workItemId, false).then(
+                                                function() {
+                                                    console.log('[Timesheet Wrapper] Work item aberto em modal');
+                                                },
+                                                function(err) {
+                                                    console.error('[Timesheet Wrapper] Erro ao abrir work item:', err);
+                                                }
+                                            );
+                                        }, function(err) {
                                             console.error('[Timesheet Wrapper] Erro ao obter WorkItemFormNavigationService:', err);
                                         });
                                     });
