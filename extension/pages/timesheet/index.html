@@ -136,10 +136,33 @@
                             iframe.style.width = '100%';
                             iframe.style.height = '100vh';
                             iframe.style.border = 'none';
-                            
+
                             document.getElementById('loading').style.display = 'none';
                             document.body.appendChild(iframe);
-                            
+
+                            // Listener para mensagens do iframe (ex: abrir work item)
+                            window.addEventListener('message', function(event) {
+                                console.log('[Timesheet Wrapper] Mensagem recebida do iframe:', event.data);
+
+                                if (event.data && event.data.type === 'OPEN_WORK_ITEM') {
+                                    var workItemId = event.data.workItemId;
+                                    console.log('[Timesheet Wrapper] Abrindo work item:', workItemId);
+
+                                    // Usar VSS SDK para abrir work item em modal
+                                    VSS.require(["TFS/WorkItemTracking/Services"], function(WorkItemServices) {
+                                        WorkItemServices.WorkItemFormNavigationService.getService().then(function(service) {
+                                            // openWorkItem(id, openInNewTab)
+                                            // false = abre em modal dentro do Azure DevOps
+                                            service.openWorkItem(workItemId, false).then(function() {
+                                                console.log('[Timesheet Wrapper] Work item aberto em modal');
+                                            }).catch(function(err) {
+                                                console.error('[Timesheet Wrapper] Erro ao abrir work item:', err);
+                                            });
+                                        });
+                                    });
+                                }
+                            });
+
                             VSS.notifyLoadSucceeded();
                             
                         }).catch(function(error) {
