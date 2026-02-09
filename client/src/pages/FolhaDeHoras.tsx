@@ -233,9 +233,27 @@ export default function FolhaDeHoras() {
 
   // Recolher todos os work items
   const collapseAll = useCallback(() => {
-    console.log('[collapseAll] Recolhendo todos os work items');
-    setExpandedItems({});
-  }, []);
+    if (!timesheet) return;
+
+    const getAllWorkItemIds = (items: WorkItemTimesheet[]): string[] => {
+      const ids: string[] = [];
+      items.forEach(item => {
+        ids.push(item.id.toString());
+        if (item.children && item.children.length > 0) {
+          ids.push(...getAllWorkItemIds(item.children));
+        }
+      });
+      return ids;
+    };
+
+    const allIds = getAllWorkItemIds(timesheet.work_items);
+    const newExpandedState: Record<string, boolean> = {};
+    allIds.forEach(id => {
+      newExpandedState[id] = false; // Explicitamente recolhido
+    });
+    console.log('[collapseAll] Recolhendo', allIds.length, 'work items');
+    setExpandedItems(newExpandedState);
+  }, [timesheet]);
 
   // Handlers do modal
   const handleNovoApontamento = useCallback((workItemId?: number, workItemTitle?: string, data?: string, podeEditar?: boolean) => {
