@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Plus, ChevronDown, ChevronRight, ChevronLeft, Calendar as CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight, ChevronLeft, Calendar as CalendarIcon, AlertCircle, Loader2, ChevronsDown, ChevronsUp } from "lucide-react";
 import { format, addWeeks, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ModalAdicionarTempo, ModalMode } from "@/components/custom/ModalAdicionarTempo";
@@ -7,6 +7,7 @@ import { CelulaApontamento } from "@/components/custom/CelulaApontamento";
 import { DialogConfirmarExclusao } from "@/components/custom/DialogConfirmarExclusao";
 import { IterationSelector } from "@/components/custom/IterationSelector";
 import { TeamSelector } from "@/components/custom/TeamSelector";
+import { WorkItemLink } from "@/components/custom/WorkItemLink";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -206,6 +207,34 @@ export default function FolhaDeHoras() {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
+  // Expandir todos os work items
+  const expandAll = useCallback(() => {
+    if (!timesheet) return;
+
+    const getAllWorkItemIds = (items: WorkItemTimesheet[]): string[] => {
+      const ids: string[] = [];
+      items.forEach(item => {
+        ids.push(item.id.toString());
+        if (item.children && item.children.length > 0) {
+          ids.push(...getAllWorkItemIds(item.children));
+        }
+      });
+      return ids;
+    };
+
+    const allIds = getAllWorkItemIds(timesheet.work_items);
+    const newExpandedState: Record<string, boolean> = {};
+    allIds.forEach(id => {
+      newExpandedState[id] = true;
+    });
+    setExpandedItems(newExpandedState);
+  }, [timesheet]);
+
+  // Recolher todos os work items
+  const collapseAll = useCallback(() => {
+    setExpandedItems({});
+  }, []);
+
   // Handlers do modal
   const handleNovoApontamento = useCallback((workItemId?: number, workItemTitle?: string, data?: string, podeEditar?: boolean) => {
     setModalMode("create");
@@ -292,16 +321,32 @@ export default function FolhaDeHoras() {
               )}
               
               <WorkItemIcon type={item.type} size={18} />
-              
-              <span className={cn(
-                "text-[12px] truncate max-w-[200px]",
-                level === 0 && "font-black uppercase tracking-tight",
-                level === 1 && "font-bold uppercase",
-                level === 2 && "font-medium",
-                level >= 3 && "font-medium text-[#605E5C]"
-              )}>
-                {isLeafItem && `#${item.id} `}{item.title}
-              </span>
+
+              {isLeafItem ? (
+                <WorkItemLink
+                  workItemId={item.id}
+                  workItemType={item.type}
+                  className={cn(
+                    "text-[12px] truncate max-w-[200px] inline-flex items-center gap-1",
+                    level === 0 && "font-black uppercase tracking-tight",
+                    level === 1 && "font-bold uppercase",
+                    level === 2 && "font-medium",
+                    level >= 3 && "font-medium text-[#605E5C]"
+                  )}
+                >
+                  #{item.id} {item.title}
+                </WorkItemLink>
+              ) : (
+                <span className={cn(
+                  "text-[12px] truncate max-w-[200px]",
+                  level === 0 && "font-black uppercase tracking-tight",
+                  level === 1 && "font-bold uppercase",
+                  level === 2 && "font-medium",
+                  level >= 3 && "font-medium text-[#605E5C]"
+                )}>
+                  {item.title}
+                </span>
+              )}
             </div>
           </td>
 
@@ -521,6 +566,32 @@ export default function FolhaDeHoras() {
             <CalendarIcon size={14} className="text-[#0078D4]" />
             {timesheet?.semana_label || `${format(weekStart, "dd/MM")} - ${format(new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000), "dd/MM")}`}
           </span>
+
+          {/* Botões de Expandir/Recolher Todos */}
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={expandAll}
+              title="Expandir todos os work items"
+              className="gap-1 text-xs h-7 px-2"
+              disabled={!timesheet || timesheet.work_items.length === 0}
+            >
+              <ChevronsDown size={14} />
+              Expandir Todos
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={collapseAll}
+              title="Recolher todos os work items"
+              className="gap-1 text-xs h-7 px-2"
+              disabled={!timesheet || timesheet.work_items.length === 0}
+            >
+              <ChevronsUp size={14} />
+              Recolher Todos
+            </Button>
+          </div>
         </div>
       </div>
 
