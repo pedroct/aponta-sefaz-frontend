@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Plus, ChevronDown, ChevronRight, ChevronLeft, Calendar as CalendarIcon, AlertCircle, Loader2, ChevronsDown, ChevronsUp } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight, ChevronLeft, Calendar as CalendarIcon, AlertCircle, Loader2, ChevronsDown, ChevronsUp, List, ListTree } from "lucide-react";
 import { format, addWeeks, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ModalAdicionarTempo, ModalMode } from "@/components/custom/ModalAdicionarTempo";
@@ -25,6 +25,8 @@ import {
 
 // Chave para persistir estado de expansão no localStorage
 const EXPANDED_STORAGE_KEY = "folha-horas-expanded";
+// Chave para persistir estado do filtro de hierarquia no localStorage
+const HIERARCHY_FILTER_STORAGE_KEY = "folha-horas-show-hierarchy";
 
 export default function FolhaDeHoras() {
   // Contexto do Azure DevOps - organização e projeto dinâmicos
@@ -59,6 +61,17 @@ export default function FolhaDeHoras() {
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
+    }
+  });
+
+  // Estado do filtro de hierarquia (true = mostra hierarquia, false = só folhas)
+  const [showHierarchy, setShowHierarchy] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(HIERARCHY_FILTER_STORAGE_KEY);
+      // Padrão é true (mostrar hierarquia completa)
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
     }
   });
 
@@ -165,6 +178,7 @@ export default function FolhaDeHoras() {
       week_start: weekStartFormatted,
       iteration_id: selectedIterationId ?? undefined,
       team_id: selectedTeamId ?? undefined,
+      flat_view: !showHierarchy, // Inverso: showHierarchy=false -> flat_view=true
     },
     { enabled: timesheetEnabled }
   );
@@ -196,6 +210,11 @@ export default function FolhaDeHoras() {
   useEffect(() => {
     localStorage.setItem(EXPANDED_STORAGE_KEY, JSON.stringify(expandedItems));
   }, [expandedItems]);
+
+  // Persistir estado do filtro de hierarquia no localStorage
+  useEffect(() => {
+    localStorage.setItem(HIERARCHY_FILTER_STORAGE_KEY, JSON.stringify(showHierarchy));
+  }, [showHierarchy]);
 
   // Navegação de semanas
   const handlePrevWeek = () => setCurrentDate(subWeeks(currentDate, 1));
@@ -595,7 +614,7 @@ export default function FolhaDeHoras() {
               onClick={expandAll}
               title="Expandir todos os work items"
               className="gap-1 text-xs h-7 px-2"
-              disabled={!timesheet || timesheet.work_items.length === 0}
+              disabled={!timesheet || timesheet.work_items.length === 0 || !showHierarchy}
             >
               <ChevronsDown size={14} />
               Expandir Todos
@@ -606,10 +625,25 @@ export default function FolhaDeHoras() {
               onClick={collapseAll}
               title="Recolher todos os work items"
               className="gap-1 text-xs h-7 px-2"
-              disabled={!timesheet || timesheet.work_items.length === 0}
+              disabled={!timesheet || timesheet.work_items.length === 0 || !showHierarchy}
             >
               <ChevronsUp size={14} />
               Recolher Todos
+            </Button>
+
+            {/* Separador visual */}
+            <div className="h-6 w-px bg-gray-300 mx-1"></div>
+
+            {/* Botão Toggle de Hierarquia */}
+            <Button
+              variant={showHierarchy ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowHierarchy(prev => !prev)}
+              title={showHierarchy ? "Ocultar hierarquias (mostrar apenas tarefas)" : "Mostrar hierarquias completas"}
+              className="gap-1 text-xs h-7 px-2"
+            >
+              {showHierarchy ? <ListTree size={14} /> : <List size={14} />}
+              {showHierarchy ? "Ocultar Hierarquias" : "Mostrar Hierarquias"}
             </Button>
           </div>
         </div>

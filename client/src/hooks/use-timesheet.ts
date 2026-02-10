@@ -30,7 +30,7 @@ interface UseTimesheetOptions {
 }
 
 export function useTimesheet(params: TimesheetParams, options?: UseTimesheetOptions) {
-  const { organization_name, project_id, week_start, iteration_id, team_id } = params;
+  const { organization_name, project_id, week_start, iteration_id, team_id, flat_view } = params;
   const { api, token, isLoading } = useAzureContext();
 
   // Calcula week_start padrão se não fornecido
@@ -44,9 +44,10 @@ export function useTimesheet(params: TimesheetParams, options?: UseTimesheetOpti
       effectiveWeekStart,
       iteration_id,
       team_id,
+      flat_view,
     ],
     queryFn: async (): Promise<TimesheetResponse> => {
-      console.log('[useTimesheet] Executando queryFn, token disponível:', !!token, 'iteration_id:', iteration_id, 'team_id:', team_id);
+      console.log('[useTimesheet] Executando queryFn, token disponível:', !!token, 'iteration_id:', iteration_id, 'team_id:', team_id, 'flat_view:', flat_view);
 
       const queryParams: Record<string, string> = {
         organization_name,
@@ -61,6 +62,11 @@ export function useTimesheet(params: TimesheetParams, options?: UseTimesheetOpti
 
       if (team_id) {
         queryParams.team_id = team_id;
+      }
+
+      // Adicionar flat_view se fornecido
+      if (flat_view !== undefined) {
+        queryParams.flat_view = String(flat_view);
       }
 
       return api.get<TimesheetResponse>("/timesheet", queryParams);
